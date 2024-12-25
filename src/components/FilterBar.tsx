@@ -20,9 +20,9 @@ export const FilterBar = () => {
   const [date, setDate] = useState<Date>();
 
   return (
-    <div className="flex flex-wrap gap-4 p-4 bg-white/50 backdrop-blur-sm rounded-lg animate-slide-in">
+    <div className="flex flex-wrap gap-4 p-6 bg-white/70 backdrop-blur-sm rounded-lg animate-slide-in shadow-md hover:shadow-lg transition-all duration-300 border border-purple-100">
       <Select>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[180px] bg-white/80">
           <SelectValue placeholder="Sport" />
         </SelectTrigger>
         <SelectContent>
@@ -36,7 +36,7 @@ export const FilterBar = () => {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-[180px] justify-start text-left font-normal"
+            className="w-[180px] justify-start text-left font-normal bg-white/80"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date ? format(date, "PPP") : <span>Pick a date</span>}
@@ -53,7 +53,7 @@ export const FilterBar = () => {
       </Popover>
 
       <Select>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[180px] bg-white/80">
           <SelectValue placeholder="Level" />
         </SelectTrigger>
         <SelectContent>
@@ -64,7 +64,7 @@ export const FilterBar = () => {
       </Select>
 
       <Select>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[180px] bg-white/80">
           <SelectValue placeholder="Competition Type" />
         </SelectTrigger>
         <SelectContent>
@@ -77,7 +77,7 @@ export const FilterBar = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="ml-auto"
+        className="ml-auto hover:bg-purple-100"
         title="Reset filters"
       >
         <RotateCcw className="h-4 w-4" />

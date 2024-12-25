@@ -28,10 +28,10 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
-      <div className="container py-4 md:py-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-indigo-100">
+      <div className="container max-w-4xl mx-auto py-4 md:py-8 space-y-6 px-4">
         <div className="text-center space-y-4 mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-transparent bg-clip-text">
             Find Competitions
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -42,7 +42,7 @@ const Index = () => {
         <SearchHeader />
         <FilterBar />
 
-        <div className="space-y-4 max-w-3xl mx-auto animate-slide-in">
+        <div className="space-y-4 animate-slide-in">
           {mockResults.map((result, index) => (
             <ResultCard key={index} {...result} />
           ))}

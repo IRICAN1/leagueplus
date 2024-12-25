@@ -9,7 +9,7 @@ export const SearchHeader = () => {
   const [radius, setRadius] = useState([20]);
 
   return (
-    <div className="w-full space-y-6 p-6 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10 backdrop-blur-lg rounded-lg shadow-lg border animate-fade-in">
+    <div className="w-full space-y-6 p-6 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-indigo-500/20 backdrop-blur-lg rounded-lg shadow-lg border border-white/20 animate-fade-in hover:shadow-xl transition-all duration-300">
       <div className="flex gap-4">
         <div className="relative flex-1">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500">
@@ -19,7 +19,7 @@ export const SearchHeader = () => {
             placeholder="Enter location..."
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="pl-10 pr-10 h-12 text-lg border-purple-200 focus:border-purple-500 focus:ring-purple-500"
+            className="pl-10 pr-10 h-12 text-lg border-purple-200 focus:border-purple-500 focus:ring-purple-500 bg-white/80"
           />
           {location && (
             <button
@@ -30,7 +30,7 @@ export const SearchHeader = () => {
             </button>
           )}
         </div>
-        <Button className="h-12 px-8 text-lg bg-purple-600 hover:bg-purple-700 text-white transition-colors">
+        <Button className="h-12 px-8 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-300 shadow-md hover:shadow-lg">
           <Search className="h-5 w-5 mr-2" />
           Search
         </Button>

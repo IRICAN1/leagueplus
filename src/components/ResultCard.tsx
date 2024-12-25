@@ -19,8 +19,8 @@ export const ResultCard = ({
   type,
 }: ResultCardProps) => {
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in border-l-4 border-l-purple-500 hover:scale-[1.02]">
-      <CardContent className="p-6 bg-gradient-to-r from-white to-purple-50">
+    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl animate-fade-in border-l-4 border-l-purple-500 hover:scale-[1.01]">
+      <CardContent className="p-6 bg-gradient-to-r from-white via-purple-50/50 to-pink-50/50">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-2 flex-1">
             <Badge variant="secondary" className="mb-2 bg-purple-100 text-purple-700 hover:bg-purple-200">
@@ -30,7 +30,7 @@ export const ResultCard = ({
               {title}
             </h3>
             <p className="text-sm text-gray-600 flex items-center gap-2">
-              <span className="inline-block w-4 h-4 rounded-full bg-purple-200" />
+              <span className="inline-block w-4 h-4 rounded-full bg-gradient-to-r from-purple-400 to-pink-400" />
               {location}
             </p>
             <p className="text-sm text-gray-500">{date}</p>
@@ -40,13 +40,13 @@ export const ResultCard = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-gray-400 hover:text-purple-500 transition-colors"
+                className="text-gray-400 hover:text-pink-500 transition-colors"
               >
                 <Heart className="h-5 w-5" />
               </Button>
               <Button 
                 variant="default"
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Join
