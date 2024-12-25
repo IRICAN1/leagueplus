@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart } from "lucide-react";
+import { Heart, UserPlus } from "lucide-react";
 
 interface ResultCardProps {
   title: string;
@@ -36,13 +36,22 @@ export const ResultCard = ({
             <p className="text-sm text-gray-500">{date}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-400 hover:text-purple-500 transition-colors"
-            >
-              <Heart className="h-5 w-5" />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-400 hover:text-purple-500 transition-colors"
+              >
+                <Heart className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="default"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Join
+              </Button>
+            </div>
             <Badge variant="outline" className="ml-auto bg-purple-50 border-purple-200 text-purple-700">
               {distance} km
             </Badge>
