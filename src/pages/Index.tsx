@@ -29,9 +29,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
-      <div className="container py-8 space-y-6">
+      <div className="container py-4 md:py-8 space-y-6">
         <div className="text-center space-y-4 mb-8 animate-fade-in">
-          <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
             Find Competitions
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
