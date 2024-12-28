@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Award, Swords, BadgeCheck, BadgeInfo, BadgeDollarSign } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -135,10 +136,13 @@ const TournamentDetails = () => {
                     <TableCell>
                       <Button
                         variant="outline"
-                        className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+                        className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 transition-all duration-200"
+                        asChild
                       >
-                        <Swords className="h-4 w-4 mr-2" />
-                        Challenge
+                        <Link to={`/player-challenge/${player.id}`}>
+                          <Swords className="h-4 w-4 mr-2" />
+                          Challenge
+                        </Link>
                       </Button>
                     </TableCell>
                   </TableRow>

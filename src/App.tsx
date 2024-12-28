@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import Index from "./pages/Index";
 import TournamentDetails from "./pages/TournamentDetails";
+import PlayerChallenge from "./pages/PlayerChallenge";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/tournament/:id" element={<TournamentDetails />} />
+            <Route path="/player-challenge/:playerId" element={<PlayerChallenge />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
