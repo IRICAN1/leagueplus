@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Sword } from "lucide-react";
+import { Sword, Trophy, Award } from "lucide-react";
 import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
