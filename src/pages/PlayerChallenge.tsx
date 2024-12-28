@@ -1,19 +1,19 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Trophy, MapPin, Calendar as CalendarIcon, Award, User, Sword } from "lucide-react";
+import { Trophy, MapPin, Calendar as CalendarIcon, Award, User, Sword, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const PlayerChallenge = () => {
   const { playerId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState("");
 
   // Mock player data - in a real app, this would come from an API
@@ -33,16 +33,25 @@ const PlayerChallenge = () => {
       { title: "Most Improved", icon: Award },
     ],
     availability: {
-      // Mock available time slots
+      workingHours: {
+        start: 8,
+        end: 20,
+      },
       disabledDays: [0, 6], // Weekends disabled
-      disabledHours: [0, 1, 2, 3, 4, 5, 6, 7, 22, 23], // Early morning and late night disabled
+      availableTimeSlots: Array.from({ length: 7 }, (_, dayIndex) => ({
+        day: dayIndex,
+        slots: Array.from({ length: 12 }, (_, hourIndex) => ({
+          time: 8 + hourIndex,
+          available: Math.random() > 0.3, // Randomly generate availability for demo
+        })),
+      })),
     },
   };
 
   const handleChallenge = () => {
-    if (!selectedDate || !selectedLocation) {
+    if (!selectedTimeSlot || !selectedLocation) {
       toast({
-        title: "Please select both date and location",
+        title: "Please select both time and location",
         variant: "destructive",
       });
       return;
@@ -54,6 +63,28 @@ const PlayerChallenge = () => {
     });
 
     setTimeout(() => navigate("/tournament/1"), 2000);
+  };
+
+  const getDayName = (dayIndex: number) => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return days[dayIndex];
+  };
+
+  const getTimeSlotClass = (available: boolean, isSelected: boolean) => {
+    return cn(
+      "p-2 rounded-md text-sm transition-all duration-200 flex flex-col items-center justify-center h-16",
+      {
+        "bg-blue-50 hover:bg-blue-100 cursor-pointer border-2 border-transparent hover:border-blue-300": available && !isSelected,
+        "bg-gray-100 cursor-not-allowed text-gray-400": !available,
+        "bg-blue-200 border-2 border-blue-500": isSelected,
+      }
+    );
+  };
+
+  const getTimeBlockLabel = (hour: number) => {
+    if (hour < 12) return "Morning";
+    if (hour < 17) return "Afternoon";
+    return "Evening";
   };
 
   return (
@@ -111,29 +142,51 @@ const PlayerChallenge = () => {
               </div>
             </CardContent>
           </Card>
-          {/* Calendar Card */}
-          <Card className="bg-white/80 shadow-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
+          {/* Weekly Schedule Card */}
+          <Card className="md:col-span-2 bg-white/80 shadow-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5 text-blue-500" />
-                Select Date & Time
+                <Clock className="h-5 w-5 text-blue-500" />
+                Select Time Slot
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                disabled={(date) => {
-                  return (
-                    date < new Date() ||
-                    player.availability.disabledDays.includes(date.getDay())
-                  );
-                }}
-                className="animate-fade-in"
-              />
+              <div className="grid grid-cols-7 gap-4">
+                {player.availability.availableTimeSlots.map((day) => (
+                  <div key={day.day} className="space-y-2">
+                    <div className="text-center font-semibold text-gray-700 pb-2 border-b">
+                      {getDayName(day.day)}
+                    </div>
+                    <div className="space-y-2">
+                      {day.slots.map((slot) => {
+                        const timeString = `${format(new Date().setHours(slot.time), 'ha')}`;
+                        const slotId = `${day.day}-${slot.time}`;
+                        const isSelected = selectedTimeSlot === slotId;
+
+                        return (
+                          <div
+                            key={slotId}
+                            className={getTimeSlotClass(slot.available, isSelected)}
+                            onClick={() => {
+                              if (slot.available) {
+                                setSelectedTimeSlot(slotId);
+                              }
+                            }}
+                          >
+                            <span className="font-medium">{timeString}</span>
+                            <span className="text-xs text-gray-500">
+                              {getTimeBlockLabel(slot.time)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
+
           {/* Locations Card */}
           <Card className="md:col-span-2 bg-white/80 shadow-lg animate-fade-in" style={{ animationDelay: "200ms" }}>
             <CardHeader>

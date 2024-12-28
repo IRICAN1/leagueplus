@@ -87,6 +87,10 @@ export default {
           "0%": { transform: "rotate(0deg) translateX(0)" },
           "100%": { transform: "rotate(-45deg) translateX(-4px)" },
         },
+        "pulse-soft": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.05)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -96,6 +100,7 @@ export default {
         "slide-in": "slide-in 0.3s ease-out",
         "cross-swords": "cross-swords 0.3s ease-out forwards",
         "uncross-swords": "uncross-swords 0.3s ease-out forwards",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },
     },
   },
