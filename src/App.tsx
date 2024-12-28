@@ -13,7 +13,7 @@ import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
-// Protected Route component
+// Protected Route component - only used for routes that require authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
@@ -51,38 +51,18 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Navbar />
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <>
-                    <Navbar />
-                    <Index />
-                  </>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/tournament/:id"
-              element={
-                <ProtectedRoute>
-                  <>
-                    <Navbar />
-                    <TournamentDetails />
-                  </>
-                </ProtectedRoute>
-              }
-            />
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/tournament/:id" element={<TournamentDetails />} />
+            {/* Protected routes */}
             <Route
               path="/player-challenge/:playerId"
               element={
                 <ProtectedRoute>
-                  <>
-                    <Navbar />
-                    <PlayerChallenge />
-                  </>
+                  <PlayerChallenge />
                 </ProtectedRoute>
               }
             />
