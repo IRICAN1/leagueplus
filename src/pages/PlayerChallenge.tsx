@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Trophy, MapPin, Calendar as CalendarIcon, Award, User } from "lucide-react";
+import { Trophy, MapPin, Calendar as CalendarIcon, Award, User, Sword } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PlayerChallenge = () => {
@@ -53,7 +53,6 @@ const PlayerChallenge = () => {
       description: "Your challenge request has been sent successfully.",
     });
 
-    // Animate success and redirect
     setTimeout(() => navigate("/tournament/1"), 2000);
   };
 
@@ -112,7 +111,6 @@ const PlayerChallenge = () => {
               </div>
             </CardContent>
           </Card>
-
           {/* Calendar Card */}
           <Card className="bg-white/80 shadow-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
             <CardHeader>
@@ -136,7 +134,6 @@ const PlayerChallenge = () => {
               />
             </CardContent>
           </Card>
-
           {/* Locations Card */}
           <Card className="md:col-span-2 bg-white/80 shadow-lg animate-fade-in" style={{ animationDelay: "200ms" }}>
             <CardHeader>
@@ -174,15 +171,18 @@ const PlayerChallenge = () => {
             </CardContent>
           </Card>
 
-          {/* Challenge Button */}
+          {/* Challenge Button with Sword Animation */}
           <div className="md:col-span-2 flex justify-center animate-fade-in" style={{ animationDelay: "300ms" }}>
             <Button
               onClick={handleChallenge}
-              className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105"
+              className="group relative w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 px-8"
               size="lg"
             >
-              <Trophy className="mr-2 h-5 w-5" />
-              Send Challenge Request
+              <div className="relative flex items-center justify-center gap-2">
+                <Sword className="absolute left-0 transform -translate-x-2 group-hover:-translate-x-4 group-hover:-rotate-45 transition-all duration-300" />
+                <span className="mx-8">Send Challenge Request</span>
+                <Sword className="absolute right-0 transform translate-x-2 group-hover:translate-x-4 group-hover:rotate-45 transition-all duration-300" />
+              </div>
             </Button>
           </div>
         </div>

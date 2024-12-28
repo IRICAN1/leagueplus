@@ -79,6 +79,14 @@ export default {
           "0%": { transform: "translateY(10px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
+        "cross-swords": {
+          "0%": { transform: "rotate(0deg) translateX(0)" },
+          "100%": { transform: "rotate(45deg) translateX(4px)" },
+        },
+        "uncross-swords": {
+          "0%": { transform: "rotate(0deg) translateX(0)" },
+          "100%": { transform: "rotate(-45deg) translateX(-4px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -86,6 +94,8 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "fade-out": "fade-out 0.3s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
+        "cross-swords": "cross-swords 0.3s ease-out forwards",
+        "uncross-swords": "uncross-swords 0.3s ease-out forwards",
       },
     },
   },
