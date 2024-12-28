@@ -2,7 +2,15 @@ import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Award, Swords, UserCheck } from "lucide-react";
+import { Trophy, Award, Swords, BadgeCheck, BadgeInfo, BadgeDollarSign } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const TournamentDetails = () => {
   const { id } = useParams();
@@ -21,7 +29,10 @@ const TournamentDetails = () => {
         wins: 15,
         losses: 3,
         points: 1500,
-        achievements: ["Tournament Winner", "Perfect Season"],
+        achievements: [
+          { title: "Tournament Winner", icon: Trophy },
+          { title: "Perfect Season", icon: BadgeCheck },
+        ],
       },
       {
         id: 2,
@@ -30,9 +41,11 @@ const TournamentDetails = () => {
         wins: 12,
         losses: 6,
         points: 1200,
-        achievements: ["Most Improved"],
+        achievements: [
+          { title: "Most Improved", icon: BadgeInfo },
+          { title: "Prize Winner", icon: BadgeDollarSign },
+        ],
       },
-      // Add more players as needed
     ],
   };
 
@@ -72,62 +85,66 @@ const TournamentDetails = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {tournament.players.map((player) => (
-                <div
-                  key={player.id}
-                  className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors"
-                >
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <span className="text-2xl font-bold text-blue-600">#{player.rank}</span>
-                    <div className="flex-grow">
-                      <h3 className="font-semibold">{player.name}</h3>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {player.achievements.map((achievement, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="bg-blue-50 border-blue-200 text-blue-600"
-                          >
-                            <Award className="h-3 w-3 mr-1" />
-                            {achievement}
-                          </Badge>
-                        ))}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">Rank</TableHead>
+                  <TableHead>Player</TableHead>
+                  <TableHead className="w-48">Achievements</TableHead>
+                  <TableHead className="text-right w-20">Wins</TableHead>
+                  <TableHead className="text-right w-20">Losses</TableHead>
+                  <TableHead className="text-right w-20">Points</TableHead>
+                  <TableHead className="w-32"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tournament.players.map((player) => (
+                  <TableRow key={player.id}>
+                    <TableCell className="font-bold text-blue-600">
+                      #{player.rank}
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      {player.name}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        {player.achievements.map((achievement, index) => {
+                          const Icon = achievement.icon;
+                          return (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="bg-blue-50 border-blue-200 text-blue-600"
+                            >
+                              <Icon className="h-3 w-3 mr-1" />
+                              {achievement.title}
+                            </Badge>
+                          );
+                        })}
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full sm:w-auto mt-3 sm:mt-0">
-                    <div className="text-center p-2 rounded-md bg-green-50">
-                      <div className="text-green-600 text-xs font-semibold">Wins</div>
-                      <div className="text-lg font-bold text-green-700">
-                        {player.wins}
-                      </div>
-                    </div>
-                    <div className="text-center p-2 rounded-md bg-red-50">
-                      <div className="text-red-600 text-xs font-semibold">Losses</div>
-                      <div className="text-lg font-bold text-red-700">
-                        {player.losses}
-                      </div>
-                    </div>
-                    <div className="text-center p-2 rounded-md bg-blue-50 col-span-2 sm:col-span-1">
-                      <div className="text-blue-600 text-xs font-semibold">Points</div>
-                      <div className="text-lg font-bold text-blue-700">
-                        {player.points}
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-auto mt-3 sm:mt-0 border-blue-200 text-blue-600 hover:bg-blue-50"
-                  >
-                    <Swords className="h-4 w-4 mr-2" />
-                    Challenge
-                  </Button>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-green-600">
+                      {player.wins}
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-red-600">
+                      {player.losses}
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-blue-600">
+                      {player.points}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+                      >
+                        <Swords className="h-4 w-4 mr-2" />
+                        Challenge
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
