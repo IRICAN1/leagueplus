@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   Home, 
   Trophy, 
@@ -29,7 +29,7 @@ export const Navbar = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
 
   // Check authentication status on mount
-  useState(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
@@ -43,6 +43,14 @@ export const Navbar = () => {
       }
     };
     checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {
