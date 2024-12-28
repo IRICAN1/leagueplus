@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ResultCardProps {
+  id?: string;
   title: string;
   location: string;
   distance: number;
@@ -12,12 +14,19 @@ interface ResultCardProps {
 }
 
 export const ResultCard = ({
+  id = "1",
   title,
   location,
   distance,
   date,
   type,
 }: ResultCardProps) => {
+  const navigate = useNavigate();
+
+  const handleJoin = () => {
+    navigate(`/tournament/${id}`);
+  };
+
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80">
       <CardContent className="p-6 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
@@ -46,6 +55,7 @@ export const ResultCard = ({
               </Button>
               <Button 
                 variant="default"
+                onClick={handleJoin}
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
