@@ -1,8 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Award } from "lucide-react";
+import { Trophy, Award, Swords } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -14,7 +14,6 @@ import {
 
 const TournamentDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   // Mock data for demonstration
   const tournament = {
@@ -44,10 +43,6 @@ const TournamentDetails = () => {
     ],
   };
 
-  const handleChallenge = (playerId: number) => {
-    navigate(`/challenge/${playerId}`);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
@@ -72,73 +67,77 @@ const TournamentDetails = () => {
             </div>
           </CardHeader>
           <CardContent className="pt-6">
-            <p className="text-gray-700 mb-6">{tournament.description}</p>
+            <p className="text-gray-700">{tournament.description}</p>
+          </CardContent>
+        </Card>
 
-            <Card className="bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-blue-500" />
-                  Player Rankings & Statistics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-16">Rank</TableHead>
-                        <TableHead>Player</TableHead>
-                        <TableHead className="w-32">Achievements</TableHead>
-                        <TableHead className="text-right w-20">Wins</TableHead>
-                        <TableHead className="text-right w-20">Losses</TableHead>
-                        <TableHead className="text-right w-24">Points</TableHead>
-                        <TableHead className="w-28">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {tournament.players.map((player) => (
-                        <TableRow key={player.id}>
-                          <TableCell className="font-medium">#{player.rank}</TableCell>
-                          <TableCell>{player.name}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {player.achievements.map((achievement, index) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="bg-blue-50 border-blue-200 text-blue-600"
-                                >
-                                  <Award className="h-3 w-3 mr-1" />
-                                  {achievement}
-                                </Badge>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right text-green-600">
-                            {player.wins}
-                          </TableCell>
-                          <TableCell className="text-right text-red-600">
-                            {player.losses}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {player.points}
-                          </TableCell>
-                          <TableCell>
-                            <Button
+        <Card className="bg-white/80 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-blue-500" />
+              Player Rankings & Statistics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16 text-right">Rank</TableHead>
+                    <TableHead className="min-w-[200px]">Player</TableHead>
+                    <TableHead className="w-[200px]">Achievements</TableHead>
+                    <TableHead className="w-24 text-right">Wins</TableHead>
+                    <TableHead className="w-24 text-right">Losses</TableHead>
+                    <TableHead className="w-24 text-right">Points</TableHead>
+                    <TableHead className="w-32"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tournament.players.map((player) => (
+                    <TableRow key={player.id}>
+                      <TableCell className="text-right font-bold text-blue-600">
+                        #{player.rank}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {player.name}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {player.achievements.map((achievement, index) => (
+                            <Badge
+                              key={index}
                               variant="outline"
-                              className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
-                              onClick={() => handleChallenge(player.id)}
+                              className="bg-blue-50 border-blue-200 text-blue-600 whitespace-nowrap"
                             >
-                              Challenge
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+                              <Award className="h-3 w-3 mr-1" />
+                              {achievement}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-green-600">
+                        {player.wins}
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-red-600">
+                        {player.losses}
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-blue-600">
+                        {player.points}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+                        >
+                          <Swords className="h-4 w-4 mr-2" />
+                          Challenge
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
