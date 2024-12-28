@@ -19,40 +19,40 @@ export const ResultCard = ({
   type,
 }: ResultCardProps) => {
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl animate-fade-in border-l-4 border-l-purple-500 hover:scale-[1.01]">
-      <CardContent className="p-6 bg-gradient-to-r from-white via-purple-50/50 to-pink-50/50">
+    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl animate-fade-in border-l-4 border-l-blue-500 hover:scale-[1.01] bg-gray-800/80">
+      <CardContent className="p-6 bg-gradient-to-r from-gray-800/90 via-blue-900/50 to-gray-800/90">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-2 flex-1">
-            <Badge variant="secondary" className="mb-2 bg-purple-100 text-purple-700 hover:bg-purple-200">
+            <Badge variant="secondary" className="mb-2 bg-blue-900/50 text-blue-200 hover:bg-blue-800">
               {type}
             </Badge>
-            <h3 className="text-xl font-bold text-purple-900 group-hover:text-purple-700 transition-colors">
+            <h3 className="text-xl font-bold text-blue-100 group-hover:text-blue-300 transition-colors">
               {title}
             </h3>
-            <p className="text-sm text-gray-600 flex items-center gap-2">
-              <span className="inline-block w-4 h-4 rounded-full bg-gradient-to-r from-purple-400 to-pink-400" />
+            <p className="text-sm text-gray-300 flex items-center gap-2">
+              <span className="inline-block w-4 h-4 rounded-full bg-gradient-to-r from-blue-400 to-blue-600" />
               {location}
             </p>
-            <p className="text-sm text-gray-500">{date}</p>
+            <p className="text-sm text-gray-400">{date}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-gray-400 hover:text-pink-500 transition-colors"
+                className="text-gray-400 hover:text-blue-400 transition-colors"
               >
                 <Heart className="h-5 w-5" />
               </Button>
               <Button 
                 variant="default"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Join
               </Button>
             </div>
-            <Badge variant="outline" className="ml-auto bg-purple-50 border-purple-200 text-purple-700">
+            <Badge variant="outline" className="ml-auto bg-blue-900/30 border-blue-400/30 text-blue-200">
               {distance} km
             </Badge>
           </div>
