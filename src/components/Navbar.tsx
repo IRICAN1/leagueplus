@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { 
-  Home, 
   Trophy, 
   Users, 
   User,
   LogOut,
+  History,
   ChevronDown
 } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -22,13 +22,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Navbar = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<any>(null);
 
-  // Check authentication status on mount
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -80,31 +78,35 @@ export const Navbar = () => {
               <span className="font-bold text-xl text-purple-600">LeaguePlus</span>
             </Link>
 
-            {/* Main Navigation Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1">
-                  <span>Browse</span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link to="/tournaments" className="flex items-center space-x-2">
-                    <Trophy className="h-4 w-4" />
-                    <span>All Tournaments</span>
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center space-x-6">
+              <Link 
+                to="/leagues" 
+                className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+              >
+                <Trophy className="h-4 w-4" />
+                <span>Leagues</span>
+              </Link>
+              
+              {isAuthenticated && (
+                <>
+                  <Link 
+                    to="/friends" 
+                    className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Friends</span>
                   </Link>
-                </DropdownMenuItem>
-                {isAuthenticated && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/friends" className="flex items-center space-x-2">
-                      <Users className="h-4 w-4" />
-                      <span>Friends List</span>
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <Link 
+                    to="/history" 
+                    className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                  >
+                    <History className="h-4 w-4" />
+                    <span>Match History</span>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Right Section */}

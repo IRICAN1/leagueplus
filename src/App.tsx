@@ -7,13 +7,14 @@ import { Navbar } from "./components/Navbar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import TournamentDetails from "./pages/TournamentDetails";
+import TournamentRegistration from "./pages/TournamentRegistration";
 import PlayerChallenge from "./pages/PlayerChallenge";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
-// Protected Route component - only used for routes that require authentication
+// Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
@@ -57,12 +58,37 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/tournament/:id" element={<TournamentDetails />} />
+            <Route path="/leagues" element={<Navigate to="/" replace />} />
             {/* Protected routes */}
+            <Route
+              path="/tournament/:id/register"
+              element={
+                <ProtectedRoute>
+                  <TournamentRegistration />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/player-challenge/:playerId"
               element={
                 <ProtectedRoute>
                   <PlayerChallenge />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/friends"
+              element={
+                <ProtectedRoute>
+                  <div>Friends Page (Coming Soon)</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <div>Match History (Coming Soon)</div>
                 </ProtectedRoute>
               }
             />
