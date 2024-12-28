@@ -28,13 +28,13 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
       <div className="container max-w-4xl mx-auto py-4 md:py-8 space-y-6 px-4">
         <div className="text-center space-y-4 mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-400 via-blue-300 to-blue-500 text-transparent bg-clip-text">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-transparent bg-clip-text">
             Find Competitions
           </h1>
-          <p className="text-lg text-blue-200 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Discover sports competitions near you and join the excitement
           </p>
         </div>
