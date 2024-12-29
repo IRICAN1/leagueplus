@@ -1,20 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Trophy, Calendar, Info } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { TournamentHeader } from "@/components/tournament-registration/TournamentHeader";
+import { TournamentInfo } from "@/components/tournament-registration/TournamentInfo";
+import { PositionSelector } from "@/components/tournament-registration/PositionSelector";
+import { RegistrationButton } from "@/components/tournament-registration/RegistrationButton";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -57,13 +51,8 @@ const TournamentRegistration = () => {
     })),
   };
 
-  const handleTimeSlotSelect = (slotId: string) => {
-    setSelectedTimeSlots(prev => {
-      if (prev.includes(slotId)) {
-        return prev.filter(id => id !== slotId);
-      }
-      return [...prev, slotId];
-    });
+  const handleTimeSlotSelect = (newSelectedTimeSlots: string[]) => {
+    setSelectedTimeSlots(newSelectedTimeSlots);
   };
 
   const handleSelectAllDay = (day: number) => {
@@ -163,82 +152,22 @@ const TournamentRegistration = () => {
       <div className="container max-w-6xl mx-auto px-4">
         <div className="grid gap-6">
           <Card className="bg-white/80 shadow-lg">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Badge variant="secondary" className="mb-2">
-                    Registration Open
-                  </Badge>
-                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-purple-600" />
-                    {league.name}
-                  </CardTitle>
-                </div>
-              </div>
-            </CardHeader>
+            <TournamentHeader name={league.name} />
             <CardContent className="grid gap-6">
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-purple-600" />
-                    Important Dates
-                  </h3>
-                  <div className="text-sm space-y-1">
-                    <p>Registration Deadline: {new Date(league.registration_deadline).toLocaleDateString()}</p>
-                    <p>Start Date: {new Date(league.start_date).toLocaleDateString()}</p>
-                    <p>End Date: {new Date(league.end_date).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-purple-600" />
-                    Tournament Format
-                  </h3>
-                  <p className="text-sm">{league.match_format}</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Info className="h-4 w-4 text-purple-600" />
-                    Rules
-                  </h3>
-                  <div className="text-sm space-y-1">
-                    {league.rules ? (
-                      <p>{league.rules}</p>
-                    ) : (
-                      <p>No specific rules provided</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <TournamentInfo
+                registrationDeadline={league.registration_deadline}
+                startDate={league.start_date}
+                endDate={league.end_date}
+                matchFormat={league.match_format}
+                rules={league.rules}
+              />
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="font-semibold">Primary Position</label>
-                  <Select value={primaryPosition} onValueChange={setPrimaryPosition}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select primary position" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="singles">Singles</SelectItem>
-                      <SelectItem value="doubles">Doubles</SelectItem>
-                      <SelectItem value="mixed">Mixed Doubles</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="font-semibold">Secondary Position (Optional)</label>
-                  <Select value={secondaryPosition} onValueChange={setSecondaryPosition}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select secondary position" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="singles">Singles</SelectItem>
-                      <SelectItem value="doubles">Doubles</SelectItem>
-                      <SelectItem value="mixed">Mixed Doubles</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <PositionSelector
+                primaryPosition={primaryPosition}
+                setPrimaryPosition={setPrimaryPosition}
+                secondaryPosition={secondaryPosition}
+                setSecondaryPosition={setSecondaryPosition}
+              />
 
               <WeeklySchedule
                 availableTimeSlots={availability.availableTimeSlots}
@@ -247,16 +176,7 @@ const TournamentRegistration = () => {
                 onSelectAllDay={handleSelectAllDay}
               />
 
-              <div className="flex justify-center">
-                <Button
-                  onClick={handleSubmit}
-                  className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-                  size="lg"
-                >
-                  <Trophy className="mr-2 h-4 w-4" />
-                  Complete Registration
-                </Button>
-              </div>
+              <RegistrationButton onClick={handleSubmit} />
             </CardContent>
           </Card>
         </div>
