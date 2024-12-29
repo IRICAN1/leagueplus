@@ -10,6 +10,7 @@ import TournamentDetails from "./pages/TournamentDetails";
 import TournamentRegistration from "./pages/TournamentRegistration";
 import PlayerChallenge from "./pages/PlayerChallenge";
 import CreateLeague from "./pages/CreateLeague";
+import MyLeagues from "./pages/MyLeagues";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 
@@ -61,6 +62,14 @@ const App = () => (
             <Route path="/tournament/:id" element={<TournamentDetails />} />
             <Route path="/leagues" element={<Navigate to="/" replace />} />
             {/* Protected routes */}
+            <Route
+              path="/my-leagues"
+              element={
+                <ProtectedRoute>
+                  <MyLeagues />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/create-league"
               element={

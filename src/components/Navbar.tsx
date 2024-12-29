@@ -6,7 +6,8 @@ import {
   LogOut,
   History,
   ChevronDown,
-  Plus
+  Plus,
+  Medal
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +92,13 @@ export const Navbar = () => {
               
               {isAuthenticated && (
                 <>
+                  <Link 
+                    to="/my-leagues"
+                    className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                  >
+                    <Medal className="h-4 w-4" />
+                    <span>My Leagues</span>
+                  </Link>
                   <Link 
                     to="/create-league"
                     className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
