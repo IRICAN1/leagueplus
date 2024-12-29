@@ -13,37 +13,35 @@ import {
 } from "@/components/ui/select";
 import { Trophy, Calendar, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [primaryPosition, setPrimaryPosition] = useState<string>("");
   const [secondaryPosition, setSecondaryPosition] = useState<string>("");
 
-  // Mock tournament data - replace with actual data fetching
-  const tournament = {
-    title: "Tennis Tournament 2024",
-    format: "Single Elimination",
-    rules: [
-      "Matches are best of 3 sets",
-      "Standard tennis scoring rules apply",
-      "Players must arrive 15 minutes before match time",
-    ],
-    dates: {
-      registration: "January 15, 2024",
-      start: "February 1, 2024",
-      end: "February 15, 2024",
-    },
-    positions: [
-      { id: "singles", label: "Singles" },
-      { id: "doubles", label: "Doubles" },
-      { id: "mixed", label: "Mixed Doubles" },
-    ],
-  };
+  const { data: league, isLoading } = useQuery({
+    queryKey: ['league', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leagues')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-  // Mock availability data - replace with actual data
+      if (error) throw error;
+      return data;
+    },
+    meta: {
+      errorMessage: 'Failed to load league details'
+    }
+  });
+
+  // Mock availability data - in a real app, this would come from the backend
   const availability = {
     workingHours: {
       start: 8,
@@ -59,8 +57,31 @@ const TournamentRegistration = () => {
     })),
   };
 
+  const handleTimeSlotSelect = (slotId: string) => {
+    setSelectedTimeSlots(prev => {
+      if (prev.includes(slotId)) {
+        return prev.filter(id => id !== slotId);
+      }
+      return [...prev, slotId];
+    });
+  };
+
+  const handleSelectAllDay = (day: number) => {
+    const daySlots = availability.availableTimeSlots[day].slots
+      .filter(slot => slot.available)
+      .map(slot => `${day}-${slot.time}`);
+
+    setSelectedTimeSlots(prev => {
+      const isFullySelected = daySlots.every(slot => prev.includes(slot));
+      if (isFullySelected) {
+        return prev.filter(slot => !daySlots.includes(slot));
+      }
+      return [...new Set([...prev, ...daySlots])];
+    });
+  };
+
   const handleSubmit = async () => {
-    if (!selectedTimeSlot || !primaryPosition) {
+    if (!selectedTimeSlots.length || !primaryPosition) {
       toast({
         title: "Please complete all required fields",
         variant: "destructive",
@@ -69,13 +90,50 @@ const TournamentRegistration = () => {
     }
 
     try {
-      // Add registration logic here
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to register for the league.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // First, join the league
+      const { error: joinError } = await supabase
+        .from('league_participants')
+        .insert({
+          league_id: id,
+          user_id: user.id,
+        });
+
+      if (joinError) throw joinError;
+
+      // Then, save player statistics with availability
+      const { error: statsError } = await supabase
+        .from('player_statistics')
+        .insert({
+          league_id: id,
+          player_id: user.id,
+          preferred_position: primaryPosition,
+          availability_schedule: {
+            timeSlots: selectedTimeSlots,
+            secondaryPosition,
+          },
+        });
+
+      if (statsError) throw statsError;
+
       toast({
         title: "Registration successful!",
         description: "You have been registered for the tournament.",
       });
+      
       navigate(`/tournament/${id}`);
     } catch (error) {
+      console.error('Registration error:', error);
       toast({
         title: "Registration failed",
         description: "Please try again later.",
@@ -84,11 +142,26 @@ const TournamentRegistration = () => {
     }
   };
 
+  if (isLoading) {
+    return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
+      <div className="container max-w-6xl mx-auto px-4">
+        Loading tournament details...
+      </div>
+    </div>;
+  }
+
+  if (!league) {
+    return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
+      <div className="container max-w-6xl mx-auto px-4">
+        Tournament not found
+      </div>
+    </div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
         <div className="grid gap-6">
-          {/* Tournament Information */}
           <Card className="bg-white/80 shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -98,13 +171,12 @@ const TournamentRegistration = () => {
                   </Badge>
                   <CardTitle className="text-2xl font-bold flex items-center gap-2">
                     <Trophy className="h-5 w-5 text-purple-600" />
-                    {tournament.title}
+                    {league.name}
                   </CardTitle>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="grid gap-6">
-              {/* Tournament Details */}
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <h3 className="font-semibold flex items-center gap-2">
@@ -112,9 +184,9 @@ const TournamentRegistration = () => {
                     Important Dates
                   </h3>
                   <div className="text-sm space-y-1">
-                    <p>Registration: {tournament.dates.registration}</p>
-                    <p>Start Date: {tournament.dates.start}</p>
-                    <p>End Date: {tournament.dates.end}</p>
+                    <p>Registration Deadline: {new Date(league.registration_deadline).toLocaleDateString()}</p>
+                    <p>Start Date: {new Date(league.start_date).toLocaleDateString()}</p>
+                    <p>End Date: {new Date(league.end_date).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -122,22 +194,23 @@ const TournamentRegistration = () => {
                     <Trophy className="h-4 w-4 text-purple-600" />
                     Tournament Format
                   </h3>
-                  <p className="text-sm">{tournament.format}</p>
+                  <p className="text-sm">{league.match_format}</p>
                 </div>
                 <div className="space-y-2">
                   <h3 className="font-semibold flex items-center gap-2">
                     <Info className="h-4 w-4 text-purple-600" />
                     Rules
                   </h3>
-                  <ul className="text-sm space-y-1">
-                    {tournament.rules.map((rule, index) => (
-                      <li key={index}>{rule}</li>
-                    ))}
-                  </ul>
+                  <div className="text-sm space-y-1">
+                    {league.rules ? (
+                      <p>{league.rules}</p>
+                    ) : (
+                      <p>No specific rules provided</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Position Selection */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="font-semibold">Primary Position</label>
@@ -146,11 +219,9 @@ const TournamentRegistration = () => {
                       <SelectValue placeholder="Select primary position" />
                     </SelectTrigger>
                     <SelectContent>
-                      {tournament.positions.map((position) => (
-                        <SelectItem key={position.id} value={position.id}>
-                          {position.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="singles">Singles</SelectItem>
+                      <SelectItem value="doubles">Doubles</SelectItem>
+                      <SelectItem value="mixed">Mixed Doubles</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -161,24 +232,21 @@ const TournamentRegistration = () => {
                       <SelectValue placeholder="Select secondary position" />
                     </SelectTrigger>
                     <SelectContent>
-                      {tournament.positions.map((position) => (
-                        <SelectItem key={position.id} value={position.id}>
-                          {position.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="singles">Singles</SelectItem>
+                      <SelectItem value="doubles">Doubles</SelectItem>
+                      <SelectItem value="mixed">Mixed Doubles</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              {/* Time Slot Selection */}
               <WeeklySchedule
                 availableTimeSlots={availability.availableTimeSlots}
-                selectedTimeSlot={selectedTimeSlot}
-                onTimeSlotSelect={setSelectedTimeSlot}
+                selectedTimeSlots={selectedTimeSlots}
+                onTimeSlotSelect={handleTimeSlotSelect}
+                onSelectAllDay={handleSelectAllDay}
               />
 
-              {/* Submit Button */}
               <div className="flex justify-center">
                 <Button
                   onClick={handleSubmit}
