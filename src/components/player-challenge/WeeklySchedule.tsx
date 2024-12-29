@@ -28,25 +28,20 @@ export const WeeklySchedule = ({
     return days[dayIndex];
   };
 
-  const getTimeSlotClass = (available: boolean, isSelected: boolean) => {
+  const getTimeSlotClass = (isSelected: boolean) => {
     return cn(
       "p-0.5 rounded text-[10px] transition-all duration-200 flex items-center justify-center h-6",
       {
-        "bg-blue-50 hover:bg-blue-100 cursor-pointer border-[0.5px] border-transparent hover:border-blue-300": available && !isSelected,
-        "bg-gray-100 cursor-not-allowed text-gray-400": !available,
+        "bg-blue-50 hover:bg-blue-100 cursor-pointer border-[0.5px] border-transparent hover:border-blue-300": !isSelected,
         "bg-blue-200 border-[0.5px] border-blue-500": isSelected,
       }
     );
   };
 
-  const areAllDaySlotsAvailable = (day: number) => {
-    return availableTimeSlots[day].slots.every(slot => slot.available);
-  };
-
   const isDayFullySelected = (day: number) => {
     return availableTimeSlots[day].slots.every((slot) => {
       const slotId = `${day}-${slot.time}`;
-      return !slot.available || selectedTimeSlots.includes(slotId);
+      return selectedTimeSlots.includes(slotId);
     });
   };
 
@@ -73,20 +68,18 @@ export const WeeklySchedule = ({
                 <div className="text-center font-semibold text-gray-700 pb-0.5 border-b text-xs">
                   {getDayName(day.day)}
                 </div>
-                {areAllDaySlotsAvailable(day.day) && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-4 w-4 p-0"
-                    onClick={() => onSelectAllDay(day.day)}
-                  >
-                    {isDayFullySelected(day.day) ? (
-                      <Check className="h-3 w-3 text-green-500" />
-                    ) : (
-                      <div className="h-3 w-3 border border-gray-300 rounded" />
-                    )}
-                  </Button>
-                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0"
+                  onClick={() => onSelectAllDay(day.day)}
+                >
+                  {isDayFullySelected(day.day) ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <div className="h-3 w-3 border border-gray-300 rounded" />
+                  )}
+                </Button>
               </div>
               <div className="space-y-0.5">
                 {day.slots.map((slot) => {
@@ -97,12 +90,8 @@ export const WeeklySchedule = ({
                   return (
                     <div
                       key={slotId}
-                      className={getTimeSlotClass(slot.available, isSelected)}
-                      onClick={() => {
-                        if (slot.available) {
-                          handleTimeSlotClick(slotId);
-                        }
-                      }}
+                      className={getTimeSlotClass(isSelected)}
+                      onClick={() => handleTimeSlotClick(slotId)}
                     >
                       <span className="font-medium">{timeString}</span>
                     </div>
