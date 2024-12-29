@@ -43,13 +43,15 @@ const TournamentDetails = () => {
     },
     meta: {
       errorMessage: 'Failed to load player statistics'
-    },
-    onError: () => {
-      toast.error('Failed to load player statistics');
     }
   });
 
-  // Mock data for demonstration - replace with actual data from API
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load player statistics');
+    }
+  }, [error]);
+
   const tournament = {
     title: "Tennis Tournament 2024",
     location: "Tennis Club Paris",
