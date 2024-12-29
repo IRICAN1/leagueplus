@@ -20,7 +20,7 @@ interface TournamentStatsProps {
 
 export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps) => {
   const formattedPlayerStats = playerStats?.map(player => ({
-    id: player.id,
+    id: Number(player.id), // Convert string id to number
     name: player.profiles?.username || 'Unknown Player',
     rank: player.rank,
     wins: player.wins,
