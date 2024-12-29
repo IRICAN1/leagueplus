@@ -89,12 +89,18 @@ const CreateLeague = () => {
         throw new Error("Not authenticated");
       }
 
+      // Convert Date objects to ISO strings for Supabase
+      const formattedData = {
+        ...data,
+        creator_id: session.user.id,
+        start_date: data.start_date.toISOString(),
+        end_date: data.end_date.toISOString(),
+        registration_deadline: data.registration_deadline.toISOString(),
+      };
+
       const { error } = await supabase
         .from('leagues')
-        .insert([{
-          ...data,
-          creator_id: session.user.id,
-        }]);
+        .insert(formattedData); // Remove the array wrapper
 
       if (error) throw error;
 
