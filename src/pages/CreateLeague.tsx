@@ -1,26 +1,19 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -30,84 +23,85 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 
 const formSchema = z.object({
-  name: z.string().min(3, "League name must be at least 3 characters"),
+  name: z.string().min(1, "Name is required"),
   sport_type: z.enum(["Tennis", "Basketball", "Football", "Volleyball", "Badminton"]),
-  skill_level_min: z.coerce.number().min(1).max(10),
-  skill_level_max: z.coerce.number().min(1).max(10),
+  skill_level_min: z.number().min(1).max(10),
+  skill_level_max: z.number().min(1).max(10),
   gender_category: z.enum(["Men", "Women", "Mixed"]),
   start_date: z.date(),
   end_date: z.date(),
-  location: z.string().min(3, "Location must be at least 3 characters"),
-  max_participants: z.coerce.number().min(2, "Must have at least 2 participants"),
+  location: z.string().min(1, "Location is required"),
+  max_participants: z.number().min(2),
   description: z.string().optional(),
   rules: z.string().optional(),
   match_format: z.enum(["Single Matches", "Round Robin", "Knockout"]),
   tournament_structure: z.string().optional(),
   registration_deadline: z.date(),
-  age_min: z.coerce.number().optional(),
-  age_max: z.coerce.number().optional(),
+  age_min: z.number().optional(),
+  age_max: z.number().optional(),
   format: z.enum(["Individual", "Team"]),
   schedule_preferences: z.string().optional(),
   equipment_requirements: z.string().optional(),
   venue_details: z.string().optional(),
-}).refine(data => data.skill_level_max >= data.skill_level_min, {
-  message: "Maximum skill level must be greater than or equal to minimum skill level",
-  path: ["skill_level_max"],
-}).refine(data => data.end_date > data.start_date, {
-  message: "End date must be after start date",
-  path: ["end_date"],
-}).refine(data => data.start_date > data.registration_deadline, {
-  message: "Start date must be after registration deadline",
-  path: ["start_date"],
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
 const CreateLeague = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       format: "Individual",
       skill_level_min: 1,
       skill_level_max: 10,
-      gender_category: "Mixed", // Set a default value for required field
-      match_format: "Single Matches", // Set a default value for required field
-      sport_type: "Tennis", // Set a default value for required field
+      gender_category: "Mixed",
+      match_format: "Single Matches",
+      sport_type: "Tennis",
+      max_participants: 2,
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
+      if (!session) {
         throw new Error("Not authenticated");
       }
 
-      // Convert Date objects to ISO strings for Supabase and ensure all required fields
       const formattedData = {
-        ...data,
         creator_id: session.user.id,
-        start_date: data.start_date.toISOString(),
-        end_date: data.end_date.toISOString(),
-        registration_deadline: data.registration_deadline.toISOString(),
         name: data.name,
         sport_type: data.sport_type,
         skill_level_min: data.skill_level_min,
         skill_level_max: data.skill_level_max,
         gender_category: data.gender_category,
+        start_date: data.start_date.toISOString(),
+        end_date: data.end_date.toISOString(),
         location: data.location,
         max_participants: data.max_participants,
+        description: data.description,
+        rules: data.rules,
         match_format: data.match_format,
+        tournament_structure: data.tournament_structure,
+        registration_deadline: data.registration_deadline.toISOString(),
+        age_min: data.age_min,
+        age_max: data.age_max,
         format: data.format,
+        schedule_preferences: data.schedule_preferences,
+        equipment_requirements: data.equipment_requirements,
+        venue_details: data.venue_details,
       };
 
       const { error } = await supabase
@@ -117,32 +111,29 @@ const CreateLeague = () => {
       if (error) throw error;
 
       toast({
-        title: "League created successfully!",
-        description: "You will be redirected to the leagues page.",
+        title: "Success",
+        description: "League created successfully",
       });
 
       navigate("/");
     } catch (error) {
+      console.error("Error creating league:", error);
       toast({
-        title: "Error creating league",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: "Error",
+        description: "Failed to create league. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="container max-w-2xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">Create a New League</h1>
-      
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Basic Information */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Basic Information</h2>
-            
             <FormField
               control={form.control}
               name="name"
@@ -182,16 +173,17 @@ const CreateLeague = () => {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="skill_level_min"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Minimum Skill Level (1-10)</FormLabel>
+                    <FormLabel>Minimum Skill Level</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" max="10" {...field} />
+                      <Input type="number" min={1} max={10} {...field} onChange={e => field.onChange(+e.target.value)} />
                     </FormControl>
+                    <FormDescription>Scale of 1-10</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -202,10 +194,11 @@ const CreateLeague = () => {
                 name="skill_level_max"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Maximum Skill Level (1-10)</FormLabel>
+                    <FormLabel>Maximum Skill Level</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" max="10" {...field} />
+                      <Input type="number" min={1} max={10} {...field} onChange={e => field.onChange(+e.target.value)} />
                     </FormControl>
+                    <FormDescription>Scale of 1-10</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -234,7 +227,11 @@ const CreateLeague = () => {
                 </FormItem>
               )}
             />
+          </div>
 
+          {/* Dates */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Dates</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -267,7 +264,7 @@ const CreateLeague = () => {
                           selected={field.value}
                           onSelect={field.onChange}
                           disabled={(date) =>
-                            date < new Date() || (form.getValues("registration_deadline") && date <= form.getValues("registration_deadline"))
+                            date < new Date()
                           }
                           initialFocus
                         />
@@ -309,7 +306,49 @@ const CreateLeague = () => {
                           selected={field.value}
                           onSelect={field.onChange}
                           disabled={(date) =>
-                            date < new Date() || (form.getValues("start_date") && date <= form.getValues("start_date"))
+                            date < new Date()
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="registration_deadline"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Registration Deadline</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date()
                           }
                           initialFocus
                         />
@@ -320,49 +359,11 @@ const CreateLeague = () => {
                 )}
               />
             </div>
+          </div>
 
-            <FormField
-              control={form.control}
-              name="registration_deadline"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Registration Deadline</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date() || (form.getValues("start_date") && date >= form.getValues("start_date"))
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+          {/* Location and Participants */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Location and Participants</h2>
             <FormField
               control={form.control}
               name="location"
@@ -384,7 +385,12 @@ const CreateLeague = () => {
                 <FormItem>
                   <FormLabel>Maximum Participants</FormLabel>
                   <FormControl>
-                    <Input type="number" min="2" {...field} />
+                    <Input 
+                      type="number" 
+                      min={2} 
+                      {...field} 
+                      onChange={e => field.onChange(+e.target.value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -392,41 +398,26 @@ const CreateLeague = () => {
             />
           </div>
 
-          {/* Detailed Information */}
+          {/* Format and Rules */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Detailed Information</h2>
-            
+            <h2 className="text-xl font-semibold">Format and Rules</h2>
             <FormField
               control={form.control}
-              name="description"
+              name="format"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>League Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter league description"
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="rules"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>League Rules</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter league rules"
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel>Format</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select format" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Individual">Individual</SelectItem>
+                      <SelectItem value="Team">Team</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -457,15 +448,33 @@ const CreateLeague = () => {
 
             <FormField
               control={form.control}
-              name="tournament_structure"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tournament Structure</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Describe the tournament structure"
-                      className="min-h-[100px]"
-                      {...field}
+                    <Textarea 
+                      placeholder="Enter league description" 
+                      className="resize-none" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="rules"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rules</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Enter league rules" 
+                      className="resize-none" 
+                      {...field} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -474,11 +483,10 @@ const CreateLeague = () => {
             />
           </div>
 
-          {/* Additional Settings */}
+          {/* Additional Details */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Additional Settings</h2>
-
-            <div className="grid grid-cols-2 gap-4">
+            <h2 className="text-xl font-semibold">Additional Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="age_min"
@@ -486,7 +494,11 @@ const CreateLeague = () => {
                   <FormItem>
                     <FormLabel>Minimum Age</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={e => field.onChange(e.target.value ? +e.target.value : undefined)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -500,7 +512,11 @@ const CreateLeague = () => {
                   <FormItem>
                     <FormLabel>Maximum Age</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={e => field.onChange(e.target.value ? +e.target.value : undefined)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -510,36 +526,15 @@ const CreateLeague = () => {
 
             <FormField
               control={form.control}
-              name="format"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>League Format</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select league format" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Individual">Individual</SelectItem>
-                      <SelectItem value="Team">Team</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="schedule_preferences"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Schedule Preferences</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Enter schedule preferences"
-                      {...field}
+                    <Textarea 
+                      placeholder="Enter schedule preferences" 
+                      className="resize-none" 
+                      {...field} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -554,9 +549,10 @@ const CreateLeague = () => {
                 <FormItem>
                   <FormLabel>Equipment Requirements</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Enter equipment requirements"
-                      {...field}
+                    <Textarea 
+                      placeholder="Enter equipment requirements" 
+                      className="resize-none" 
+                      {...field} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -571,9 +567,10 @@ const CreateLeague = () => {
                 <FormItem>
                   <FormLabel>Venue Details</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Enter venue details"
-                      {...field}
+                    <Textarea 
+                      placeholder="Enter venue details" 
+                      className="resize-none" 
+                      {...field} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -582,14 +579,13 @@ const CreateLeague = () => {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Creating League..." : "Create League"}
+          <Button type="submit" className="w-full">
+            Create League
           </Button>
         </form>
       </Form>
     </div>
   );
-
 };
 
 export default CreateLeague;
