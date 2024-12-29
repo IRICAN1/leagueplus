@@ -61,6 +61,14 @@ const App = () => (
             <Route path="/leagues" element={<Navigate to="/" replace />} />
             {/* Protected routes */}
             <Route
+              path="/create-league"
+              element={
+                <ProtectedRoute>
+                  <div>Create League Page (Coming Soon)</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/tournament/:id/register"
               element={
                 <ProtectedRoute>

@@ -9,6 +9,95 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      leagues: {
+        Row: {
+          age_max: number | null
+          age_min: number | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          end_date: string
+          equipment_requirements: string | null
+          format: Database["public"]["Enums"]["league_format"]
+          gender_category: Database["public"]["Enums"]["league_gender_category"]
+          id: string
+          location: string
+          match_format: Database["public"]["Enums"]["league_match_format"]
+          max_participants: number
+          name: string
+          registration_deadline: string
+          rules: string | null
+          schedule_preferences: string | null
+          skill_level_max: number
+          skill_level_min: number
+          sport_type: Database["public"]["Enums"]["league_sport_type"]
+          start_date: string
+          tournament_structure: string | null
+          updated_at: string
+          venue_details: string | null
+        }
+        Insert: {
+          age_max?: number | null
+          age_min?: number | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          end_date: string
+          equipment_requirements?: string | null
+          format?: Database["public"]["Enums"]["league_format"]
+          gender_category: Database["public"]["Enums"]["league_gender_category"]
+          id?: string
+          location: string
+          match_format: Database["public"]["Enums"]["league_match_format"]
+          max_participants: number
+          name: string
+          registration_deadline: string
+          rules?: string | null
+          schedule_preferences?: string | null
+          skill_level_max: number
+          skill_level_min: number
+          sport_type: Database["public"]["Enums"]["league_sport_type"]
+          start_date: string
+          tournament_structure?: string | null
+          updated_at?: string
+          venue_details?: string | null
+        }
+        Update: {
+          age_max?: number | null
+          age_min?: number | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          end_date?: string
+          equipment_requirements?: string | null
+          format?: Database["public"]["Enums"]["league_format"]
+          gender_category?: Database["public"]["Enums"]["league_gender_category"]
+          id?: string
+          location?: string
+          match_format?: Database["public"]["Enums"]["league_match_format"]
+          max_participants?: number
+          name?: string
+          registration_deadline?: string
+          rules?: string | null
+          schedule_preferences?: string | null
+          skill_level_max?: number
+          skill_level_min?: number
+          sport_type?: Database["public"]["Enums"]["league_sport_type"]
+          start_date?: string
+          tournament_structure?: string | null
+          updated_at?: string
+          venue_details?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leagues_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -41,7 +130,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      league_format: "Individual" | "Team"
+      league_gender_category: "Men" | "Women" | "Mixed"
+      league_match_format: "Single Matches" | "Round Robin" | "Knockout"
+      league_sport_type:
+        | "Tennis"
+        | "Basketball"
+        | "Football"
+        | "Volleyball"
+        | "Badminton"
     }
     CompositeTypes: {
       [_ in never]: never
