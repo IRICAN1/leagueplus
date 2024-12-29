@@ -4,7 +4,7 @@ import { PlayerRankingsTable } from "./PlayerRankingsTable";
 import { Tables } from "@/integrations/supabase/types";
 
 type PlayerStatWithProfile = Tables<"player_statistics"> & {
-  profiles: Tables<"profiles"> | null;
+  profiles: Tables<"profiles">;
 };
 
 interface TournamentStatsProps {
@@ -14,7 +14,7 @@ interface TournamentStatsProps {
 
 export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps) => {
   const formattedPlayerStats = playerStats?.map(player => ({
-    id: player.id,  // Keep as string, no conversion needed
+    id: player.id,
     name: player.profiles?.username || 'Unknown Player',
     rank: player.rank,
     wins: player.wins,

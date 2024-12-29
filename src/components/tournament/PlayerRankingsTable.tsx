@@ -8,7 +8,7 @@ export interface Achievement {
 }
 
 export interface Player {
-  id: string;  // Changed from number to string to match UUID from Supabase
+  id: string;
   name: string;
   rank: number;
   wins: number;
@@ -51,8 +51,7 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
                 {player.achievements?.map((achievement, index) => (
                   <PlayerAchievementBadge
                     key={index}
-                    title={achievement.title}
-                    icon={achievement.icon}
+                    achievement={achievement}
                   />
                 )) ?? null}
               </div>
