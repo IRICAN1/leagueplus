@@ -13,7 +13,7 @@ interface WeeklyScheduleProps {
     }>;
   }>;
   selectedTimeSlots: string[];
-  onTimeSlotSelect: (slotId: string) => void;
+  onTimeSlotSelect: (value: string[]) => void;
   onSelectAllDay: (day: number) => void;
 }
 
@@ -44,10 +44,17 @@ export const WeeklySchedule = ({
   };
 
   const isDayFullySelected = (day: number) => {
-    return availableTimeSlots[day].slots.every((slot, index) => {
+    return availableTimeSlots[day].slots.every((slot) => {
       const slotId = `${day}-${slot.time}`;
       return !slot.available || selectedTimeSlots.includes(slotId);
     });
+  };
+
+  const handleTimeSlotClick = (slotId: string) => {
+    const newSelectedTimeSlots = selectedTimeSlots.includes(slotId)
+      ? selectedTimeSlots.filter(id => id !== slotId)
+      : [...selectedTimeSlots, slotId];
+    onTimeSlotSelect(newSelectedTimeSlots);
   };
 
   return (
@@ -93,7 +100,7 @@ export const WeeklySchedule = ({
                       className={getTimeSlotClass(slot.available, isSelected)}
                       onClick={() => {
                         if (slot.available) {
-                          onTimeSlotSelect(slotId);
+                          handleTimeSlotClick(slotId);
                         }
                       }}
                     >
