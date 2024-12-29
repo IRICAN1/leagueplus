@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import TournamentDetails from "./pages/TournamentDetails";
 import TournamentRegistration from "./pages/TournamentRegistration";
 import PlayerChallenge from "./pages/PlayerChallenge";
+import CreateLeague from "./pages/CreateLeague";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 
@@ -64,7 +65,7 @@ const App = () => (
               path="/create-league"
               element={
                 <ProtectedRoute>
-                  <div>Create League Page (Coming Soon)</div>
+                  <CreateLeague />
                 </ProtectedRoute>
               }
             />
