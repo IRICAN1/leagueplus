@@ -21,7 +21,6 @@ const TournamentDetails = () => {
   const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
-      // Add UUID validation
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!id || !UUID_REGEX.test(id)) {
         throw new Error('Invalid league ID format');
@@ -54,7 +53,7 @@ const TournamentDetails = () => {
         .from('player_statistics')
         .select(`
           *,
-          profiles:player_id (username)
+          profiles (username)
         `)
         .eq('league_id', id)
         .order('rank', { ascending: true });
@@ -110,7 +109,7 @@ const TournamentDetails = () => {
           isAuthenticated={isAuthenticated}
         />
         <TournamentStats 
-          playerStats={playerStats || []}
+          playerStats={playerStats}
           isLoading={isLoadingStats}
         />
       </div>

@@ -4,7 +4,7 @@ import { PlayerRankingsTable } from "./PlayerRankingsTable";
 import { Tables } from "@/integrations/supabase/types";
 
 type PlayerStatWithProfile = Tables<"player_statistics"> & {
-  profiles: Tables<"profiles">;
+  profiles: Pick<Tables<"profiles">, "username">;
 };
 
 interface TournamentStatsProps {
