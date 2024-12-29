@@ -11,7 +11,7 @@ const PlayerChallenge = () => {
   const { playerId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
 
   // Mock player data - in a real app, this would come from an API
@@ -33,21 +33,21 @@ const PlayerChallenge = () => {
     availability: {
       workingHours: {
         start: 8,
-        end: 24, // Extended to midnight
+        end: 24,
       },
-      disabledDays: [0, 6], // Weekends disabled
+      disabledDays: [0, 6],
       availableTimeSlots: Array.from({ length: 7 }, (_, dayIndex) => ({
         day: dayIndex,
-        slots: Array.from({ length: 16 }, (_, hourIndex) => ({  // Extended to 16 slots (8am to midnight)
+        slots: Array.from({ length: 16 }, (_, hourIndex) => ({
           time: 8 + hourIndex,
-          available: Math.random() > 0.3, // Randomly generate availability for demo
+          available: Math.random() > 0.3,
         })),
       })),
     },
   };
 
   const handleChallenge = () => {
-    if (!selectedTimeSlot || !selectedLocation) {
+    if (selectedTimeSlots.length === 0 || !selectedLocation) {
       toast({
         title: "Please select both time and location",
         variant: "destructive",
@@ -63,6 +63,21 @@ const PlayerChallenge = () => {
     setTimeout(() => navigate("/tournament/1"), 2000);
   };
 
+  const handleSelectAllDay = (day: number) => {
+    const daySlots = player.availability.availableTimeSlots[day].slots;
+    const dayTimeSlots = daySlots
+      .filter(slot => slot.available)
+      .map(slot => `${day}-${slot.time}`);
+    
+    const allSelected = dayTimeSlots.every(slot => selectedTimeSlots.includes(slot));
+    
+    if (allSelected) {
+      setSelectedTimeSlots(prev => prev.filter(slot => !dayTimeSlots.includes(slot)));
+    } else {
+      setSelectedTimeSlots(prev => [...new Set([...prev, ...dayTimeSlots])]);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
@@ -71,8 +86,9 @@ const PlayerChallenge = () => {
           
           <WeeklySchedule
             availableTimeSlots={player.availability.availableTimeSlots}
-            selectedTimeSlot={selectedTimeSlot}
-            onTimeSlotSelect={setSelectedTimeSlot}
+            selectedTimeSlots={selectedTimeSlots}
+            onTimeSlotSelect={setSelectedTimeSlots}
+            onSelectAllDay={handleSelectAllDay}
           />
 
           <LocationSelector
