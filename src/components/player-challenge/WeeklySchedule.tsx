@@ -1,8 +1,7 @@
-import { format } from "date-fns";
-import { Clock, Check } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { DayHeader } from "./DayHeader";
+import { TimeSlot } from "./TimeSlot";
 
 interface WeeklyScheduleProps {
   availableTimeSlots: Array<{
@@ -23,21 +22,6 @@ export const WeeklySchedule = ({
   onTimeSlotSelect,
   onSelectAllDay,
 }: WeeklyScheduleProps) => {
-  const getDayName = (dayIndex: number) => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days[dayIndex];
-  };
-
-  const getTimeSlotClass = (isSelected: boolean) => {
-    return cn(
-      "p-0.5 rounded text-[10px] transition-all duration-200 flex items-center justify-center h-6",
-      {
-        "bg-blue-50 hover:bg-blue-100 cursor-pointer border-[0.5px] border-transparent hover:border-blue-300": !isSelected,
-        "bg-blue-200 border-[0.5px] border-blue-500": isSelected,
-      }
-    );
-  };
-
   const isDayFullySelected = (day: number) => {
     return availableTimeSlots[day].slots.every((slot) => {
       const slotId = `${day}-${slot.time}`;
@@ -64,37 +48,23 @@ export const WeeklySchedule = ({
         <div className="grid grid-cols-7 gap-1">
           {availableTimeSlots.map((day) => (
             <div key={day.day} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-1">
-                <div className="text-center font-semibold text-gray-700 pb-0.5 border-b text-xs">
-                  {getDayName(day.day)}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0"
-                  onClick={() => onSelectAllDay(day.day)}
-                >
-                  {isDayFullySelected(day.day) ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <div className="h-3 w-3 border border-gray-300 rounded" />
-                  )}
-                </Button>
-              </div>
+              <DayHeader
+                day={day.day}
+                isFullySelected={isDayFullySelected(day.day)}
+                onSelectAll={() => onSelectAllDay(day.day)}
+              />
               <div className="space-y-0.5">
                 {day.slots.map((slot) => {
-                  const timeString = `${format(new Date().setHours(slot.time), 'ha')}`;
                   const slotId = `${day.day}-${slot.time}`;
                   const isSelected = selectedTimeSlots.includes(slotId);
 
                   return (
-                    <div
+                    <TimeSlot
                       key={slotId}
-                      className={getTimeSlotClass(isSelected)}
+                      time={slot.time}
+                      isSelected={isSelected}
                       onClick={() => handleTimeSlotClick(slotId)}
-                    >
-                      <span className="font-medium">{timeString}</span>
-                    </div>
+                    />
                   );
                 })}
               </div>
