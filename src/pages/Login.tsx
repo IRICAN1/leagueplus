@@ -4,16 +4,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const returnTo = new URLSearchParams(location.search).get('returnTo') || '/';
 
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        toast({
+          title: "Error checking authentication status",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
       if (session) {
         navigate(returnTo);
       }
@@ -22,8 +32,40 @@ const Login = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session) {
+      async (event, session) => {
+        if (event === 'SIGNED_IN') {
+          // Ensure profile exists
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session?.user?.id)
+            .single();
+
+          if (profileError && !profile) {
+            // Create profile if it doesn't exist
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([
+                { 
+                  id: session?.user?.id,
+                  username: session?.user?.email?.split('@')[0] // Default username from email
+                }
+              ]);
+
+            if (insertError) {
+              toast({
+                title: "Error creating profile",
+                description: insertError.message,
+                variant: "destructive",
+              });
+              return;
+            }
+          }
+
+          toast({
+            title: "Successfully signed in",
+            description: "Welcome back!",
+          });
           navigate(returnTo);
         }
       }
@@ -32,7 +74,7 @@ const Login = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, returnTo]);
+  }, [navigate, returnTo, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 flex items-center justify-center p-4">
@@ -48,10 +90,15 @@ const Login = () => {
               variables: {
                 default: {
                   colors: {
-                    brand: '#2563eb',
-                    brandAccent: '#1d4ed8',
+                    brand: '#7c3aed',
+                    brandAccent: '#6d28d9',
                   },
                 },
+              },
+              className: {
+                container: 'flex flex-col gap-4',
+                button: 'bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors',
+                input: 'border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-500',
               },
             }}
             theme="light"
