@@ -22,11 +22,6 @@ export const leagueFormSchema = z.object({
   equipment_requirements: z.string().optional(),
   venue_details: z.string().optional(),
 }).refine((data) => {
-  return data.registration_deadline < data.start_date;
-}, {
-  message: "Registration deadline must be before start date",
-  path: ["registration_deadline"],
-}).refine((data) => {
   return data.start_date < data.end_date;
 }, {
   message: "Start date must be before end date",
