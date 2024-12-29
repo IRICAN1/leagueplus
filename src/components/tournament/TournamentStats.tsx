@@ -2,12 +2,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 import { PlayerRankingsTable } from "./PlayerRankingsTable";
 
+interface PlayerStats {
+  id: string;
+  rank: number;
+  wins: number;
+  losses: number;
+  points: number;
+  profiles: {
+    username: string;
+  } | null;
+}
+
 interface TournamentStatsProps {
-  playerStats: any[];
+  playerStats: PlayerStats[];
   isLoading: boolean;
 }
 
 export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps) => {
+  const formattedPlayerStats = playerStats?.map(player => ({
+    id: player.id,
+    name: player.profiles?.username || 'Unknown Player',
+    rank: player.rank,
+    wins: player.wins,
+    losses: player.losses,
+    points: player.points
+  }));
+
   return (
     <Card className="bg-white/80 shadow-lg">
       <CardHeader>
@@ -20,7 +40,7 @@ export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps
         {isLoading ? (
           <div className="text-center">Loading player statistics...</div>
         ) : (
-          <PlayerRankingsTable players={playerStats} />
+          <PlayerRankingsTable players={formattedPlayerStats} />
         )}
       </CardContent>
     </Card>
