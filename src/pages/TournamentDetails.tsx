@@ -42,10 +42,10 @@ const TournamentDetails = () => {
       return data;
     },
     meta: {
-      onError: (error: Error) => {
-        console.error('Error fetching player stats:', error);
-        toast.error('Failed to load player statistics');
-      }
+      errorMessage: 'Failed to load player statistics'
+    },
+    onError: () => {
+      toast.error('Failed to load player statistics');
     }
   });
 
