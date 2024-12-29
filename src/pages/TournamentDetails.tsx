@@ -18,9 +18,15 @@ const TournamentDetails = () => {
     checkAuth();
   }, []);
 
-  const { data: league, isLoading: isLoadingLeague } = useQuery({
+  const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
+      // Add UUID validation
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!id || !UUID_REGEX.test(id)) {
+        throw new Error('Invalid league ID format');
+      }
+
       const { data, error } = await supabase
         .from('leagues')
         .select('*')
@@ -36,7 +42,7 @@ const TournamentDetails = () => {
     }
   });
 
-  const { data: playerStats, isLoading: isLoadingStats, error } = useQuery({
+  const { data: playerStats, isLoading: isLoadingStats, error: statsError } = useQuery({
     queryKey: ['playerStats', id],
     queryFn: async () => {
       const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -62,10 +68,13 @@ const TournamentDetails = () => {
   });
 
   useEffect(() => {
-    if (error) {
+    if (leagueError) {
+      toast.error(leagueError instanceof Error ? leagueError.message : 'Failed to load league details');
+    }
+    if (statsError) {
       toast.error('Failed to load player statistics');
     }
-  }, [error]);
+  }, [leagueError, statsError]);
 
   if (isLoadingLeague) {
     return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
@@ -75,10 +84,12 @@ const TournamentDetails = () => {
     </div>;
   }
 
-  if (!league) {
+  if (!league || leagueError) {
     return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
-        Tournament not found
+        {leagueError instanceof Error && leagueError.message === 'Invalid league ID format' 
+          ? 'Invalid tournament ID format'
+          : 'Tournament not found'}
       </div>
     </div>;
   }
