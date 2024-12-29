@@ -11,6 +11,11 @@ import { Swords } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PlayerAchievementBadge } from "./PlayerAchievementBadge";
 
+interface Achievement {
+  title: string;
+  icon: any;
+}
+
 interface Player {
   id: number;
   name: string;
@@ -18,10 +23,7 @@ interface Player {
   wins: number;
   losses: number;
   points: number;
-  achievements: Array<{
-    title: string;
-    icon: any;
-  }>;
+  achievements?: Achievement[];
 }
 
 interface PlayerRankingsTableProps {
@@ -29,6 +31,10 @@ interface PlayerRankingsTableProps {
 }
 
 export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
+  if (!players) {
+    return <div>No player data available</div>;
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -53,9 +59,9 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
             </TableCell>
             <TableCell>
               <div className="flex flex-wrap gap-2">
-                {player.achievements.map((achievement, index) => (
+                {player.achievements?.map((achievement, index) => (
                   <PlayerAchievementBadge key={index} achievement={achievement} />
-                ))}
+                )) ?? null}
               </div>
             </TableCell>
             <TableCell className="text-right font-medium text-green-600">
