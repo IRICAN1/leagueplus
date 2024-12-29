@@ -134,6 +134,124 @@ export type Database = {
           },
         ]
       }
+      match_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          league_id: string | null
+          match_date: string | null
+          opponent_id: string | null
+          player_id: string | null
+          points_earned: number
+          position_played: string | null
+          result: Database["public"]["Enums"]["match_result"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          match_date?: string | null
+          opponent_id?: string | null
+          player_id?: string | null
+          points_earned?: number
+          position_played?: string | null
+          result: Database["public"]["Enums"]["match_result"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          match_date?: string | null
+          opponent_id?: string | null
+          player_id?: string | null
+          points_earned?: number
+          position_played?: string | null
+          result?: Database["public"]["Enums"]["match_result"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_history_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_history_opponent_id_fkey"
+            columns: ["opponent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_history_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_statistics: {
+        Row: {
+          availability_schedule: Json | null
+          created_at: string | null
+          id: string
+          league_id: string | null
+          losses: number
+          matches_played: number
+          player_id: string | null
+          points: number
+          preferred_position: string | null
+          rank: number
+          updated_at: string | null
+          wins: number
+        }
+        Insert: {
+          availability_schedule?: Json | null
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          losses?: number
+          matches_played?: number
+          player_id?: string | null
+          points?: number
+          preferred_position?: string | null
+          rank?: number
+          updated_at?: string | null
+          wins?: number
+        }
+        Update: {
+          availability_schedule?: Json | null
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          losses?: number
+          matches_played?: number
+          player_id?: string | null
+          points?: number
+          preferred_position?: string | null
+          rank?: number
+          updated_at?: string | null
+          wins?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_statistics_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_statistics_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -175,6 +293,7 @@ export type Database = {
         | "Football"
         | "Volleyball"
         | "Badminton"
+      match_result: "win" | "loss" | "draw"
     }
     CompositeTypes: {
       [_ in never]: never

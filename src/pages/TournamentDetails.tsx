@@ -1,25 +1,14 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Award, Swords, BadgeCheck, BadgeInfo, BadgeDollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { TournamentHeader } from "@/components/tournament/TournamentHeader";
+import { PlayerRankingsTable } from "@/components/tournament/PlayerRankingsTable";
+import { useQuery } from "@tanstack/react-query";
 
 const TournamentDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -30,19 +19,24 @@ const TournamentDetails = () => {
     checkAuth();
   }, []);
 
-  const handleRegisterClick = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to register for the tournament.",
-      });
-      navigate(`/login?returnTo=/tournament/${id}/register`);
-      return;
-    }
-    navigate(`/tournament/${id}/register`);
-  };
+  const { data: playerStats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['playerStats', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('player_statistics')
+        .select(`
+          *,
+          profiles:player_id (username)
+        `)
+        .eq('league_id', id)
+        .order('rank', { ascending: true });
 
-  // Mock data for demonstration
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Mock data for demonstration - replace with actual data from API
   const tournament = {
     title: "Tennis Tournament 2024",
     location: "Tennis Club Paris",
@@ -58,7 +52,7 @@ const TournamentDetails = () => {
         points: 1500,
         achievements: [
           { title: "Tournament Winner", icon: Trophy },
-          { title: "Perfect Season", icon: BadgeCheck },
+          { title: "Perfect Season", icon: Trophy },
         ],
       },
       {
@@ -69,8 +63,8 @@ const TournamentDetails = () => {
         losses: 6,
         points: 1200,
         achievements: [
-          { title: "Most Improved", icon: BadgeInfo },
-          { title: "Prize Winner", icon: BadgeDollarSign },
+          { title: "Most Improved", icon: Trophy },
+          { title: "Prize Winner", icon: Trophy },
         ],
       },
       {
@@ -80,7 +74,7 @@ const TournamentDetails = () => {
         wins: 11,
         losses: 4,
         points: 1150,
-        achievements: [{ title: "Rising Star", icon: Award }],
+        achievements: [{ title: "Rising Star", icon: Trophy }],
       },
       {
         id: 4,
@@ -89,7 +83,7 @@ const TournamentDetails = () => {
         wins: 10,
         losses: 5,
         points: 1100,
-        achievements: [{ title: "Most Consistent", icon: BadgeCheck }],
+        achievements: [{ title: "Most Consistent", icon: Trophy }],
       },
       {
         id: 5,
@@ -107,7 +101,7 @@ const TournamentDetails = () => {
         wins: 8,
         losses: 8,
         points: 1000,
-        achievements: [{ title: "Fan Favorite", icon: BadgeInfo }],
+        achievements: [{ title: "Fan Favorite", icon: Trophy }],
       },
       {
         id: 7,
@@ -116,7 +110,7 @@ const TournamentDetails = () => {
         wins: 8,
         losses: 7,
         points: 950,
-        achievements: [{ title: "Most Improved", icon: Award }],
+        achievements: [{ title: "Most Improved", icon: Trophy }],
       },
       {
         id: 8,
@@ -134,7 +128,7 @@ const TournamentDetails = () => {
         wins: 7,
         losses: 8,
         points: 850,
-        achievements: [{ title: "Most Sportsman", icon: BadgeCheck }],
+        achievements: [{ title: "Most Sportsman", icon: Trophy }],
       },
       {
         id: 10,
@@ -143,7 +137,7 @@ const TournamentDetails = () => {
         wins: 6,
         losses: 10,
         points: 800,
-        achievements: [{ title: "Best Server", icon: BadgeDollarSign }],
+        achievements: [{ title: "Best Server", icon: Trophy }],
       },
       {
         id: 11,
@@ -152,7 +146,7 @@ const TournamentDetails = () => {
         wins: 6,
         losses: 9,
         points: 750,
-        achievements: [{ title: "Most Determined", icon: Award }],
+        achievements: [{ title: "Most Determined", icon: Trophy }],
       },
       {
         id: 12,
@@ -170,7 +164,7 @@ const TournamentDetails = () => {
         wins: 5,
         losses: 10,
         points: 650,
-        achievements: [{ title: "Most Creative", icon: BadgeInfo }],
+        achievements: [{ title: "Most Creative", icon: Trophy }],
       },
       {
         id: 14,
@@ -179,7 +173,7 @@ const TournamentDetails = () => {
         wins: 4,
         losses: 12,
         points: 600,
-        achievements: [{ title: "Best Backhand", icon: BadgeCheck }],
+        achievements: [{ title: "Best Backhand", icon: Trophy }],
       },
       {
         id: 15,
@@ -188,7 +182,7 @@ const TournamentDetails = () => {
         wins: 4,
         losses: 11,
         points: 550,
-        achievements: [{ title: "Most Resilient", icon: Award }],
+        achievements: [{ title: "Most Resilient", icon: Trophy }],
       },
       {
         id: 16,
@@ -206,7 +200,7 @@ const TournamentDetails = () => {
         wins: 3,
         losses: 12,
         points: 450,
-        achievements: [{ title: "Most Improved Serve", icon: BadgeInfo }],
+        achievements: [{ title: "Most Improved Serve", icon: Trophy }],
       },
     ],
   };
@@ -214,33 +208,11 @@ const TournamentDetails = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
-        <Card className="mb-8 bg-white/80 shadow-lg">
-          <CardHeader className="border-b border-gray-100">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <Badge variant="secondary" className="mb-2 bg-blue-100 text-blue-700">
-                  Active Tournament
-                </Badge>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-800">
-                  {tournament.title}
-                </CardTitle>
-                <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  {tournament.location} • {tournament.date}
-                </p>
-              </div>
-              <Button
-                onClick={handleRegisterClick}
-                className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-              >
-                <Trophy className="mr-2 h-4 w-4" />
-                Register Now
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <p className="text-gray-700">{tournament.description}</p>
-          </CardContent>
-        </Card>
+        <TournamentHeader
+          id={id || ''}
+          tournament={tournament}
+          isAuthenticated={isAuthenticated}
+        />
 
         <Card className="bg-white/80 shadow-lg">
           <CardHeader>
@@ -250,69 +222,7 @@ const TournamentDetails = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">Rank</TableHead>
-                  <TableHead>Player</TableHead>
-                  <TableHead className="w-48">Achievements</TableHead>
-                  <TableHead className="text-right w-20">Wins</TableHead>
-                  <TableHead className="text-right w-20">Losses</TableHead>
-                  <TableHead className="text-right w-20">Points</TableHead>
-                  <TableHead className="w-32"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tournament.players.map((player) => (
-                  <TableRow key={player.id}>
-                    <TableCell className="font-bold text-blue-600">
-                      #{player.rank}
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {player.name}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        {player.achievements.map((achievement, index) => {
-                          const Icon = achievement.icon;
-                          return (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="bg-blue-50 border-blue-200 text-blue-600"
-                            >
-                              <Icon className="h-3 w-3 mr-1" />
-                              {achievement.title}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium text-green-600">
-                      {player.wins}
-                    </TableCell>
-                    <TableCell className="text-right font-medium text-red-600">
-                      {player.losses}
-                    </TableCell>
-                    <TableCell className="text-right font-medium text-blue-600">
-                      {player.points}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 transition-all duration-200"
-                        asChild
-                      >
-                        <Link to={`/player-challenge/${player.id}`}>
-                          <Swords className="h-4 w-4 mr-2" />
-                          Challenge
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <PlayerRankingsTable players={tournament.players} />
           </CardContent>
         </Card>
       </div>
