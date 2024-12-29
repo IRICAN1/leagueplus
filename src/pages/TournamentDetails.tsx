@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
 import { PlayerRankingsTable } from "@/components/tournament/PlayerRankingsTable";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const TournamentDetails = () => {
   const { id } = useParams();
@@ -19,9 +20,15 @@ const TournamentDetails = () => {
     checkAuth();
   }, []);
 
-  const { data: playerStats, isLoading: isLoadingStats } = useQuery({
+  const { data: playerStats, isLoading: isLoadingStats, error } = useQuery({
     queryKey: ['playerStats', id],
     queryFn: async () => {
+      // Validate if id is a valid UUID
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!id || !UUID_REGEX.test(id)) {
+        throw new Error('Invalid league ID format');
+      }
+
       const { data, error } = await supabase
         .from('player_statistics')
         .select(`
@@ -34,6 +41,10 @@ const TournamentDetails = () => {
       if (error) throw error;
       return data;
     },
+    onError: (error) => {
+      console.error('Error fetching player stats:', error);
+      toast.error('Failed to load player statistics');
+    }
   });
 
   // Mock data for demonstration - replace with actual data from API
@@ -222,7 +233,15 @@ const TournamentDetails = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PlayerRankingsTable players={tournament.players} />
+            {error ? (
+              <div className="text-center text-red-600">
+                Failed to load player statistics
+              </div>
+            ) : isLoadingStats ? (
+              <div className="text-center">Loading player statistics...</div>
+            ) : (
+              <PlayerRankingsTable players={tournament.players} />
+            )}
           </CardContent>
         </Card>
       </div>
