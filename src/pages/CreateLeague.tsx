@@ -78,6 +78,9 @@ const CreateLeague = () => {
       format: "Individual",
       skill_level_min: 1,
       skill_level_max: 10,
+      gender_category: "Mixed", // Set a default value for required field
+      match_format: "Single Matches", // Set a default value for required field
+      sport_type: "Tennis", // Set a default value for required field
     },
   });
 
@@ -89,18 +92,27 @@ const CreateLeague = () => {
         throw new Error("Not authenticated");
       }
 
-      // Convert Date objects to ISO strings for Supabase
+      // Convert Date objects to ISO strings for Supabase and ensure all required fields
       const formattedData = {
         ...data,
         creator_id: session.user.id,
         start_date: data.start_date.toISOString(),
         end_date: data.end_date.toISOString(),
         registration_deadline: data.registration_deadline.toISOString(),
+        name: data.name,
+        sport_type: data.sport_type,
+        skill_level_min: data.skill_level_min,
+        skill_level_max: data.skill_level_max,
+        gender_category: data.gender_category,
+        location: data.location,
+        max_participants: data.max_participants,
+        match_format: data.match_format,
+        format: data.format,
       };
 
       const { error } = await supabase
         .from('leagues')
-        .insert(formattedData); // Remove the array wrapper
+        .insert(formattedData);
 
       if (error) throw error;
 
@@ -577,6 +589,7 @@ const CreateLeague = () => {
       </Form>
     </div>
   );
+
 };
 
 export default CreateLeague;
