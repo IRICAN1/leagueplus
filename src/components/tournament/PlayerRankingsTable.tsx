@@ -1,23 +1,14 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Swords } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Trophy, Award } from "lucide-react";
 import { PlayerAchievementBadge } from "./PlayerAchievementBadge";
 
-interface Achievement {
+export interface Achievement {
   title: string;
-  icon: any;
+  icon: typeof Trophy | typeof Award;
 }
 
-interface Player {
-  id: number;
+export interface Player {
+  id: string;  // Changed from number to string to match UUID from Supabase
   name: string;
   rank: number;
   wins: number;
@@ -31,60 +22,45 @@ interface PlayerRankingsTableProps {
 }
 
 export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
-  if (!players) {
-    return <div>No player data available</div>;
+  if (!players || players.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No player rankings available
+      </div>
+    );
   }
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-16">Rank</TableHead>
+          <TableHead className="w-[100px]">Rank</TableHead>
           <TableHead>Player</TableHead>
-          <TableHead className="w-48">Achievements</TableHead>
-          <TableHead className="text-right w-20">Wins</TableHead>
-          <TableHead className="text-right w-20">Losses</TableHead>
-          <TableHead className="text-right w-20">Points</TableHead>
-          <TableHead className="w-32"></TableHead>
+          <TableHead>Achievements</TableHead>
+          <TableHead className="text-right">W/L</TableHead>
+          <TableHead className="text-right">Points</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {players.map((player) => (
           <TableRow key={player.id}>
-            <TableCell className="font-bold text-blue-600">
-              #{player.rank}
-            </TableCell>
-            <TableCell className="font-semibold">
-              {player.name}
-            </TableCell>
+            <TableCell className="font-medium">#{player.rank}</TableCell>
+            <TableCell>{player.name}</TableCell>
             <TableCell>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex gap-2">
                 {player.achievements?.map((achievement, index) => (
-                  <PlayerAchievementBadge key={index} achievement={achievement} />
+                  <PlayerAchievementBadge
+                    key={index}
+                    title={achievement.title}
+                    icon={achievement.icon}
+                  />
                 )) ?? null}
               </div>
             </TableCell>
-            <TableCell className="text-right font-medium text-green-600">
-              {player.wins}
+            <TableCell className="text-right">
+              {player.wins}/{player.losses}
             </TableCell>
-            <TableCell className="text-right font-medium text-red-600">
-              {player.losses}
-            </TableCell>
-            <TableCell className="text-right font-medium text-blue-600">
-              {player.points}
-            </TableCell>
-            <TableCell>
-              <Button
-                variant="outline"
-                className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 transition-all duration-200"
-                asChild
-              >
-                <Link to={`/player-challenge/${player.id}`}>
-                  <Swords className="h-4 w-4 mr-2" />
-                  Challenge
-                </Link>
-              </Button>
-            </TableCell>
+            <TableCell className="text-right">{player.points}</TableCell>
           </TableRow>
         ))}
       </TableBody>
