@@ -28,6 +28,7 @@ const Profile = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate('/login');
+      return;
     }
   };
 
@@ -147,7 +148,7 @@ const Profile = () => {
     <div className="min-h-screen pt-16 bg-gradient-to-br from-purple-50 via-white to-purple-50">
       <div className="container max-w-2xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Profile Management</h1>
+          <h1 className="text-2xl font-bold">Profile Settings</h1>
           {!isEditing && (
             <Button 
               variant="outline" 
