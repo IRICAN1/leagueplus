@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Users, Medal } from "lucide-react";
 import { PlayerRankingsTable } from "./PlayerRankingsTable";
 import { Tables } from "@/integrations/supabase/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type PlayerStatWithProfile = Tables<"player_statistics"> & {
   profiles: Pick<Tables<"profiles">, "username">;
@@ -13,6 +14,21 @@ interface TournamentStatsProps {
 }
 
 export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps) => {
+  // Validate that we have valid player stats
+  if (!playerStats && !isLoading) {
+    return (
+      <Card className="mt-6">
+        <CardContent className="p-6">
+          <Alert>
+            <AlertDescription>
+              No player statistics available for this tournament.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const formattedPlayerStats = playerStats?.map(player => ({
     id: player.id,
     name: player.profiles?.username || 'Unknown Player',

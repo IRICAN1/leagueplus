@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
 import { TournamentStats } from "@/components/tournament/TournamentStats";
@@ -7,8 +7,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEffect, useState } from "react";
 import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const TournamentDetails = () => {
   const { id } = useParams();
@@ -34,7 +35,6 @@ const TournamentDetails = () => {
   const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
-      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!id || !UUID_REGEX.test(id)) {
         throw new Error('Invalid league ID format');
       }
@@ -48,16 +48,21 @@ const TournamentDetails = () => {
           )
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!id
   });
 
   const { data: playerStats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['player_statistics', id],
     queryFn: async () => {
+      if (!id || !UUID_REGEX.test(id)) {
+        throw new Error('Invalid league ID format');
+      }
+
       const { data, error } = await supabase
         .from('player_statistics')
         .select(`
@@ -69,8 +74,21 @@ const TournamentDetails = () => {
 
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!id && !!league
   });
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return (
+      <div className="container mx-auto p-4">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Invalid tournament ID format. Please check the URL.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   if (isLoadingLeague) {
     return <div className="container mx-auto p-4">Loading...</div>;
