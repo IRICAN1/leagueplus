@@ -79,9 +79,9 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Welcome to LeaguePlus</CardTitle>
+          <CardTitle className="text-2xl text-center font-bold">Welcome to LeaguePlus</CardTitle>
         </CardHeader>
         <CardContent>
           <Auth
@@ -101,6 +101,9 @@ const Login = () => {
                 button: 'bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors',
                 input: 'border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-500',
                 label: 'block text-sm font-medium text-gray-700 mb-1',
+                anchor: 'text-purple-600 hover:text-purple-700 font-medium',
+                divider: 'my-4 border-t border-gray-200',
+                message: 'text-sm text-gray-600 mt-2',
               },
             }}
             theme="light"
