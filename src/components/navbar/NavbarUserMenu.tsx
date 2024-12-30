@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Settings, LogOut, Medal } from "lucide-react";
+import { Settings, LogOut, Medal, Users, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
@@ -66,10 +66,6 @@ export const NavbarUserMenu = () => {
     }
   };
 
-  const handleProfileClick = () => {
-    navigate("/profile");
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -88,16 +84,31 @@ export const NavbarUserMenu = () => {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleProfileClick}>
-          <Settings className="h-4 w-4 mr-2" />
-          <span>Profile Settings</span>
+        <DropdownMenuItem asChild>
+          <Link to="/profile" className="flex items-center w-full">
+            <Settings className="h-4 w-4 mr-2" />
+            <span>Profile Settings</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/my-leagues" className="flex items-center">
+          <Link to="/my-leagues" className="flex items-center w-full">
             <Medal className="h-4 w-4 mr-2" />
             <span>My Leagues</span>
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/friends" className="flex items-center w-full">
+            <Users className="h-4 w-4 mr-2" />
+            <span>Friends</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/history" className="flex items-center w-full">
+            <History className="h-4 w-4 mr-2" />
+            <span>Match History</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem 
           onClick={handleLogout}
           className="text-red-600 focus:text-red-600"
