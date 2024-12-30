@@ -14,6 +14,7 @@ import { AdditionalDetails } from "@/components/league-form/AdditionalDetails";
 import * as z from "zod";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const CreateLeague = () => {
   const { toast } = useToast();
@@ -88,12 +89,15 @@ const CreateLeague = () => {
 
   return (
     <div className="container max-w-2xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Create a New League</h1>
+      <h1 className="text-xl md:text-3xl font-bold mb-8">Create a New League</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Required Fields */}
-          <div className="space-y-8 p-6 bg-white rounded-lg shadow">
-            <h2 className="text-xl font-semibold">Required Information</h2>
+          {/* Required Fields Section */}
+          <div className="space-y-8 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg animate-fade-in">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">Required Information</h2>
+              <span className="text-sm text-red-500">*</span>
+            </div>
             <BasicInformation form={form} />
             <DateFields form={form} />
             <LocationParticipants form={form} />
@@ -103,8 +107,11 @@ const CreateLeague = () => {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
             onClick={() => setShowOptional(!showOptional)}
+            className={cn(
+              "w-full transition-all duration-200",
+              showOptional && "bg-accent"
+            )}
           >
             {showOptional ? (
               <>
@@ -119,16 +126,22 @@ const CreateLeague = () => {
             )}
           </Button>
 
-          {/* Optional Fields */}
+          {/* Optional Fields Section */}
           {showOptional && (
-            <div className="space-y-8 p-6 bg-white rounded-lg shadow">
-              <h2 className="text-xl font-semibold">Additional Details</h2>
+            <div className="space-y-8 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg animate-fade-in">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-semibold">Additional Details</h2>
+                <span className="text-sm text-muted-foreground">(Optional)</span>
+              </div>
               <FormatRules form={form} />
               <AdditionalDetails form={form} />
             </div>
           )}
 
-          <Button type="submit" className="w-full">
+          <Button 
+            type="submit" 
+            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
+          >
             Create League
           </Button>
         </form>

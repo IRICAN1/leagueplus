@@ -1,11 +1,12 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DateFieldsProps {
   form: UseFormReturn<any>;
@@ -14,7 +15,20 @@ interface DateFieldsProps {
 export const DateFields = ({ form }: DateFieldsProps) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Dates</h2>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h2 className="text-xl font-semibold flex items-center gap-2 cursor-help">
+              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+              Dates
+            </h2>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Set the important dates for your league</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}

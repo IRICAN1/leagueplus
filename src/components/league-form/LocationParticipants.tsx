@@ -1,6 +1,8 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
+import { MapPin, Users } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LocationParticipantsProps {
   form: UseFormReturn<any>;
@@ -9,13 +11,29 @@ interface LocationParticipantsProps {
 export const LocationParticipants = ({ form }: LocationParticipantsProps) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Location and Participants</h2>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h2 className="text-xl font-semibold flex items-center gap-2 cursor-help">
+              <MapPin className="h-5 w-5 text-muted-foreground" />
+              Location and Participants
+            </h2>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Specify where the league will take place and how many can join</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       <FormField
         control={form.control}
         name="location"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Location</FormLabel>
+            <FormLabel className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              Location
+            </FormLabel>
             <FormControl>
               <Input placeholder="Enter location" {...field} />
             </FormControl>
@@ -29,7 +47,10 @@ export const LocationParticipants = ({ form }: LocationParticipantsProps) => {
         name="max_participants"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Maximum Participants</FormLabel>
+            <FormLabel className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              Maximum Participants
+            </FormLabel>
             <FormControl>
               <Input 
                 type="number" 

@@ -2,6 +2,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
+import { Trophy, Users } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BasicInformationProps {
   form: UseFormReturn<any>;
@@ -10,7 +12,6 @@ interface BasicInformationProps {
 export const BasicInformation = ({ form }: BasicInformationProps) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Basic Information</h2>
       <FormField
         control={form.control}
         name="name"
@@ -30,7 +31,10 @@ export const BasicInformation = ({ form }: BasicInformationProps) => {
         name="sport_type"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Sport Type</FormLabel>
+            <FormLabel className="flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-muted-foreground" />
+              Sport Type
+            </FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>
@@ -87,7 +91,19 @@ export const BasicInformation = ({ form }: BasicInformationProps) => {
         name="gender_category"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Gender Category</FormLabel>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <FormLabel className="flex items-center gap-2 cursor-help">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    Gender Category
+                  </FormLabel>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Select the gender category for this league</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>
