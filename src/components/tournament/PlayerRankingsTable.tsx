@@ -1,7 +1,12 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trophy, Award, Medal } from "lucide-react";
+import { Trophy, Award, Medal, Swords } from "lucide-react";
 import { PlayerAchievementBadge } from "./PlayerAchievementBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export interface Achievement {
   title: string;
@@ -16,6 +21,7 @@ export interface Player {
   losses: number;
   points: number;
   achievements?: Achievement[];
+  avatar_url?: string;
 }
 
 interface PlayerRankingsTableProps {
@@ -23,6 +29,23 @@ interface PlayerRankingsTableProps {
 }
 
 export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
+  const navigate = useNavigate();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setCurrentUserId(session.user.id);
+      }
+    };
+    checkUser();
+  }, []);
+
+  const handleChallenge = (playerId: string) => {
+    navigate(`/player-challenge/${playerId}`);
+  };
+
   if (!players || players.length === 0) {
     return (
       <Card>
@@ -68,6 +91,7 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
               <TableHead>Achievements</TableHead>
               <TableHead className="text-right">W/L</TableHead>
               <TableHead className="text-right">Points</TableHead>
+              <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,7 +104,17 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
                   {player.rank === 1 && <Trophy className="h-4 w-4 text-yellow-500 inline mr-1" />}
                   #{player.rank}
                 </TableCell>
-                <TableCell className="font-medium">{player.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={player.avatar_url} />
+                      <AvatarFallback>
+                        {player.name[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{player.name}</span>
+                  </div>
+                </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     {player.achievements?.map((achievement, index) => (
@@ -98,6 +132,19 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
                 </TableCell>
                 <TableCell className="text-right font-semibold">
                   {player.points}
+                </TableCell>
+                <TableCell>
+                  {currentUserId && player.id !== currentUserId && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleChallenge(player.id)}
+                    >
+                      <Swords className="h-4 w-4 mr-1" />
+                      Challenge
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

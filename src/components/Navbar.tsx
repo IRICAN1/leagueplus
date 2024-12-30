@@ -7,7 +7,8 @@ import {
   History,
   ChevronDown,
   Plus,
-  Medal
+  Medal,
+  Settings
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +47,17 @@ export const Navbar = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
+      if (session) {
+        // Fetch profile when auth state changes
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            setUserProfile(data);
+          });
+      }
     });
 
     return () => {
@@ -134,11 +146,11 @@ export const Navbar = () => {
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={userProfile?.avatar_url} />
                       <AvatarFallback>
-                        {userProfile?.username?.[0]?.toUpperCase() || 'U'}
+                        {userProfile?.full_name?.[0]?.toUpperCase() || userProfile?.username?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <span className="hidden md:inline-block">
-                      {userProfile?.username || 'User'}
+                      {userProfile?.full_name || userProfile?.username || 'User'}
                     </span>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
@@ -148,8 +160,14 @@ export const Navbar = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/profile" className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Profile</span>
+                      <Settings className="h-4 w-4" />
+                      <span>Profile Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/my-leagues" className="flex items-center space-x-2">
+                      <Medal className="h-4 w-4" />
+                      <span>My Leagues</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
