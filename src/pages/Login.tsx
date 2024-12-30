@@ -77,6 +77,16 @@ const Login = () => {
           });
           return;
         }
+
+        // Handle invalid credentials specifically
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Login Failed",
+            description: "Invalid email or password. Please check your credentials and try again.",
+            variant: "destructive",
+          });
+          return;
+        }
         
         toast({
           title: "Login Failed",
