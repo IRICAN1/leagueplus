@@ -1,12 +1,11 @@
 import { useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -28,9 +28,7 @@ const loginSchema = z.object({
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
-  const returnTo = new URLSearchParams(location.search).get('returnTo') || '/';
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -43,83 +41,31 @@ const Login = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Auth error:", error);
-        toast({
-          title: "Authentication Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate(returnTo);
+        navigate('/');
       }
     };
     checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          try {
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-
-            if (profileError && !profile) {
-              const { error: insertError } = await supabase
-                .from('profiles')
-                .insert([
-                  { 
-                    id: session.user.id,
-                    username: session.user.email?.split('@')[0],
-                    full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0]
-                  }
-                ]);
-
-              if (insertError) {
-                console.error("Profile creation error:", insertError);
-                toast({
-                  title: "Error Creating Profile",
-                  description: insertError.message,
-                  variant: "destructive",
-                });
-                return;
-              }
-            }
-
-            toast({
-              title: "Welcome Back!",
-              description: "Successfully signed in",
-            });
-            navigate(returnTo);
-          } catch (error) {
-            console.error("Profile handling error:", error);
-            toast({
-              title: "Error",
-              description: "An error occurred while setting up your profile",
-              variant: "destructive",
-            });
-          }
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate, returnTo, toast]);
+  }, [navigate]);
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      
+      navigate('/');
+    } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: "Login Failed",
         description: error.message,
@@ -132,7 +78,9 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center font-bold text-purple-700">Welcome Back!</CardTitle>
+          <CardTitle className="text-2xl text-center font-bold text-purple-700">
+            Welcome Back!
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -180,36 +128,43 @@ const Login = () => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="rememberMe"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                    <FormControl>
+              <div className="flex items-center justify-between">
+                <FormField
+                  control={form.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
                       <Checkbox
+                        id="rememberMe"
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
-                    </FormControl>
-                    <FormLabel className="text-sm font-normal">Remember me</FormLabel>
-                  </FormItem>
-                )}
-              />
+                      <label
+                        htmlFor="rememberMe"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Remember me
+                      </label>
+                    </div>
+                  )}
+                />
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
 
               <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
-                Sign In
+                Login
               </Button>
 
-              <div className="space-y-2 text-center text-sm">
-                <Link to="/forgot-password" className="text-purple-600 hover:text-purple-700">
-                  Forgot your password?
+              <div className="text-center text-sm text-gray-600">
+                Don't have an account?{" "}
+                <Link to="/register" className="text-purple-600 hover:text-purple-700 font-medium">
+                  Register here
                 </Link>
-                <div className="text-gray-600">
-                  Don't have an account?{" "}
-                  <Link to="/register" className="text-purple-600 hover:text-purple-700 font-medium">
-                    Register here
-                  </Link>
-                </div>
               </div>
             </form>
           </Form>

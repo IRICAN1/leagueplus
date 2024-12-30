@@ -162,11 +162,18 @@ export const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" asChild className="text-purple-600 hover:text-purple-700 hover:bg-purple-50">
+              <div className="flex items-center space-x-3">
+                <Button 
+                  variant="ghost" 
+                  asChild 
+                  className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 font-medium"
+                >
                   <Link to="/login">Login</Link>
                 </Button>
-                <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Button 
+                  asChild 
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium shadow-sm"
+                >
                   <Link to="/register">Register</Link>
                 </Button>
               </div>
