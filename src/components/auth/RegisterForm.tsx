@@ -23,6 +23,7 @@ const registerSchema = z.object({
 export const RegisterForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -38,6 +39,8 @@ export const RegisterForm = () => {
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     try {
+      setIsLoading(true);
+      
       // First, register the user
       const { error: signUpError, data: { user } } = await supabase.auth.signUp({
         email: values.email,
@@ -65,7 +68,6 @@ export const RegisterForm = () => {
 
         if (uploadError) {
           console.error('Avatar upload error:', uploadError);
-          // Changed from warning to default
           toast({
             title: "Avatar Upload Failed",
             description: "Your account was created, but we couldn't upload your profile picture. You can try again later.",
@@ -84,7 +86,6 @@ export const RegisterForm = () => {
 
           if (updateError) {
             console.error('Profile update error:', updateError);
-            // Changed from warning to default
             toast({
               title: "Profile Update Warning",
               description: "Your account was created, but we couldn't update your profile picture. You can try again later.",
@@ -96,7 +97,7 @@ export const RegisterForm = () => {
 
       toast({
         title: "Registration Successful",
-        description: "Welcome to LeaguePlus!",
+        description: "Welcome to LeaguePlus! Please check your email to verify your account.",
       });
 
       navigate('/login');
@@ -107,6 +108,8 @@ export const RegisterForm = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,8 +117,12 @@ export const RegisterForm = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <RegisterFormFields form={form} setAvatarFile={setAvatarFile} />
-        <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
-          Create Account
+        <Button 
+          type="submit" 
+          className="w-full bg-purple-600 hover:bg-purple-700"
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating Account..." : "Create Account"}
         </Button>
       </form>
     </Form>

@@ -12,7 +12,7 @@ interface RegisterFormFieldsProps {
 
 export const RegisterFormFields = ({ form, setAvatarFile }: RegisterFormFieldsProps) => {
   return (
-    <>
+    <div className="space-y-4">
       <FormField
         control={form.control}
         name="avatarUrl"
@@ -40,7 +40,11 @@ export const RegisterFormFields = ({ form, setAvatarFile }: RegisterFormFieldsPr
             <FormControl>
               <div className="relative">
                 <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                <Input placeholder="John Doe" className="pl-10" {...field} />
+                <Input 
+                  placeholder="John Doe" 
+                  className="pl-10 bg-white" 
+                  {...field} 
+                />
               </div>
             </FormControl>
             <FormMessage />
@@ -57,7 +61,12 @@ export const RegisterFormFields = ({ form, setAvatarFile }: RegisterFormFieldsPr
             <FormControl>
               <div className="relative">
                 <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                <Input placeholder="your.email@example.com" className="pl-10" {...field} />
+                <Input 
+                  placeholder="your.email@example.com" 
+                  className="pl-10 bg-white" 
+                  type="email"
+                  {...field} 
+                />
               </div>
             </FormControl>
             <FormMessage />
@@ -74,7 +83,12 @@ export const RegisterFormFields = ({ form, setAvatarFile }: RegisterFormFieldsPr
             <FormControl>
               <div className="relative">
                 <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                <Input type="password" placeholder="Create a strong password" className="pl-10" {...field} />
+                <Input 
+                  type="password" 
+                  placeholder="Create a strong password" 
+                  className="pl-10 bg-white" 
+                  {...field} 
+                />
               </div>
             </FormControl>
             <PasswordStrengthMeter password={field.value} />
@@ -92,13 +106,18 @@ export const RegisterFormFields = ({ form, setAvatarFile }: RegisterFormFieldsPr
             <FormControl>
               <div className="relative">
                 <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                <Input type="password" placeholder="Confirm your password" className="pl-10" {...field} />
+                <Input 
+                  type="password" 
+                  placeholder="Confirm your password" 
+                  className="pl-10 bg-white" 
+                  {...field} 
+                />
               </div>
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 };
