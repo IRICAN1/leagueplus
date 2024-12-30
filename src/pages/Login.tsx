@@ -105,13 +105,11 @@ const Login = () => {
             }}
             theme="light"
             providers={[]}
-            options={{
-              emailRedirectTo: `${window.location.origin}${returnTo}`,
-              additionalSignUpFields: {
-                full_name: {
-                  required: true,
-                  label: 'Full Name',
-                }
+            redirectTo={`${window.location.origin}${returnTo}`}
+            additionalSignUpFields={{
+              full_name: {
+                required: true,
+                label: 'Full Name',
               }
             }}
           />
