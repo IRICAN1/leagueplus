@@ -1,12 +1,12 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, User } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -17,28 +17,23 @@ import {
 } from "@/components/ui/form";
 import { ImageUpload } from "./ImageUpload";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
-import { useState } from "react";
+import { Mail, User, Lock } from "lucide-react";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  password: z.string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
+  avatarUrl: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
 export const RegisterForm = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -47,30 +42,14 @@ export const RegisterForm = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      avatarUrl: "",
     },
   });
 
-  const calculatePasswordStrength = (password: string) => {
-    let strength = 0;
-    if (password.length >= 8) strength += 25;
-    if (password.match(/[A-Z]/)) strength += 25;
-    if (password.match(/[a-z]/)) strength += 25;
-    if (password.match(/[0-9]/)) strength += 25;
-    setPasswordStrength(strength);
-  };
-
-  const handleImageUpload = (file: File) => {
-    setAvatarFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarUrl(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Register user
+      const { error: signUpError, data: { user } } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -80,33 +59,41 @@ export const RegisterForm = () => {
         },
       });
 
-      if (authError) throw authError;
+      if (signUpError) throw signUpError;
 
-      if (authData.user && avatarFile) {
+      // Upload avatar if provided
+      if (avatarFile && user) {
         const fileExt = avatarFile.name.split('.').pop();
-        const filePath = `${authData.user.id}/avatar.${fileExt}`;
+        const filePath = `${user.id}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('avatars')
           .upload(filePath, avatarFile);
 
-        if (uploadError) {
-          console.error('Error uploading avatar:', uploadError);
-          toast({
-            title: "Avatar Upload Failed",
-            description: "Your account was created but we couldn't upload your avatar.",
-            variant: "destructive",
-          });
-        }
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        // Update profile with avatar URL
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ avatar_url: publicUrl })
+          .eq('id', user.id);
+
+        if (updateError) throw updateError;
       }
 
       toast({
-        title: "Registration Successful!",
-        description: "Please check your email to verify your account.",
+        title: "Registration Successful",
+        description: "Welcome to LeaguePlus!",
       });
-      
+
       navigate('/login');
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: "Registration Failed",
         description: error.message,
@@ -117,10 +104,23 @@ export const RegisterForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <ImageUpload 
-          avatarUrl={avatarUrl}
-          onImageUpload={handleImageUpload}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="avatarUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profile Picture</FormLabel>
+              <FormControl>
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                  onFileChange={(file) => setAvatarFile(file)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField
@@ -179,14 +179,10 @@ export const RegisterForm = () => {
                     placeholder="Create a strong password"
                     className="pl-10"
                     {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      calculatePasswordStrength(e.target.value);
-                    }}
                   />
                 </div>
               </FormControl>
-              <PasswordStrengthMeter strength={passwordStrength} />
+              <PasswordStrengthMeter password={field.value} />
               <FormMessage />
             </FormItem>
           )}
@@ -214,16 +210,9 @@ export const RegisterForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+        <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
           Create Account
         </Button>
-
-        <div className="text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
-            Login here
-          </Link>
-        </div>
       </form>
     </Form>
   );

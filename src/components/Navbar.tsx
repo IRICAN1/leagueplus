@@ -166,13 +166,13 @@ export const Navbar = () => {
                 <Button 
                   variant="ghost" 
                   asChild 
-                  className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 font-medium"
+                  className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                 >
                   <Link to="/login">Login</Link>
                 </Button>
                 <Button 
                   asChild 
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium shadow-sm"
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <Link to="/register">Register</Link>
                 </Button>
