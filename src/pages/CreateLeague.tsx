@@ -12,10 +12,13 @@ import { LocationParticipants } from "@/components/league-form/LocationParticipa
 import { FormatRules } from "@/components/league-form/FormatRules";
 import { AdditionalDetails } from "@/components/league-form/AdditionalDetails";
 import * as z from "zod";
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const CreateLeague = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [showOptional, setShowOptional] = useState(false);
 
   const form = useForm<z.infer<typeof leagueFormSchema>>({
     resolver: zodResolver(leagueFormSchema),
@@ -88,11 +91,43 @@ const CreateLeague = () => {
       <h1 className="text-3xl font-bold mb-8">Create a New League</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <BasicInformation form={form} />
-          <DateFields form={form} />
-          <LocationParticipants form={form} />
-          <FormatRules form={form} />
-          <AdditionalDetails form={form} />
+          {/* Required Fields */}
+          <div className="space-y-8 p-6 bg-white rounded-lg shadow">
+            <h2 className="text-xl font-semibold">Required Information</h2>
+            <BasicInformation form={form} />
+            <DateFields form={form} />
+            <LocationParticipants form={form} />
+          </div>
+
+          {/* Optional Fields Toggle */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => setShowOptional(!showOptional)}
+          >
+            {showOptional ? (
+              <>
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Hide Additional Options
+              </>
+            ) : (
+              <>
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Show Additional Options
+              </>
+            )}
+          </Button>
+
+          {/* Optional Fields */}
+          {showOptional && (
+            <div className="space-y-8 p-6 bg-white rounded-lg shadow">
+              <h2 className="text-xl font-semibold">Additional Details</h2>
+              <FormatRules form={form} />
+              <AdditionalDetails form={form} />
+            </div>
+          )}
+
           <Button type="submit" className="w-full">
             Create League
           </Button>

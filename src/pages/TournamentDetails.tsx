@@ -1,14 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
 import { TournamentStats } from "@/components/tournament/TournamentStats";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useEffect, useState } from "react";
+import { LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const TournamentDetails = () => {
   const { id } = useParams();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -16,6 +20,14 @@ const TournamentDetails = () => {
       setIsAuthenticated(!!session);
     };
     checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
@@ -28,27 +40,23 @@ const TournamentDetails = () => {
 
       const { data, error } = await supabase
         .from('leagues')
-        .select('*')
+        .select(`
+          *,
+          creator:creator_id (
+            username
+          )
+        `)
         .eq('id', id)
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
-      if (!data) throw new Error('League not found');
       return data;
-    },
-    meta: {
-      errorMessage: 'Failed to load league details'
     }
   });
 
-  const { data: playerStats, isLoading: isLoadingStats, error: statsError } = useQuery({
-    queryKey: ['playerStats', id],
+  const { data: playerStats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['player_statistics', id],
     queryFn: async () => {
-      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      if (!id || !UUID_REGEX.test(id)) {
-        throw new Error('Invalid league ID format');
-      }
-
       const { data, error } = await supabase
         .from('player_statistics')
         .select(`
@@ -60,52 +68,55 @@ const TournamentDetails = () => {
 
       if (error) throw error;
       return data;
-    },
-    meta: {
-      errorMessage: 'Failed to load player statistics'
     }
   });
 
-  useEffect(() => {
-    if (leagueError) {
-      toast.error(leagueError instanceof Error ? leagueError.message : 'Failed to load league details');
-    }
-    if (statsError) {
-      toast.error('Failed to load player statistics');
-    }
-  }, [leagueError, statsError]);
-
   if (isLoadingLeague) {
-    return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
-      <div className="container max-w-6xl mx-auto px-4">
-        Loading tournament details...
-      </div>
-    </div>;
+    return <div className="container mx-auto p-4">Loading...</div>;
   }
 
-  if (!league || leagueError) {
-    return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
-      <div className="container max-w-6xl mx-auto px-4">
-        {leagueError instanceof Error && leagueError.message === 'Invalid league ID format' 
-          ? 'Invalid tournament ID format'
-          : 'Tournament not found'}
+  if (leagueError) {
+    return (
+      <div className="container mx-auto p-4">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Error loading league details. Please try again later.
+          </AlertDescription>
+        </Alert>
       </div>
-    </div>;
+    );
   }
 
-  const tournamentData = {
-    title: league.name,
-    location: league.location,
-    date: new Date(league.start_date).toLocaleDateString(),
-    description: league.description || 'No description available',
-  };
+  if (!league) {
+    return (
+      <div className="container mx-auto p-4">
+        <Alert>
+          <AlertDescription>League not found.</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
-      <div className="container max-w-6xl mx-auto px-4">
-        <TournamentHeader
-          id={id || ''}
-          tournament={tournamentData}
+    <div className="container mx-auto p-4 space-y-6">
+      {!isAuthenticated && (
+        <Alert>
+          <AlertDescription className="flex items-center justify-between">
+            <span>Sign in to register for this league and access all features.</span>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/login', { state: { returnTo: `/tournament/${id}` } })}
+              className="ml-4"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      <div className="space-y-6">
+        <TournamentHeader 
+          league={league} 
           isAuthenticated={isAuthenticated}
         />
         <TournamentStats 
