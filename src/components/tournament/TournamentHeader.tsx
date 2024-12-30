@@ -19,6 +19,8 @@ import {
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface TournamentHeaderProps {
   league: Tables<"leagues"> & {
@@ -42,138 +44,165 @@ export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderPr
     }
   });
 
+  // Check if current user is registered
+  const { data: isUserRegistered } = useQuery({
+    queryKey: ['isUserRegistered', league.id],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return false;
+
+      const { count } = await supabase
+        .from('league_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('league_id', league.id)
+        .eq('user_id', session.user.id);
+      
+      return count ? count > 0 : false;
+    },
+    enabled: isAuthenticated,
+  });
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
-        <div>
-          <h1 className="text-3xl font-bold">{league.name}</h1>
-          <p className="text-gray-600">Created by {league.creator?.username}</p>
-        </div>
-        {isAuthenticated && (
-          <Button asChild>
-            <Link to={`/tournament/${league.id}/register`}>Register Now</Link>
-          </Button>
-        )}
-      </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div>
+            <CardTitle className="text-3xl font-bold">{league.name}</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">Created by {league.creator?.username}</p>
+          </div>
+          {isAuthenticated && !isUserRegistered && (
+            <Button asChild className="bg-purple-600 hover:bg-purple-700">
+              <Link to={`/tournament/${league.id}/register`}>Register Now</Link>
+            </Button>
+          )}
+          {isUserRegistered && (
+            <Badge variant="secondary" className="px-4 py-2">
+              Already Registered
+            </Badge>
+          )}
+        </CardHeader>
 
-      {/* Primary Information Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <TooltipProvider>
-          {/* Dates Section */}
-          <div className="flex items-center space-x-3">
-            <Tooltip>
-              <TooltipTrigger>
-                <Calendar className="h-5 w-5 text-purple-600" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Tournament Dates</p>
-              </TooltipContent>
-            </Tooltip>
-            <div>
-              <p className="font-medium">Dates</p>
-              <p className="text-sm text-gray-600">
-                {format(new Date(league.start_date), 'MMM d, yyyy')} - {format(new Date(league.end_date), 'MMM d, yyyy')}
-              </p>
-            </div>
+        <CardContent className="space-y-6">
+          {/* Primary Information Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <TooltipProvider>
+              {/* Dates Section */}
+              <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Calendar className="h-5 w-5 text-purple-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Tournament Dates</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div>
+                  <p className="font-medium">Dates</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(league.start_date), 'MMM d, yyyy')} - {format(new Date(league.end_date), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Location Section */}
+              <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <MapPin className="h-5 w-5 text-purple-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Venue Location</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div>
+                  <p className="font-medium">Location</p>
+                  <p className="text-sm text-muted-foreground">{league.location}</p>
+                </div>
+              </div>
+
+              {/* Participants Section */}
+              <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Users className="h-5 w-5 text-purple-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Tournament Participants</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div>
+                  <p className="font-medium">Participants</p>
+                  <p className="text-sm text-muted-foreground">
+                    {registeredPlayers} / {league.max_participants} registered
+                  </p>
+                </div>
+              </div>
+            </TooltipProvider>
           </div>
 
-          {/* Location Section */}
-          <div className="flex items-center space-x-3">
-            <Tooltip>
-              <TooltipTrigger>
-                <MapPin className="h-5 w-5 text-purple-600" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Venue Location</p>
-              </TooltipContent>
-            </Tooltip>
-            <div>
-              <p className="font-medium">Location</p>
-              <p className="text-sm text-gray-600">{league.location}</p>
-            </div>
+          {/* Secondary Information Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <TooltipProvider>
+              {/* Format Section */}
+              <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Trophy className="h-5 w-5 text-purple-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Tournament Format</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div>
+                  <p className="font-medium">Format</p>
+                  <p className="text-sm text-muted-foreground">{league.match_format}</p>
+                </div>
+              </div>
+
+              {/* Rules Section */}
+              <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Bell className="h-5 w-5 text-purple-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>League Rules</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div>
+                  <p className="font-medium">Rules</p>
+                  <p className="text-sm text-muted-foreground">{league.rules || "Standard rules apply"}</p>
+                </div>
+              </div>
+
+              {/* Statistics Section */}
+              <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <BarChart className="h-5 w-5 text-purple-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>League Statistics</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div>
+                  <p className="font-medium">Statistics</p>
+                  <p className="text-sm text-muted-foreground">View rankings and stats</p>
+                </div>
+              </div>
+            </TooltipProvider>
           </div>
 
-          {/* Participants Section */}
-          <div className="flex items-center space-x-3">
-            <Tooltip>
-              <TooltipTrigger>
-                <Users className="h-5 w-5 text-purple-600" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Tournament Participants</p>
-              </TooltipContent>
-            </Tooltip>
-            <div>
-              <p className="font-medium">Participants</p>
-              <p className="text-sm text-gray-600">
-                {registeredPlayers} / {league.max_participants} registered
-              </p>
+          {/* Description Section */}
+          {league.description && (
+            <div className="flex items-start space-x-3 bg-muted/50 p-4 rounded-lg">
+              <Info className="h-5 w-5 text-purple-600 mt-1" />
+              <p className="text-muted-foreground">{league.description}</p>
             </div>
-          </div>
-        </TooltipProvider>
-      </div>
-
-      {/* Secondary Information Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-4 rounded-lg">
-        <TooltipProvider>
-          {/* Format Section */}
-          <div className="flex items-center space-x-3">
-            <Tooltip>
-              <TooltipTrigger>
-                <Trophy className="h-5 w-5 text-purple-600" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Tournament Format</p>
-              </TooltipContent>
-            </Tooltip>
-            <div>
-              <p className="font-medium">Format</p>
-              <p className="text-sm text-gray-600">{league.match_format}</p>
-            </div>
-          </div>
-
-          {/* Rules Section */}
-          <div className="flex items-center space-x-3">
-            <Tooltip>
-              <TooltipTrigger>
-                <Bell className="h-5 w-5 text-purple-600" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>League Rules</p>
-              </TooltipContent>
-            </Tooltip>
-            <div>
-              <p className="font-medium">Rules</p>
-              <p className="text-sm text-gray-600">{league.rules || "Standard rules apply"}</p>
-            </div>
-          </div>
-
-          {/* Statistics Section */}
-          <div className="flex items-center space-x-3">
-            <Tooltip>
-              <TooltipTrigger>
-                <BarChart className="h-5 w-5 text-purple-600" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>League Statistics</p>
-              </TooltipContent>
-            </Tooltip>
-            <div>
-              <p className="font-medium">Statistics</p>
-              <p className="text-sm text-gray-600">View rankings and stats</p>
-            </div>
-          </div>
-        </TooltipProvider>
-      </div>
-
-      {/* Description Section */}
-      {league.description && (
-        <div className="flex items-start space-x-3 mt-6 bg-white p-4 rounded-lg border">
-          <Info className="h-5 w-5 text-purple-600 mt-1" />
-          <p className="text-gray-600">{league.description}</p>
-        </div>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
