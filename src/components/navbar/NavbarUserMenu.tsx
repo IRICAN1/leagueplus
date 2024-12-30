@@ -93,8 +93,8 @@ export const NavbarUserMenu = () => {
           <span>Profile Settings</span>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/my-leagues" className="flex items-center space-x-2">
-            <Medal className="h-4 w-4" />
+          <Link to="/my-leagues" className="flex items-center">
+            <Medal className="h-4 w-4 mr-2" />
             <span>My Leagues</span>
           </Link>
         </DropdownMenuItem>
