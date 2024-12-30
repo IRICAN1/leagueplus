@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { RegisterFormFields } from "./RegisterFormFields";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -23,6 +25,7 @@ export const RegisterForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -37,6 +40,7 @@ export const RegisterForm = () => {
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     try {
       setIsLoading(true);
+      setError(null);
       
       const { error: signUpError, data: { user } } = await supabase.auth.signUp({
         email: values.email,
@@ -52,12 +56,27 @@ export const RegisterForm = () => {
 
       toast({
         title: "Registration Successful",
-        description: "Welcome to LeaguePlus! Please check your email to verify your account.",
+        description: "Please check your email to verify your account.",
       });
 
-      navigate('/login');
+      // Clear form
+      form.reset();
+      
+      // Navigate to login page after a short delay
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+
     } catch (error: any) {
       console.error('Registration error:', error);
+      
+      // Handle specific error cases
+      if (error.message.includes('User already registered')) {
+        setError('This email is already registered. Please try logging in instead.');
+      } else {
+        setError(error.message || 'Failed to create account. Please try again.');
+      }
+      
       toast({
         title: "Registration Failed",
         description: error.message,
@@ -71,13 +90,27 @@ export const RegisterForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
         <RegisterFormFields form={form} />
+        
         <Button 
           type="submit" 
           className="w-full bg-purple-600 hover:bg-purple-700"
           disabled={isLoading}
         >
-          {isLoading ? "Creating Account..." : "Create Account"}
+          {isLoading ? (
+            <>
+              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+              Creating Account...
+            </>
+          ) : (
+            "Create Account"
+          )}
         </Button>
       </form>
     </Form>
