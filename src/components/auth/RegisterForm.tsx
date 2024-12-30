@@ -6,18 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { ImageUpload } from "./ImageUpload";
-import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
-import { Mail, User, Lock } from "lucide-react";
+import { Form } from "@/components/ui/form";
+import { RegisterFormFields } from "./RegisterFormFields";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -48,7 +38,7 @@ export const RegisterForm = () => {
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     try {
-      // Register user
+      // First, register the user
       const { error: signUpError, data: { user } } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -60,30 +50,48 @@ export const RegisterForm = () => {
       });
 
       if (signUpError) throw signUpError;
+      if (!user) throw new Error("No user returned after registration");
 
-      // Upload avatar if provided
-      if (avatarFile && user) {
+      // Then, if there's an avatar file, upload it
+      if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
-        const filePath = `${user.id}.${fileExt}`;
+        const filePath = `${user.id}/${user.id}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('avatars')
-          .upload(filePath, avatarFile);
+          .upload(filePath, avatarFile, {
+            upsert: true
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Avatar upload error:', uploadError);
+          // Don't throw here, just show a warning toast
+          toast({
+            title: "Avatar Upload Failed",
+            description: "Your account was created, but we couldn't upload your profile picture. You can try again later.",
+            variant: "warning",
+          });
+        } else {
+          // Get public URL and update profile
+          const { data: { publicUrl } } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
 
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ avatar_url: publicUrl })
+            .eq('id', user.id);
 
-        // Update profile with avatar URL
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ avatar_url: publicUrl })
-          .eq('id', user.id);
-
-        if (updateError) throw updateError;
+          if (updateError) {
+            console.error('Profile update error:', updateError);
+            // Don't throw here either, just show a warning toast
+            toast({
+              title: "Profile Update Warning",
+              description: "Your account was created, but we couldn't update your profile picture. You can try again later.",
+              variant: "warning",
+            });
+          }
+        }
       }
 
       toast({
@@ -105,111 +113,7 @@ export const RegisterForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="avatarUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profile Picture</FormLabel>
-              <FormControl>
-                <ImageUpload
-                  value={field.value}
-                  onChange={field.onChange}
-                  onFileChange={(file) => setAvatarFile(file)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <Input
-                    placeholder="John Doe"
-                    className="pl-10"
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <Input
-                    placeholder="your.email@example.com"
-                    className="pl-10"
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <Input
-                    type="password"
-                    placeholder="Create a strong password"
-                    className="pl-10"
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              <PasswordStrengthMeter password={field.value} />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <Input
-                    type="password"
-                    placeholder="Confirm your password"
-                    className="pl-10"
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        <RegisterFormFields form={form} setAvatarFile={setAvatarFile} />
         <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
           Create Account
         </Button>
