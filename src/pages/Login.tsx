@@ -22,12 +22,12 @@ const Login = () => {
 
   const handleResendConfirmation = async (email: string) => {
     try {
-      const { error: resendError } = await supabase.auth.resend({
+      const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email,
       });
       
-      if (resendError) {
+      if (error) {
         toast({
           title: "Error",
           description: "Failed to resend confirmation email. Please try again later.",
@@ -39,7 +39,7 @@ const Login = () => {
           description: "Please check your inbox for the confirmation link.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error resending confirmation:', error);
       toast({
         title: "Error",
@@ -73,7 +73,7 @@ const Login = () => {
                 </Button>
               </div>
             ),
-            duration: 10000,
+            duration: 10000, // Keep the toast visible longer
           });
           return;
         }
