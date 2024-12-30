@@ -48,7 +48,8 @@ const Login = () => {
               .insert([
                 { 
                   id: session?.user?.id,
-                  username: session?.user?.email?.split('@')[0] // Default username from email
+                  username: session?.user?.email?.split('@')[0],
+                  full_name: session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0]
                 }
               ]);
 
@@ -99,10 +100,20 @@ const Login = () => {
                 container: 'flex flex-col gap-4',
                 button: 'bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors',
                 input: 'border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-500',
+                label: 'block text-sm font-medium text-gray-700 mb-1',
               },
             }}
             theme="light"
             providers={[]}
+            options={{
+              emailRedirectTo: `${window.location.origin}${returnTo}`,
+              additionalSignUpFields: {
+                full_name: {
+                  required: true,
+                  label: 'Full Name',
+                }
+              }
+            }}
           />
         </CardContent>
       </Card>
