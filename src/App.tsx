@@ -7,6 +7,7 @@ import { Navbar } from "./components/Navbar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Profile from "./pages/Profile";
 import TournamentDetails from "./pages/TournamentDetails";
 import TournamentRegistration from "./pages/TournamentRegistration";
 import PlayerChallenge from "./pages/PlayerChallenge";
@@ -64,6 +65,14 @@ const App = () => (
             <Route path="/tournament/:id" element={<TournamentDetails />} />
             <Route path="/leagues" element={<Navigate to="/" replace />} />
             {/* Protected routes */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/my-leagues"
               element={
