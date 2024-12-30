@@ -1,10 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trophy, Award } from "lucide-react";
+import { Trophy, Award, Medal } from "lucide-react";
 import { PlayerAchievementBadge } from "./PlayerAchievementBadge";
 
 export interface Achievement {
   title: string;
-  icon: typeof Trophy | typeof Award;
+  icon: typeof Trophy | typeof Award | typeof Medal;
 }
 
 export interface Player {
@@ -30,10 +30,23 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
     );
   }
 
+  const getRankStyle = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return "bg-yellow-50 font-semibold text-yellow-600";
+      case 2:
+        return "bg-gray-50 font-semibold text-gray-600";
+      case 3:
+        return "bg-amber-50 font-semibold text-amber-700";
+      default:
+        return "";
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
-        <TableRow>
+        <TableRow className="bg-muted/50">
           <TableHead className="w-[100px]">Rank</TableHead>
           <TableHead>Player</TableHead>
           <TableHead>Achievements</TableHead>
@@ -43,9 +56,15 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
       </TableHeader>
       <TableBody>
         {players.map((player) => (
-          <TableRow key={player.id}>
-            <TableCell className="font-medium">#{player.rank}</TableCell>
-            <TableCell>{player.name}</TableCell>
+          <TableRow 
+            key={player.id}
+            className={getRankStyle(player.rank)}
+          >
+            <TableCell className="font-medium">
+              {player.rank === 1 && <Trophy className="h-4 w-4 text-yellow-500 inline mr-1" />}
+              #{player.rank}
+            </TableCell>
+            <TableCell className="font-medium">{player.name}</TableCell>
             <TableCell>
               <div className="flex gap-2">
                 {player.achievements?.map((achievement, index) => (
@@ -57,9 +76,13 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
               </div>
             </TableCell>
             <TableCell className="text-right">
-              {player.wins}/{player.losses}
+              <span className="text-green-600 font-medium">{player.wins}</span>
+              <span className="text-gray-500">/</span>
+              <span className="text-red-600 font-medium">{player.losses}</span>
             </TableCell>
-            <TableCell className="text-right">{player.points}</TableCell>
+            <TableCell className="text-right font-semibold">
+              {player.points}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

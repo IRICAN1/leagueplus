@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 
 const TournamentDetails = () => {
   const { id } = useParams();
@@ -115,10 +116,14 @@ const TournamentDetails = () => {
         </Alert>
       )}
       <div className="space-y-6">
-        <TournamentHeader 
-          league={league} 
-          isAuthenticated={isAuthenticated}
-        />
+        <Card>
+          <CardContent className="p-6">
+            <TournamentHeader 
+              league={league} 
+              isAuthenticated={isAuthenticated}
+            />
+          </CardContent>
+        </Card>
         <TournamentStats 
           playerStats={playerStats}
           isLoading={isLoadingStats}
