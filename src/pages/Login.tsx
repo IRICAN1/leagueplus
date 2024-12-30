@@ -13,12 +13,12 @@ const Login = () => {
   const returnTo = new URLSearchParams(location.search).get('returnTo') || '/';
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkUser = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
+        console.error("Auth error:", error);
         toast({
-          title: "Error checking authentication status",
+          title: "Authentication Error",
           description: error.message,
           variant: "destructive",
         });
@@ -30,44 +30,59 @@ const Login = () => {
     };
     checkUser();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN') {
-          // Ensure profile exists
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session?.user?.id)
-            .single();
-
-          if (profileError && !profile) {
-            // Create profile if it doesn't exist
-            const { error: insertError } = await supabase
+        console.log("Auth event:", event);
+        if (event === 'SIGNED_IN' && session) {
+          try {
+            // Check if profile exists
+            const { data: profile, error: profileError } = await supabase
               .from('profiles')
-              .insert([
-                { 
-                  id: session?.user?.id,
-                  username: session?.user?.email?.split('@')[0],
-                  full_name: session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0]
-                }
-              ]);
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
 
-            if (insertError) {
-              toast({
-                title: "Error creating profile",
-                description: insertError.message,
-                variant: "destructive",
-              });
-              return;
+            if (profileError && !profile) {
+              // Create profile if it doesn't exist
+              const { error: insertError } = await supabase
+                .from('profiles')
+                .insert([
+                  { 
+                    id: session.user.id,
+                    username: session.user.email?.split('@')[0],
+                    full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0]
+                  }
+                ]);
+
+              if (insertError) {
+                console.error("Profile creation error:", insertError);
+                toast({
+                  title: "Error Creating Profile",
+                  description: insertError.message,
+                  variant: "destructive",
+                });
+                return;
+              }
             }
-          }
 
+            toast({
+              title: "Welcome!",
+              description: "Successfully signed in",
+            });
+            navigate(returnTo);
+          } catch (error) {
+            console.error("Profile handling error:", error);
+            toast({
+              title: "Error",
+              description: "An error occurred while setting up your profile",
+              variant: "destructive",
+            });
+          }
+        } else if (event === 'SIGNED_OUT') {
           toast({
-            title: "Successfully signed in",
-            description: "Welcome back!",
+            title: "Signed Out",
+            description: "You have been successfully signed out",
           });
-          navigate(returnTo);
         }
       }
     );
@@ -109,18 +124,25 @@ const Login = () => {
             theme="light"
             providers={[]}
             redirectTo={`${window.location.origin}${returnTo}`}
-            view="sign_up"
             localization={{
               variables: {
                 sign_up: {
-                  button_label: "Sign up",
                   email_label: "Email",
                   password_label: "Password",
                   email_input_placeholder: "Your email address",
                   password_input_placeholder: "Your password",
+                  button_label: "Sign up",
                   link_text: "Already have an account? Sign in",
-                }
-              }
+                },
+                sign_in: {
+                  email_label: "Email",
+                  password_label: "Password",
+                  email_input_placeholder: "Your email address",
+                  password_input_placeholder: "Your password",
+                  button_label: "Sign in",
+                  link_text: "Don't have an account? Sign up",
+                },
+              },
             }}
           />
         </CardContent>
