@@ -14,7 +14,6 @@ const registerSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
-  avatarUrl: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -24,7 +23,6 @@ export const RegisterForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -33,7 +31,6 @@ export const RegisterForm = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      avatarUrl: "",
     },
   });
 
@@ -41,7 +38,6 @@ export const RegisterForm = () => {
     try {
       setIsLoading(true);
       
-      // First, register the user
       const { error: signUpError, data: { user } } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -53,47 +49,6 @@ export const RegisterForm = () => {
       });
 
       if (signUpError) throw signUpError;
-      if (!user) throw new Error("No user returned after registration");
-
-      // Then, if there's an avatar file, upload it
-      if (avatarFile) {
-        const fileExt = avatarFile.name.split('.').pop();
-        const filePath = `${user.id}/${user.id}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, avatarFile, {
-            upsert: true
-          });
-
-        if (uploadError) {
-          console.error('Avatar upload error:', uploadError);
-          toast({
-            title: "Avatar Upload Failed",
-            description: "Your account was created, but we couldn't upload your profile picture. You can try again later.",
-            variant: "default",
-          });
-        } else {
-          // Get public URL and update profile
-          const { data: { publicUrl } } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(filePath);
-
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ avatar_url: publicUrl })
-            .eq('id', user.id);
-
-          if (updateError) {
-            console.error('Profile update error:', updateError);
-            toast({
-              title: "Profile Update Warning",
-              description: "Your account was created, but we couldn't update your profile picture. You can try again later.",
-              variant: "default",
-            });
-          }
-        }
-      }
 
       toast({
         title: "Registration Successful",
@@ -116,7 +71,7 @@ export const RegisterForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <RegisterFormFields form={form} setAvatarFile={setAvatarFile} />
+        <RegisterFormFields form={form} />
         <Button 
           type="submit" 
           className="w-full bg-purple-600 hover:bg-purple-700"

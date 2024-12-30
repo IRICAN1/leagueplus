@@ -1,36 +1,16 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Mail, User, Lock } from "lucide-react";
-import { ImageUpload } from "./ImageUpload";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 import { UseFormReturn } from "react-hook-form";
 
 interface RegisterFormFieldsProps {
   form: UseFormReturn<any>;
-  setAvatarFile: (file: File | null) => void;
 }
 
-export const RegisterFormFields = ({ form, setAvatarFile }: RegisterFormFieldsProps) => {
+export const RegisterFormFields = ({ form }: RegisterFormFieldsProps) => {
   return (
     <div className="space-y-4">
-      <FormField
-        control={form.control}
-        name="avatarUrl"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Profile Picture</FormLabel>
-            <FormControl>
-              <ImageUpload
-                value={field.value}
-                onChange={field.onChange}
-                onFileChange={(file) => setAvatarFile(file)}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
       <FormField
         control={form.control}
         name="fullName"
