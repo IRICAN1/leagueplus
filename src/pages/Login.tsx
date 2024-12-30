@@ -55,7 +55,52 @@ const Login = () => {
         password: values.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if the error is due to unconfirmed email
+        if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email Not Confirmed",
+            description: (
+              <div className="space-y-2">
+                <p>Please check your email inbox and confirm your email address before logging in.</p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={async () => {
+                    const { error: resendError } = await supabase.auth.resend({
+                      type: 'signup',
+                      email: values.email,
+                    });
+                    if (resendError) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to resend confirmation email. Please try again later.",
+                        variant: "destructive",
+                      });
+                    } else {
+                      toast({
+                        title: "Confirmation Email Sent",
+                        description: "Please check your inbox for the confirmation link.",
+                      });
+                    }
+                  }}
+                >
+                  Resend Confirmation Email
+                </Button>
+              </div>
+            ),
+            duration: 10000,
+          });
+          return;
+        }
+        
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Login Successful",
@@ -67,7 +112,7 @@ const Login = () => {
       console.error('Login error:', error);
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     }
