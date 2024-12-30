@@ -96,6 +96,23 @@ const Login = () => {
         return;
       }
 
+      // Check if profile exists
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (profileError || !profile) {
+        toast({
+          title: "Profile Not Found",
+          description: "It seems you don't have a profile yet. Please register first.",
+          duration: 5000,
+        });
+        navigate('/register');
+        return;
+      }
+
       toast({
         title: "Login Successful",
         description: "Welcome back!",
