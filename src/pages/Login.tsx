@@ -106,10 +106,13 @@ const Login = () => {
             theme="light"
             providers={[]}
             redirectTo={`${window.location.origin}${returnTo}`}
-            additionalSignUpFields={{
-              full_name: {
-                required: true,
-                label: 'Full Name',
+            view="sign_up"
+            localization={{
+              variables: {
+                sign_up: {
+                  full_name_label: 'Full Name',
+                  full_name_placeholder: 'Enter your full name',
+                }
               }
             }}
           />
