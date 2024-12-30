@@ -65,11 +65,11 @@ export const RegisterForm = () => {
 
         if (uploadError) {
           console.error('Avatar upload error:', uploadError);
-          // Don't throw here, just show a warning toast
+          // Changed from warning to default
           toast({
             title: "Avatar Upload Failed",
             description: "Your account was created, but we couldn't upload your profile picture. You can try again later.",
-            variant: "warning",
+            variant: "default",
           });
         } else {
           // Get public URL and update profile
@@ -84,11 +84,11 @@ export const RegisterForm = () => {
 
           if (updateError) {
             console.error('Profile update error:', updateError);
-            // Don't throw here either, just show a warning toast
+            // Changed from warning to default
             toast({
               title: "Profile Update Warning",
               description: "Your account was created, but we couldn't update your profile picture. You can try again later.",
-              variant: "warning",
+              variant: "default",
             });
           }
         }
