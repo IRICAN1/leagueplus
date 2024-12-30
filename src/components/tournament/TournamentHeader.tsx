@@ -8,7 +8,7 @@ import {
   Trophy,
   Bell,
   BarChart,
-  Info
+  Info,
 } from "lucide-react";
 import {
   Tooltip,
@@ -17,6 +17,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TournamentHeaderProps {
   league: Tables<"leagues"> & {
@@ -28,9 +30,22 @@ interface TournamentHeaderProps {
 }
 
 export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderProps) => {
+  // Query to get the number of registered players
+  const { data: registeredPlayers } = useQuery({
+    queryKey: ['registeredPlayers', league.id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('league_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('league_id', league.id);
+      return count || 0;
+    }
+  });
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
         <div>
           <h1 className="text-3xl font-bold">{league.name}</h1>
           <p className="text-gray-600">Created by {league.creator?.username}</p>
@@ -42,13 +57,14 @@ export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderPr
         )}
       </div>
 
+      {/* Primary Information Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <TooltipProvider>
           {/* Dates Section */}
           <div className="flex items-center space-x-3">
             <Tooltip>
               <TooltipTrigger>
-                <Calendar className="h-5 w-5 text-gray-600" />
+                <Calendar className="h-5 w-5 text-purple-600" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Tournament Dates</p>
@@ -66,7 +82,7 @@ export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderPr
           <div className="flex items-center space-x-3">
             <Tooltip>
               <TooltipTrigger>
-                <MapPin className="h-5 w-5 text-gray-600" />
+                <MapPin className="h-5 w-5 text-purple-600" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Venue Location</p>
@@ -82,27 +98,30 @@ export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderPr
           <div className="flex items-center space-x-3">
             <Tooltip>
               <TooltipTrigger>
-                <Users className="h-5 w-5 text-gray-600" />
+                <Users className="h-5 w-5 text-purple-600" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Maximum Participants</p>
+                <p>Tournament Participants</p>
               </TooltipContent>
             </Tooltip>
             <div>
               <p className="font-medium">Participants</p>
-              <p className="text-sm text-gray-600">Max: {league.max_participants}</p>
+              <p className="text-sm text-gray-600">
+                {registeredPlayers} / {league.max_participants} registered
+              </p>
             </div>
           </div>
         </TooltipProvider>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Secondary Information Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-4 rounded-lg">
         <TooltipProvider>
           {/* Format Section */}
           <div className="flex items-center space-x-3">
             <Tooltip>
               <TooltipTrigger>
-                <Trophy className="h-5 w-5 text-gray-600" />
+                <Trophy className="h-5 w-5 text-purple-600" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Tournament Format</p>
@@ -118,7 +137,7 @@ export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderPr
           <div className="flex items-center space-x-3">
             <Tooltip>
               <TooltipTrigger>
-                <Bell className="h-5 w-5 text-gray-600" />
+                <Bell className="h-5 w-5 text-purple-600" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>League Rules</p>
@@ -134,7 +153,7 @@ export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderPr
           <div className="flex items-center space-x-3">
             <Tooltip>
               <TooltipTrigger>
-                <BarChart className="h-5 w-5 text-gray-600" />
+                <BarChart className="h-5 w-5 text-purple-600" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>League Statistics</p>
@@ -148,9 +167,10 @@ export const TournamentHeader = ({ league, isAuthenticated }: TournamentHeaderPr
         </TooltipProvider>
       </div>
 
+      {/* Description Section */}
       {league.description && (
-        <div className="flex items-start space-x-3 mt-6">
-          <Info className="h-5 w-5 text-gray-600 mt-1" />
+        <div className="flex items-start space-x-3 mt-6 bg-white p-4 rounded-lg border">
+          <Info className="h-5 w-5 text-purple-600 mt-1" />
           <p className="text-gray-600">{league.description}</p>
         </div>
       )}
