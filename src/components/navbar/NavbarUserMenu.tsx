@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Settings, LogOut, Medal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 export const NavbarUserMenu = () => {
   const navigate = useNavigate();
@@ -67,6 +66,10 @@ export const NavbarUserMenu = () => {
     }
   };
 
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -85,11 +88,9 @@ export const NavbarUserMenu = () => {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center space-x-2">
-            <Settings className="h-4 w-4" />
-            <span>Profile Settings</span>
-          </Link>
+        <DropdownMenuItem onClick={handleProfileClick}>
+          <Settings className="h-4 w-4 mr-2" />
+          <span>Profile Settings</span>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/my-leagues" className="flex items-center space-x-2">
