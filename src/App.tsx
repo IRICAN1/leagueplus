@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import TournamentDetails from "./pages/TournamentDetails";
 import TournamentRegistration from "./pages/TournamentRegistration";
 import PlayerChallenge from "./pages/PlayerChallenge";
@@ -57,6 +58,7 @@ const App = () => (
           <Navbar />
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/tournament/:id" element={<TournamentDetails />} />

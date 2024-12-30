@@ -163,11 +163,11 @@ export const Navbar = () => {
               </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" asChild className="text-purple-600 hover:text-purple-700 hover:bg-purple-50">
                   <Link to="/login">Login</Link>
                 </Button>
-                <Button asChild>
-                  <Link to="/login">Register</Link>
+                <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
+                  <Link to="/register">Register</Link>
                 </Button>
               </div>
             )}

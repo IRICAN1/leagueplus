@@ -1,16 +1,45 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Mail, Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  rememberMe: z.boolean().default(false),
+});
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const returnTo = new URLSearchParams(location.search).get('returnTo') || '/';
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+  });
 
   useEffect(() => {
     const checkUser = async () => {
@@ -32,10 +61,8 @@ const Login = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth event:", event);
         if (event === 'SIGNED_IN' && session) {
           try {
-            // Check if profile exists
             const { data: profile, error: profileError } = await supabase
               .from('profiles')
               .select('*')
@@ -43,7 +70,6 @@ const Login = () => {
               .single();
 
             if (profileError && !profile) {
-              // Create profile if it doesn't exist
               const { error: insertError } = await supabase
                 .from('profiles')
                 .insert([
@@ -66,7 +92,7 @@ const Login = () => {
             }
 
             toast({
-              title: "Welcome!",
+              title: "Welcome Back!",
               description: "Successfully signed in",
             });
             navigate(returnTo);
@@ -78,11 +104,6 @@ const Login = () => {
               variant: "destructive",
             });
           }
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Signed Out",
-            description: "You have been successfully signed out",
-          });
         }
       }
     );
@@ -92,59 +113,106 @@ const Login = () => {
     };
   }, [navigate, returnTo, toast]);
 
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (error) {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md animate-fade-in">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center font-bold">Welcome to LeaguePlus</CardTitle>
+          <CardTitle className="text-2xl text-center font-bold text-purple-700">Welcome Back!</CardTitle>
         </CardHeader>
         <CardContent>
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#7c3aed',
-                    brandAccent: '#6d28d9',
-                  },
-                },
-              },
-              className: {
-                container: 'flex flex-col gap-4',
-                button: 'bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors',
-                input: 'border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-500',
-                label: 'block text-sm font-medium text-gray-700 mb-1',
-                anchor: 'text-purple-600 hover:text-purple-700 font-medium',
-                divider: 'my-4 border-t border-gray-200',
-                message: 'text-sm text-gray-600 mt-2',
-              },
-            }}
-            theme="light"
-            providers={[]}
-            redirectTo={`${window.location.origin}${returnTo}`}
-            localization={{
-              variables: {
-                sign_up: {
-                  email_label: "Email",
-                  password_label: "Password",
-                  email_input_placeholder: "Your email address",
-                  password_input_placeholder: "Your password",
-                  button_label: "Sign up",
-                  link_text: "Already have an account? Sign in",
-                },
-                sign_in: {
-                  email_label: "Email",
-                  password_label: "Password",
-                  email_input_placeholder: "Your email address",
-                  password_input_placeholder: "Your password",
-                  button_label: "Sign in",
-                  link_text: "Don't have an account? Sign up",
-                },
-              },
-            }}
-          />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <Input
+                          placeholder="your.email@example.com"
+                          className="pl-10"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <Input
+                          type="password"
+                          placeholder="Enter your password"
+                          className="pl-10"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-normal">Remember me</FormLabel>
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
+                Sign In
+              </Button>
+
+              <div className="space-y-2 text-center text-sm">
+                <Link to="/forgot-password" className="text-purple-600 hover:text-purple-700">
+                  Forgot your password?
+                </Link>
+                <div className="text-gray-600">
+                  Don't have an account?{" "}
+                  <Link to="/register" className="text-purple-600 hover:text-purple-700 font-medium">
+                    Register here
+                  </Link>
+                </div>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>
