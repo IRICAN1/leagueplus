@@ -33,7 +33,8 @@ const PlayerChallenge = () => {
     queryFn: async () => {
       if (!playerId || !leagueId) return null;
 
-      const [profileResponse, statsResponse] = await Promise.all([
+      // Fetch both profile and availability data
+      const [profileResponse, statsResponse, availabilityResponse] = await Promise.all([
         supabase
           .from('profiles')
           .select('*')
@@ -44,6 +45,11 @@ const PlayerChallenge = () => {
           .select('*')
           .eq('player_id', playerId)
           .eq('league_id', leagueId)
+          .single(),
+        supabase
+          .from('profiles')
+          .select('availability_schedule')
+          .eq('id', playerId)
           .single()
       ]);
 
@@ -51,6 +57,7 @@ const PlayerChallenge = () => {
       if (statsResponse.error && !statsResponse.error.message.includes('No rows found')) {
         throw statsResponse.error;
       }
+      if (availabilityResponse.error) throw availabilityResponse.error;
 
       const stats = statsResponse.data || {
         rank: 0,
@@ -58,6 +65,11 @@ const PlayerChallenge = () => {
         losses: 0,
         points: 0
       };
+
+      // Parse availability schedule
+      const availabilitySchedule = isAvailabilitySchedule(availabilityResponse.data?.availability_schedule)
+        ? availabilityResponse.data.availability_schedule.selectedSlots
+        : [];
 
       return {
         ...profileResponse.data,
@@ -67,7 +79,8 @@ const PlayerChallenge = () => {
         losses: stats.losses,
         points: stats.points,
         achievements: stats.points > 100 ? [{ title: "High Scorer", icon: Award }] : [],
-        leagueId
+        leagueId,
+        availabilitySchedule
       };
     },
     enabled: !!playerId && !!leagueId
@@ -95,10 +108,6 @@ const PlayerChallenge = () => {
       available: true,
     })),
   }));
-
-  const playerAvailability = isAvailabilitySchedule(playerData.availability_schedule) 
-    ? playerData.availability_schedule.selectedSlots 
-    : [];
 
   const handleChallengeSubmit = () => {
     if (!selectedTimeSlot) {
@@ -136,7 +145,8 @@ const PlayerChallenge = () => {
           availableTimeSlots={availableTimeSlots}
           selectedTimeSlot={selectedTimeSlot}
           onTimeSlotSelect={setSelectedTimeSlot}
-          playerAvailability={playerAvailability}
+          playerAvailability={playerData.availabilitySchedule}
+          multiSelect={false}
         />
         <div className="mt-6">
           <Button 
