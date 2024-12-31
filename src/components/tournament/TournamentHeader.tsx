@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface TournamentHeaderProps {
-  league: Tables<"leagues"> & {
+  league: Tables<"leagues", never> & {
     creator: {
       username: string | null;
     } | null;

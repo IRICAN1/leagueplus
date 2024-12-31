@@ -4,8 +4,8 @@ import { PlayerRankingsTable } from "./PlayerRankingsTable";
 import { Tables } from "@/integrations/supabase/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-type PlayerStatWithProfile = Tables<"player_statistics"> & {
-  profiles: Pick<Tables<"profiles">, "username">;
+type PlayerStatWithProfile = Tables<"player_statistics", never> & {
+  profiles: Pick<Tables<"profiles", never>, "username">;
 };
 
 interface TournamentStatsProps {

@@ -78,7 +78,7 @@ const Index = () => {
         throw error;
       }
 
-      return data as (Tables<'leagues'> & { league_participants: { count: number }[] })[];
+      return data as (Tables<'leagues', never> & { league_participants: { count: number }[] })[];
     },
   });
 
