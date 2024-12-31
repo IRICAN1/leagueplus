@@ -1,12 +1,12 @@
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
+import { ChallengeConfirmationDialog } from "@/components/player-challenge/ChallengeConfirmationDialog";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Trophy, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -28,13 +28,14 @@ const PlayerChallenge = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
 
   const { data: playerData, isLoading } = useQuery({
     queryKey: ['player', playerId, leagueId],
     queryFn: async () => {
       if (!playerId || !leagueId) return null;
 
-      const [profileResponse, statsResponse] = await Promise.all([
+      const [profileResponse, statsResponse, leagueResponse] = await Promise.all([
         supabase
           .from('profiles')
           .select('*')
@@ -45,13 +46,16 @@ const PlayerChallenge = () => {
           .select('*')
           .eq('player_id', playerId)
           .eq('league_id', leagueId)
+          .single(),
+        supabase
+          .from('leagues')
+          .select('name')
+          .eq('id', leagueId)
           .single()
       ]);
 
       if (profileResponse.error) throw profileResponse.error;
-      if (statsResponse.error && !statsResponse.error.message.includes('No rows found')) {
-        throw statsResponse.error;
-      }
+      if (leagueResponse.error) throw leagueResponse.error;
 
       const stats = statsResponse.data || {
         rank: 0,
@@ -67,7 +71,7 @@ const PlayerChallenge = () => {
         wins: stats.wins,
         losses: stats.losses,
         points: stats.points,
-        achievements: stats.points > 100 ? [{ title: "High Scorer", icon: Award }] : [],
+        leagueName: leagueResponse.data.name,
         leagueId
       };
     },
@@ -91,7 +95,7 @@ const PlayerChallenge = () => {
   const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
     day: dayIndex,
     slots: Array.from({ length: 12 }, (_, timeIndex) => ({
-      time: timeIndex + 8, // Start from 8 AM
+      time: timeIndex + 8,
       available: isAvailabilitySchedule(playerData.availability_schedule) && 
                 playerData.availability_schedule.selectedSlots.includes(`${dayIndex}-${timeIndex + 8}`),
     })),
@@ -107,8 +111,6 @@ const PlayerChallenge = () => {
       .map(slot => `${day}-${slot.time}`);
     
     if (daySlots.length === 0) return;
-    
-    // In single select mode, just select the first available slot of the day
     setSelectedTimeSlot([daySlots[0]]);
   };
 
@@ -116,7 +118,7 @@ const PlayerChallenge = () => {
     setSelectedLocation(locationId);
   };
 
-  const handleChallenge = async () => {
+  const handleOpenConfirmation = () => {
     if (selectedTimeSlot.length === 0) {
       toast({
         title: "Select Time Slot",
@@ -135,10 +137,13 @@ const PlayerChallenge = () => {
       return;
     }
 
+    setIsConfirmationOpen(true);
+  };
+
+  const handleChallenge = async () => {
     try {
       setIsSubmitting(true);
 
-      // Parse the selected time slot (format: "day-hour")
       const [day, hour] = selectedTimeSlot[0].split('-').map(Number);
       const proposedDate = new Date();
       proposedDate.setDate(proposedDate.getDate() + ((7 + day - proposedDate.getDay()) % 7));
@@ -185,6 +190,15 @@ const PlayerChallenge = () => {
     { id: "3", name: "City Stadium", distance: "8 miles" }
   ];
 
+  const [day, hour] = selectedTimeSlot[0]?.split('-').map(Number) || [];
+  const proposedDate = new Date();
+  if (day !== undefined && hour !== undefined) {
+    proposedDate.setDate(proposedDate.getDate() + ((7 + day - proposedDate.getDay()) % 7));
+    proposedDate.setHours(hour, 0, 0, 0);
+  }
+
+  const selectedLocationDetails = locations.find(loc => loc.id === selectedLocation);
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <Card className="p-6">
@@ -204,13 +218,26 @@ const PlayerChallenge = () => {
         <div className="mt-6">
           <Button 
             className="w-full"
-            onClick={handleChallenge}
+            onClick={handleOpenConfirmation}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Sending Challenge..." : "Send Challenge Request"}
           </Button>
         </div>
       </Card>
+
+      <ChallengeConfirmationDialog
+        isOpen={isConfirmationOpen}
+        onClose={() => setIsConfirmationOpen(false)}
+        onConfirm={handleChallenge}
+        challengeDetails={{
+          playerName: playerData.name,
+          leagueName: playerData.leagueName,
+          location: selectedLocationDetails?.name || "",
+          proposedTime: proposedDate.toISOString(),
+          leagueId: playerData.leagueId,
+        }}
+      />
     </div>
   );
 };
