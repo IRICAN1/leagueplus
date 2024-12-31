@@ -13,9 +13,9 @@ interface AvailabilitySchedule {
   selectedSlots: string[];
 }
 
-const isAvailabilitySchedule = (json: Json): json is AvailabilitySchedule => {
-  if (typeof json !== 'object' || !json) return false;
-  return Array.isArray((json as AvailabilitySchedule).selectedSlots);
+const isAvailabilitySchedule = (json: Json | null): json is { selectedSlots: string[] } => {
+  if (!json || typeof json !== 'object') return false;
+  return Array.isArray((json as { selectedSlots?: unknown }).selectedSlots);
 };
 
 const PlayerChallenge = () => {
@@ -92,10 +92,9 @@ const PlayerChallenge = () => {
   }));
 
   // Safely parse and validate the availability_schedule
-  const availabilitySchedule = isAvailabilitySchedule(playerData.availability_schedule) 
-    ? playerData.availability_schedule 
-    : { selectedSlots: [] };
-  const selectedTimeSlots = availabilitySchedule.selectedSlots;
+  const selectedTimeSlots = isAvailabilitySchedule(playerData.availability_schedule) 
+    ? playerData.availability_schedule.selectedSlots 
+    : [];
 
   const handleScheduleChange = (schedule: any) => {
     console.log("Schedule updated:", schedule);
