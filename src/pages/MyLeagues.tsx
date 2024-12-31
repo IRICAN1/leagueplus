@@ -3,14 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResultCard } from "@/components/ResultCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const MyLeagues = () => {
+  const navigate = useNavigate();
+
   const { data: createdLeagues, isLoading: isLoadingCreated } = useQuery({
     queryKey: ['created-leagues'],
     queryFn: async () => {
@@ -60,7 +63,16 @@ const MyLeagues = () => {
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">My Leagues</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">My Leagues</h1>
+        <Button 
+          onClick={() => navigate('/create-league')}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Create League
+        </Button>
+      </div>
       
       <Tabs defaultValue="created" className="space-y-6">
         <TabsList>
