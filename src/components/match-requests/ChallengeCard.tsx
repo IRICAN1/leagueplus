@@ -29,6 +29,25 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     return null;
   };
 
+  const renderScores = () => {
+    if (challenge.status !== 'completed' || !challenge.winner_score) return null;
+    const isWinner = challenge.winner_id === currentUserId;
+    return (
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+        <p className="text-sm font-medium text-gray-900">Match Result:</p>
+        <div className="flex gap-2 items-center mt-1">
+          <span className={`text-sm ${isWinner ? 'text-green-600' : 'text-red-600'}`}>
+            {isWinner ? challenge.winner_score : challenge.loser_score}
+          </span>
+          <span className="text-gray-500">vs</span>
+          <span className={`text-sm ${!isWinner ? 'text-green-600' : 'text-red-600'}`}>
+            {!isWinner ? challenge.winner_score : challenge.loser_score}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card className="p-6 mb-4 hover:shadow-lg transition-shadow duration-300 bg-white/80 backdrop-blur-sm">
       <div className="flex justify-between items-start gap-4">
@@ -42,6 +61,7 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
           onResponse={onResponse} 
         />
       </div>
+      {renderScores()}
       {renderResultSubmission()}
       <ResultApprovalCard challenge={challenge} currentUserId={currentUserId} />
     </Card>
