@@ -50,9 +50,7 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
     return (
       <Card className="bg-white/80 shadow-md">
         <CardHeader>
-          <CardTitle>
-            <Trophy className="h-5 w-5 text-purple-600" />
-          </CardTitle>
+          <CardTitle></CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-muted-foreground space-y-2">
@@ -81,7 +79,6 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
     <Card className="bg-white/80 shadow-md">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-purple-600" />
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
