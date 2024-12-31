@@ -7,6 +7,17 @@ import { ProfilePicture } from "@/components/profile/ProfilePicture";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { Edit } from "lucide-react";
 
+const defaultFormData = {
+  fullName: "",
+  email: "",
+  primaryLocation: "",
+  preferredRegions: [],
+  maxTravelDistance: 0,
+  favoriteVenues: [],
+  availabilitySchedule: { selectedSlots: [] },
+  weekdayPreference: "both",
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -14,16 +25,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    primaryLocation: "",
-    preferredRegions: [],
-    maxTravelDistance: 0,
-    favoriteVenues: [],
-    availabilitySchedule: { selectedSlots: [] },
-    weekdayPreference: "both",
-  });
+  const [formData, setFormData] = useState(defaultFormData);
 
   useEffect(() => {
     checkAuth();
@@ -59,7 +61,9 @@ const Profile = () => {
         preferredRegions: profile.preferred_regions || [],
         maxTravelDistance: profile.max_travel_distance || 0,
         favoriteVenues: profile.favorite_venues || [],
-        availabilitySchedule: profile.availability_schedule || { selectedSlots: [] },
+        availabilitySchedule: profile.availability_schedule ? 
+          { selectedSlots: profile.availability_schedule.selectedSlots || [] } : 
+          { selectedSlots: [] },
         weekdayPreference: profile.weekday_preference || "both",
       });
     } catch (error: any) {
@@ -79,7 +83,6 @@ const Profile = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Update profile information
       const updates = {
         id: session.user.id,
         full_name: formData.fullName,
@@ -99,7 +102,6 @@ const Profile = () => {
 
       if (updateError) throw updateError;
 
-      // Handle avatar upload if changed
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
         const filePath = `${session.user.id}/${session.user.id}.${fileExt}`;
@@ -147,8 +149,15 @@ const Profile = () => {
     setIsEditing(false);
     setAvatarFile(null);
     setFormData({
-      fullName: profile.full_name || "",
-      email: profile.email || "",
+      ...defaultFormData,
+      fullName: profile?.full_name || "",
+      email: profile?.email || "",
+      primaryLocation: profile?.primary_location || "",
+      preferredRegions: profile?.preferred_regions || [],
+      maxTravelDistance: profile?.max_travel_distance || 0,
+      favoriteVenues: profile?.favorite_venues || [],
+      availabilitySchedule: profile?.availability_schedule || { selectedSlots: [] },
+      weekdayPreference: profile?.weekday_preference || "both",
     });
   };
 
