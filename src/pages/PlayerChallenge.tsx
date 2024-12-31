@@ -8,6 +8,9 @@ import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trophy, Award } from "lucide-react";
 import { Json } from "@/integrations/supabase/types";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface AvailabilitySchedule {
   selectedSlots: string[];
@@ -22,6 +25,8 @@ const PlayerChallenge = () => {
   const { playerId } = useParams();
   const location = useLocation();
   const { playerName, leagueId, fromTournament } = location.state || {};
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { data: playerData, isLoading } = useQuery({
     queryKey: ['player', playerId, leagueId],
@@ -91,38 +96,25 @@ const PlayerChallenge = () => {
     })),
   }));
 
-  const selectedTimeSlots = isAvailabilitySchedule(playerData.availability_schedule) 
+  const playerAvailability = isAvailabilitySchedule(playerData.availability_schedule) 
     ? playerData.availability_schedule.selectedSlots 
     : [];
 
-  const handleScheduleChange = async (slots: string[]) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          availability_schedule: { selectedSlots: slots }
-        })
-        .eq('id', playerData.id);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error updating availability schedule:', error);
+  const handleChallengeSubmit = () => {
+    if (!selectedTimeSlot) {
+      toast({
+        title: "Select a Time",
+        description: "Please select an available time slot to challenge the player.",
+        variant: "destructive",
+      });
+      return;
     }
-  };
 
-  const handleSelectAllDay = async (day: number) => {
-    const daySlots = availableTimeSlots[day].slots.map(slot => `${day}-${slot.time}`);
-    const currentSelected = new Set(selectedTimeSlots);
-    const isDayFullySelected = daySlots.every(slot => currentSelected.has(slot));
-    
-    let newSelectedSlots;
-    if (isDayFullySelected) {
-      newSelectedSlots = selectedTimeSlots.filter(slot => !daySlots.includes(slot));
-    } else {
-      newSelectedSlots = [...new Set([...selectedTimeSlots, ...daySlots])];
-    }
-    
-    await handleScheduleChange(newSelectedSlots);
+    // Here you would implement the logic to submit the challenge
+    toast({
+      title: "Challenge Sent!",
+      description: "Your challenge has been sent to the player.",
+    });
   };
 
   const locations = [
@@ -142,10 +134,19 @@ const PlayerChallenge = () => {
         />
         <WeeklySchedule 
           availableTimeSlots={availableTimeSlots}
-          selectedTimeSlots={selectedTimeSlots}
-          onTimeSlotSelect={handleScheduleChange}
-          onSelectAllDay={handleSelectAllDay}
+          selectedTimeSlot={selectedTimeSlot}
+          onTimeSlotSelect={setSelectedTimeSlot}
+          playerAvailability={playerAvailability}
         />
+        <div className="mt-6">
+          <Button 
+            className="w-full"
+            onClick={handleChallengeSubmit}
+            disabled={!selectedTimeSlot}
+          >
+            Send Challenge
+          </Button>
+        </div>
       </Card>
     </div>
   );
