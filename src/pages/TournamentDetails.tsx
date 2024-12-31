@@ -56,28 +56,6 @@ const TournamentDetails = () => {
     enabled: !!id
   });
 
-  const { data: playerStats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['player_statistics', id],
-    queryFn: async () => {
-      if (!id || !UUID_REGEX.test(id)) {
-        throw new Error('Invalid league ID format');
-      }
-
-      const { data, error } = await supabase
-        .from('player_statistics')
-        .select(`
-          *,
-          profiles (username)
-        `)
-        .eq('league_id', id)
-        .order('rank', { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!id && !!league
-  });
-
   if (!id || !UUID_REGEX.test(id)) {
     return (
       <div className="container mx-auto p-4">
@@ -142,11 +120,7 @@ const TournamentDetails = () => {
             />
           </CardContent>
         </Card>
-        <TournamentStats 
-          playerStats={playerStats}
-          isLoading={isLoadingStats}
-          leagueId={id}
-        />
+        <TournamentStats leagueId={id} />
       </div>
     </div>
   );
