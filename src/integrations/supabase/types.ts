@@ -134,6 +134,64 @@ export type Database = {
           },
         ]
       }
+      match_challenges: {
+        Row: {
+          challenged_id: string | null
+          challenger_id: string | null
+          created_at: string | null
+          id: string
+          league_id: string | null
+          location: string
+          proposed_time: string
+          status: Database["public"]["Enums"]["challenge_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          challenged_id?: string | null
+          challenger_id?: string | null
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          location: string
+          proposed_time: string
+          status?: Database["public"]["Enums"]["challenge_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          challenged_id?: string | null
+          challenger_id?: string | null
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          location?: string
+          proposed_time?: string
+          status?: Database["public"]["Enums"]["challenge_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_challenges_challenged_id_fkey"
+            columns: ["challenged_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_challenges_challenger_id_fkey"
+            columns: ["challenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_challenges_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_history: {
         Row: {
           created_at: string | null
@@ -305,6 +363,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      challenge_status: "pending" | "accepted" | "rejected" | "completed"
       league_format: "Individual" | "Team"
       league_gender_category: "Men" | "Women" | "Mixed"
       league_match_format: "Single Matches" | "Round Robin" | "Knockout"

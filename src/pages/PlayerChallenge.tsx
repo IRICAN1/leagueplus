@@ -27,6 +27,7 @@ const PlayerChallenge = () => {
   const { toast } = useToast();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: playerData, isLoading } = useQuery({
     queryKey: ['player', playerId, leagueId],
@@ -135,18 +136,46 @@ const PlayerChallenge = () => {
     }
 
     try {
-      // Here you would typically send the challenge request to your backend
-      // For now, we'll just show a success message
+      setIsSubmitting(true);
+
+      // Parse the selected time slot (format: "day-hour")
+      const [day, hour] = selectedTimeSlot[0].split('-').map(Number);
+      const proposedDate = new Date();
+      proposedDate.setDate(proposedDate.getDate() + ((7 + day - proposedDate.getDay()) % 7));
+      proposedDate.setHours(hour, 0, 0, 0);
+
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error("You must be logged in to send a challenge");
+      }
+
+      const { data: challenge, error } = await supabase
+        .from('match_challenges')
+        .insert({
+          league_id: leagueId,
+          challenger_id: session.session.user.id,
+          challenged_id: playerId,
+          proposed_time: proposedDate.toISOString(),
+          location: selectedLocation,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
       toast({
         title: "Challenge Sent!",
         description: `Challenge request sent to ${playerData.name}`,
       });
+
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -176,8 +205,9 @@ const PlayerChallenge = () => {
           <Button 
             className="w-full"
             onClick={handleChallenge}
+            disabled={isSubmitting}
           >
-            Send Challenge Request
+            {isSubmitting ? "Sending Challenge..." : "Send Challenge Request"}
           </Button>
         </div>
       </Card>
