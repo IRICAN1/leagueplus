@@ -13,7 +13,7 @@ import { FormatRules } from "@/components/league-form/FormatRules";
 import { AdditionalDetails } from "@/components/league-form/AdditionalDetails";
 import * as z from "zod";
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Trophy, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const CreateLeague = () => {
@@ -88,64 +88,73 @@ const CreateLeague = () => {
   };
 
   return (
-    <div className="container max-w-2xl mx-auto py-8 px-4">
-      <h1 className="text-xl md:text-3xl font-bold mb-8">Create a New League</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Required Fields Section */}
-          <div className="space-y-8 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg animate-fade-in">
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold">Required Information</h2>
-              <span className="text-sm text-red-500">*</span>
-            </div>
-            <BasicInformation form={form} />
-            <DateFields form={form} />
-            <LocationParticipants form={form} />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
+      <div className="container max-w-2xl mx-auto">
+        <div className="flex items-center gap-3 mb-8">
+          <Trophy className="h-8 w-8 text-blue-600 animate-pulse-soft" />
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+            Create a New League
+          </h1>
+        </div>
 
-          {/* Optional Fields Toggle */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowOptional(!showOptional)}
-            className={cn(
-              "w-full transition-all duration-200",
-              showOptional && "bg-accent"
-            )}
-          >
-            {showOptional ? (
-              <>
-                <ChevronUp className="mr-2 h-4 w-4" />
-                Hide Additional Options
-              </>
-            ) : (
-              <>
-                <ChevronDown className="mr-2 h-4 w-4" />
-                Show Additional Options
-              </>
-            )}
-          </Button>
-
-          {/* Optional Fields Section */}
-          {showOptional && (
-            <div className="space-y-8 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg animate-fade-in">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Required Fields Section */}
+            <div className="space-y-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-blue-100 animate-fade-in">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold">Additional Details</h2>
-                <span className="text-sm text-muted-foreground">(Optional)</span>
+                <h2 className="text-xl font-semibold text-blue-800">Required Information</h2>
+                <span className="text-sm text-red-500">*</span>
               </div>
-              <FormatRules form={form} />
-              <AdditionalDetails form={form} />
+              <BasicInformation form={form} />
+              <DateFields form={form} />
+              <LocationParticipants form={form} />
             </div>
-          )}
 
-          <Button 
-            type="submit" 
-            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
-          >
-            Create League
-          </Button>
-        </form>
-      </Form>
+            {/* Optional Fields Toggle */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowOptional(!showOptional)}
+              className={cn(
+                "w-full transition-all duration-300 border-blue-200 hover:border-blue-300",
+                showOptional && "bg-blue-50 border-blue-300"
+              )}
+            >
+              {showOptional ? (
+                <>
+                  <ChevronUp className="mr-2 h-4 w-4 text-blue-600" />
+                  Hide Additional Options
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="mr-2 h-4 w-4 text-blue-600" />
+                  Show Additional Options
+                </>
+              )}
+            </Button>
+
+            {/* Optional Fields Section */}
+            {showOptional && (
+              <div className="space-y-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-blue-100 animate-fade-in">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-semibold text-blue-800">Additional Details</h2>
+                  <span className="text-sm text-blue-500">(Optional)</span>
+                </div>
+                <FormatRules form={form} />
+                <AdditionalDetails form={form} />
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg group"
+            >
+              <Rocket className="mr-2 h-5 w-5 transition-transform group-hover:rotate-12" />
+              Launch League
+            </Button>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 };
