@@ -91,13 +91,38 @@ const PlayerChallenge = () => {
     })),
   }));
 
-  // Safely parse and validate the availability_schedule
   const selectedTimeSlots = isAvailabilitySchedule(playerData.availability_schedule) 
     ? playerData.availability_schedule.selectedSlots 
     : [];
 
-  const handleScheduleChange = (schedule: any) => {
-    console.log("Schedule updated:", schedule);
+  const handleScheduleChange = async (slots: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          availability_schedule: { selectedSlots: slots }
+        })
+        .eq('id', playerData.id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating availability schedule:', error);
+    }
+  };
+
+  const handleSelectAllDay = async (day: number) => {
+    const daySlots = availableTimeSlots[day].slots.map(slot => `${day}-${slot.time}`);
+    const currentSelected = new Set(selectedTimeSlots);
+    const isDayFullySelected = daySlots.every(slot => currentSelected.has(slot));
+    
+    let newSelectedSlots;
+    if (isDayFullySelected) {
+      newSelectedSlots = selectedTimeSlots.filter(slot => !daySlots.includes(slot));
+    } else {
+      newSelectedSlots = [...new Set([...selectedTimeSlots, ...daySlots])];
+    }
+    
+    await handleScheduleChange(newSelectedSlots);
   };
 
   const locations = [
@@ -119,9 +144,7 @@ const PlayerChallenge = () => {
           availableTimeSlots={availableTimeSlots}
           selectedTimeSlots={selectedTimeSlots}
           onTimeSlotSelect={handleScheduleChange}
-          onSelectAllDay={(day) => {
-            console.log("Select all for day:", day);
-          }}
+          onSelectAllDay={handleSelectAllDay}
         />
       </Card>
     </div>

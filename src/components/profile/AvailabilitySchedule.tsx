@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { WeeklySchedule } from "../player-challenge/WeeklySchedule";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AvailabilityScheduleProps {
   isEditing: boolean;
@@ -16,7 +17,6 @@ export const AvailabilitySchedule = ({
   formData,
   onChange,
 }: AvailabilityScheduleProps) => {
-  // Initialize default time slots if not present
   const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
     day: dayIndex,
     slots: Array.from({ length: 12 }, (_, timeIndex) => ({
@@ -27,9 +27,8 @@ export const AvailabilitySchedule = ({
 
   const selectedTimeSlots = formData.availabilitySchedule?.selectedSlots || [];
 
-  const handleTimeSlotSelect = (slots: string[]) => {
+  const handleTimeSlotSelect = async (slots: string[]) => {
     onChange('availabilitySchedule', {
-      ...formData.availabilitySchedule,
       selectedSlots: slots,
     });
   };
