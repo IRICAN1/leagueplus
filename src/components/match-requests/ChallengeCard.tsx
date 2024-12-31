@@ -51,29 +51,47 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     const loserSets = parseScore(challenge.loser_score);
 
     return (
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-        <p className="text-sm font-medium text-gray-900 mb-2">Match Result:</p>
-        <Table>
+      <div className="mt-4">
+        <Table className="w-auto min-w-[200px] mx-auto bg-gradient-to-r from-gray-50 to-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px]">Player</TableHead>
-              <TableHead className="text-center">Set 1</TableHead>
-              <TableHead className="text-center">Set 2</TableHead>
+            <TableRow className="bg-gray-50/50">
+              <TableHead className="w-[140px] font-semibold text-gray-700">Player</TableHead>
+              {winnerSets.map((_, index) => (
+                <TableHead key={index} className="text-center w-16 font-semibold text-gray-700">
+                  Set {index + 1}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">{winnerName}</TableCell>
+            <TableRow className="hover:bg-blue-50/50 transition-colors">
+              <TableCell className="font-medium text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  {winnerName}
+                </div>
+              </TableCell>
               {winnerSets.map((score, index) => (
-                <TableCell key={index} className="text-center font-semibold text-green-600">
+                <TableCell 
+                  key={index} 
+                  className="text-center font-bold text-green-600 bg-green-50/50"
+                >
                   {score}
                 </TableCell>
               ))}
             </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">{loserName}</TableCell>
+            <TableRow className="hover:bg-blue-50/50 transition-colors">
+              <TableCell className="font-medium text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                  {loserName}
+                </div>
+              </TableCell>
               {loserSets.map((score, index) => (
-                <TableCell key={index} className="text-center font-semibold text-red-600">
+                <TableCell 
+                  key={index} 
+                  className="text-center font-bold text-red-600 bg-red-50/50"
+                >
                   {score}
                 </TableCell>
               ))}
