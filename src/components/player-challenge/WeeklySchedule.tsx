@@ -84,7 +84,7 @@ export const WeeklySchedule = ({
                     ? selectedTimeSlots.includes(slotId)
                     : selectedTimeSlot === slotId;
                   const isPast = isPastDate(day.day, slot.time);
-                  const isAvailable = playerAvailability.includes(slotId);
+                  const isAvailable = slot.available && playerAvailability.includes(slotId);
 
                   return (
                     <TimeSlot
