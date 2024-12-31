@@ -13,6 +13,7 @@ import TournamentRegistration from "./pages/TournamentRegistration";
 import PlayerChallenge from "./pages/PlayerChallenge";
 import CreateLeague from "./pages/CreateLeague";
 import MyLeagues from "./pages/MyLeagues";
+import MatchRequests from "./pages/MatchRequests";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 
@@ -78,6 +79,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MyLeagues />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/match-requests"
+              element={
+                <ProtectedRoute>
+                  <MatchRequests />
                 </ProtectedRoute>
               }
             />
