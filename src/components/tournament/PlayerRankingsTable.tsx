@@ -77,7 +77,7 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
 
   return (
     <Card className="bg-white/80 shadow-md">
-      <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-blue-50">
+      <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-purple-600" />
           Player Rankings
