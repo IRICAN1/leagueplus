@@ -63,11 +63,13 @@ const Profile = () => {
       let availabilitySchedule = { selectedSlots: [] as string[] };
       if (profile.availability_schedule && 
           typeof profile.availability_schedule === 'object' && 
-          !Array.isArray(profile.availability_schedule) && 
-          'selectedSlots' in profile.availability_schedule) {
-        availabilitySchedule = {
-          selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || []
-        };
+          !Array.isArray(profile.availability_schedule)) {
+        const scheduleData = profile.availability_schedule as Record<string, unknown>;
+        if ('selectedSlots' in scheduleData && Array.isArray(scheduleData.selectedSlots)) {
+          availabilitySchedule = {
+            selectedSlots: scheduleData.selectedSlots.map(slot => String(slot))
+          };
+        }
       }
 
       setFormData({
@@ -167,11 +169,13 @@ const Profile = () => {
     let availabilitySchedule = { selectedSlots: [] as string[] };
     if (profile?.availability_schedule && 
         typeof profile.availability_schedule === 'object' && 
-        !Array.isArray(profile.availability_schedule) && 
-        'selectedSlots' in profile.availability_schedule) {
-      availabilitySchedule = {
-        selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || []
-      };
+        !Array.isArray(profile.availability_schedule)) {
+      const scheduleData = profile.availability_schedule as Record<string, unknown>;
+      if ('selectedSlots' in scheduleData && Array.isArray(scheduleData.selectedSlots)) {
+        availabilitySchedule = {
+          selectedSlots: scheduleData.selectedSlots.map(slot => String(slot))
+        };
+      }
     }
 
     setFormData({
