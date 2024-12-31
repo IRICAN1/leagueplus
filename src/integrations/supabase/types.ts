@@ -142,9 +142,13 @@ export type Database = {
           id: string
           league_id: string | null
           location: string
+          loser_score: string | null
           proposed_time: string
+          result_status: Database["public"]["Enums"]["challenge_status"] | null
           status: Database["public"]["Enums"]["challenge_status"] | null
           updated_at: string | null
+          winner_id: string | null
+          winner_score: string | null
         }
         Insert: {
           challenged_id?: string | null
@@ -153,9 +157,13 @@ export type Database = {
           id?: string
           league_id?: string | null
           location: string
+          loser_score?: string | null
           proposed_time: string
+          result_status?: Database["public"]["Enums"]["challenge_status"] | null
           status?: Database["public"]["Enums"]["challenge_status"] | null
           updated_at?: string | null
+          winner_id?: string | null
+          winner_score?: string | null
         }
         Update: {
           challenged_id?: string | null
@@ -164,9 +172,13 @@ export type Database = {
           id?: string
           league_id?: string | null
           location?: string
+          loser_score?: string | null
           proposed_time?: string
+          result_status?: Database["public"]["Enums"]["challenge_status"] | null
           status?: Database["public"]["Enums"]["challenge_status"] | null
           updated_at?: string | null
+          winner_id?: string | null
+          winner_score?: string | null
         }
         Relationships: [
           {
@@ -188,6 +200,13 @@ export type Database = {
             columns: ["league_id"]
             isOneToOne: false
             referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_challenges_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -374,6 +393,7 @@ export type Database = {
         | "Volleyball"
         | "Badminton"
       match_result: "win" | "loss" | "draw"
+      result_approval_status: "pending" | "approved" | "disputed"
     }
     CompositeTypes: {
       [_ in never]: never
