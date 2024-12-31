@@ -5,6 +5,14 @@ import { ChallengeHeader } from "./ChallengeHeader";
 import { ChallengeDetails } from "./ChallengeDetails";
 import { ChallengeStatus } from "./ChallengeStatus";
 import { Challenge, ChallengeType } from "@/types/match";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -29,27 +37,55 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     return null;
   };
 
+  const parseScore = (score: string | null) => {
+    if (!score) return [];
+    return score.split('-').map(set => set.trim());
+  };
+
   const renderScores = () => {
     if (challenge.status !== 'completed' || !challenge.winner_score) return null;
     const isWinner = challenge.winner_id === currentUserId;
+    const winnerName = isWinner ? challenge.challenger.username : challenge.challenged.username;
+    const loserName = !isWinner ? challenge.challenger.username : challenge.challenged.username;
+    const winnerSets = parseScore(challenge.winner_score);
+    const loserSets = parseScore(challenge.loser_score);
+
     return (
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-        <p className="text-sm font-medium text-gray-900">Match Result:</p>
-        <div className="flex gap-2 items-center mt-1">
-          <span className={`text-sm ${isWinner ? 'text-green-600' : 'text-red-600'}`}>
-            {isWinner ? challenge.winner_score : challenge.loser_score}
-          </span>
-          <span className="text-gray-500">vs</span>
-          <span className={`text-sm ${!isWinner ? 'text-green-600' : 'text-red-600'}`}>
-            {!isWinner ? challenge.winner_score : challenge.loser_score}
-          </span>
-        </div>
+        <p className="text-sm font-medium text-gray-900 mb-2">Match Result:</p>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[200px]">Player</TableHead>
+              <TableHead className="text-center">Set 1</TableHead>
+              <TableHead className="text-center">Set 2</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="font-medium">{winnerName}</TableCell>
+              {winnerSets.map((score, index) => (
+                <TableCell key={index} className="text-center font-semibold text-green-600">
+                  {score}
+                </TableCell>
+              ))}
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">{loserName}</TableCell>
+              {loserSets.map((score, index) => (
+                <TableCell key={index} className="text-center font-semibold text-red-600">
+                  {score}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
     );
   };
 
   return (
-    <Card className="p-6 mb-4 hover:shadow-lg transition-shadow duration-300 bg-white/80 backdrop-blur-sm">
+    <Card className="p-6 mb-4 hover:shadow-lg transition-shadow bg-white/80 backdrop-blur-sm">
       <div className="flex justify-between items-start gap-4">
         <div className="flex flex-col gap-4">
           <ChallengeHeader challenge={challenge} type={type} />

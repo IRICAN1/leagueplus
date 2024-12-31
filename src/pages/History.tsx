@@ -4,6 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Loader2, Trophy, Calendar, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const History = () => {
   const { data: matches, isLoading } = useQuery({
@@ -31,6 +39,11 @@ const History = () => {
     }
   });
 
+  const parseScore = (score: string | null) => {
+    if (!score) return [];
+    return score.split('-').map(set => set.trim());
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -50,6 +63,8 @@ const History = () => {
             const isWinner = match.winner_id === match.challenger_id;
             const winnerName = isWinner ? match.challenger.username : match.challenged.username;
             const loserName = !isWinner ? match.challenger.username : match.challenged.username;
+            const winnerSets = parseScore(match.winner_score);
+            const loserSets = parseScore(match.loser_score);
 
             return (
               <Card key={match.id} className="p-6 hover:shadow-lg transition-shadow">
@@ -75,29 +90,37 @@ const History = () => {
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <div className="text-center flex-1">
-                        <p className="font-medium">{match.challenger.username}</p>
-                        <p className="text-sm text-gray-500">Challenger</p>
-                      </div>
-                      <div className="flex items-center gap-4 px-6">
-                        <span className="text-lg font-semibold">
-                          {isWinner ? match.winner_score : match.loser_score}
-                        </span>
-                        <span className="text-gray-400">vs</span>
-                        <span className="text-lg font-semibold">
-                          {!isWinner ? match.winner_score : match.loser_score}
-                        </span>
-                      </div>
-                      <div className="text-center flex-1">
-                        <p className="font-medium">{match.challenged.username}</p>
-                        <p className="text-sm text-gray-500">Challenged</p>
-                      </div>
-                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[200px]">Player</TableHead>
+                          <TableHead className="text-center">Set 1</TableHead>
+                          <TableHead className="text-center">Set 2</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-medium">{winnerName}</TableCell>
+                          {winnerSets.map((score, index) => (
+                            <TableCell key={index} className="text-center font-semibold text-green-600">
+                              {score}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">{loserName}</TableCell>
+                          {loserSets.map((score, index) => (
+                            <TableCell key={index} className="text-center font-semibold text-red-600">
+                              {score}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
               </Card>
-            )
+            );
           })
         )}
       </div>
