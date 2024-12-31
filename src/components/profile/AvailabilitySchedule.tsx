@@ -1,7 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { WeeklySchedule } from "../player-challenge/WeeklySchedule";
-import { supabase } from "@/integrations/supabase/client";
 
 interface AvailabilityScheduleProps {
   isEditing: boolean;
@@ -58,6 +57,7 @@ export const AvailabilitySchedule = ({
             selectedTimeSlots={selectedTimeSlots}
             onTimeSlotSelect={handleTimeSlotSelect}
             onSelectAllDay={handleSelectAllDay}
+            multiSelect={true}
           />
         </div>
       </div>

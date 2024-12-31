@@ -12,16 +12,22 @@ interface WeeklyScheduleProps {
       available: boolean;
     }>;
   }>;
-  selectedTimeSlot: string | null;
-  onTimeSlotSelect: (slotId: string | null) => void;
+  selectedTimeSlot?: string | null;
+  selectedTimeSlots?: string[];
+  onTimeSlotSelect: ((slotId: string) => void) | ((slots: string[]) => void);
+  onSelectAllDay?: (day: number) => void;
   playerAvailability?: string[];
+  multiSelect?: boolean;
 }
 
 export const WeeklySchedule = ({
   availableTimeSlots,
   selectedTimeSlot,
+  selectedTimeSlots = [],
   onTimeSlotSelect,
+  onSelectAllDay,
   playerAvailability = [],
+  multiSelect = false
 }: WeeklyScheduleProps) => {
   const isPastDate = (day: number, time: number) => {
     const now = new Date();
@@ -32,10 +38,17 @@ export const WeeklySchedule = ({
   };
 
   const handleTimeSlotClick = (slotId: string) => {
-    if (selectedTimeSlot === slotId) {
-      onTimeSlotSelect(null);
+    if (multiSelect) {
+      const updatedSlots = selectedTimeSlots.includes(slotId)
+        ? selectedTimeSlots.filter(slot => slot !== slotId)
+        : [...selectedTimeSlots, slotId];
+      (onTimeSlotSelect as (slots: string[]) => void)(updatedSlots);
     } else {
-      onTimeSlotSelect(slotId);
+      if (selectedTimeSlot === slotId) {
+        (onTimeSlotSelect as (slotId: string) => void)(null as any);
+      } else {
+        (onTimeSlotSelect as (slotId: string) => void)(slotId);
+      }
     }
   };
 
@@ -62,12 +75,14 @@ export const WeeklySchedule = ({
               <DayHeader
                 day={day.day}
                 isFullySelected={false}
-                onSelectAll={() => {}}
+                onSelectAll={onSelectAllDay ? () => onSelectAllDay(day.day) : undefined}
               />
               <div className="space-y-0.5">
                 {day.slots.map((slot) => {
                   const slotId = `${day.day}-${slot.time}`;
-                  const isSelected = selectedTimeSlot === slotId;
+                  const isSelected = multiSelect 
+                    ? selectedTimeSlots.includes(slotId)
+                    : selectedTimeSlot === slotId;
                   const isPast = isPastDate(day.day, slot.time);
                   const isAvailable = playerAvailability.includes(slotId);
 
@@ -86,7 +101,7 @@ export const WeeklySchedule = ({
             </div>
           ))}
         </div>
-        {selectedTimeSlot && (
+        {!multiSelect && selectedTimeSlot && (
           <div className="mt-4 p-3 bg-green-50 rounded-md border border-green-200">
             <h4 className="text-sm font-medium text-green-800">Selected Time:</h4>
             {(() => {
