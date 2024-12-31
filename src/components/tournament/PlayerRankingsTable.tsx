@@ -12,9 +12,10 @@ import { RankDisplay } from "./RankDisplay";
 
 interface PlayerRankingsTableProps {
   players: Player[];
+  leagueId: string;
 }
 
-export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
+export const PlayerRankingsTable = ({ players, leagueId }: PlayerRankingsTableProps) => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -28,8 +29,14 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
     checkUser();
   }, []);
 
-  const handleChallenge = (playerId: string) => {
-    navigate(`/player-challenge/${playerId}`);
+  const handleChallenge = (playerId: string, playerName: string) => {
+    navigate(`/player-challenge/${playerId}`, {
+      state: { 
+        playerName,
+        leagueId,
+        fromTournament: true
+      }
+    });
   };
 
   const getRankStyle = (rank: number) => {
@@ -103,7 +110,7 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
                       size="sm"
                       variant="outline"
                       className="w-full bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 transition-colors group-hover:border-blue-300"
-                      onClick={() => handleChallenge(player.id)}
+                      onClick={() => handleChallenge(player.id, player.name)}
                     >
                       <Swords className="h-4 w-4 mr-1" />
                       Challenge

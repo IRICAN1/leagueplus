@@ -11,9 +11,10 @@ type PlayerStatWithProfile = Tables<"player_statistics"> & {
 interface TournamentStatsProps {
   playerStats: PlayerStatWithProfile[] | null;
   isLoading: boolean;
+  leagueId: string;
 }
 
-export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps) => {
+export const TournamentStats = ({ playerStats, isLoading, leagueId }: TournamentStatsProps) => {
   if (!playerStats && !isLoading) {
     return (
       <Card className="mt-6 bg-gradient-to-br from-gray-50 to-white/80 shadow-lg">
@@ -29,7 +30,7 @@ export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps
   }
 
   const formattedPlayerStats = playerStats?.map(player => ({
-    id: player.id,
+    id: player.player_id,
     name: player.profiles?.username || 'Unknown Player',
     rank: player.rank,
     wins: player.wins,
@@ -80,7 +81,7 @@ export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps
       <CardContent className="p-0 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-50/30 to-purple-50/30 pointer-events-none" />
         <div className="relative">
-          <PlayerRankingsTable players={formattedPlayerStats} />
+          <PlayerRankingsTable players={formattedPlayerStats} leagueId={leagueId} />
         </div>
       </CardContent>
     </Card>
