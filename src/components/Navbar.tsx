@@ -5,10 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { NavbarLinks } from "./navbar/NavbarLinks";
 import { NavbarAuth } from "./navbar/NavbarAuth";
 import { Badge } from "./ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { format } from "date-fns";
+import { Card } from "./ui/card";
+import { Button } from "./ui/button";
 
 export const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [pendingChallenges, setPendingChallenges] = useState<number>(0);
+  const [pendingChallenges, setPendingChallenges] = useState<any[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -19,11 +23,15 @@ export const Navbar = () => {
         // Fetch initial pending challenges
         const { data: challenges } = await supabase
           .from('match_challenges')
-          .select('*')
+          .select(`
+            *,
+            challenger:profiles!match_challenges_challenger_id_fkey(username),
+            league:leagues(name)
+          `)
           .eq('challenged_id', session.user.id)
           .eq('status', 'pending');
         
-        setPendingChallenges(challenges?.length || 0);
+        setPendingChallenges(challenges || []);
 
         // Subscribe to real-time updates
         const channel = supabase
@@ -37,14 +45,18 @@ export const Navbar = () => {
               filter: `challenged_id=eq.${session.user.id}`
             },
             async () => {
-              // Refetch challenges count on any changes
+              // Refetch challenges on any changes
               const { data: updatedChallenges } = await supabase
                 .from('match_challenges')
-                .select('*')
+                .select(`
+                  *,
+                  challenger:profiles!match_challenges_challenger_id_fkey(username),
+                  league:leagues(name)
+                `)
                 .eq('challenged_id', session.user.id)
                 .eq('status', 'pending');
               
-              setPendingChallenges(updatedChallenges?.length || 0);
+              setPendingChallenges(updatedChallenges || []);
             }
           )
           .subscribe();
@@ -71,7 +83,6 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Left Section */}
           <div className="flex items-center space-x-8">
-            {/* Logo and App Name */}
             <Link to="/" className="flex items-center space-x-2">
               <Trophy className="h-6 w-6 text-purple-600" />
               <span className="font-bold text-xl text-purple-600">LeaguePlus</span>
@@ -82,19 +93,54 @@ export const Navbar = () => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {isAuthenticated && pendingChallenges > 0 && (
-              <Link 
-                to="/match-requests" 
-                className="relative inline-flex items-center"
-              >
-                <BellDot className="h-6 w-6 text-red-500" />
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                >
-                  {pendingChallenges}
-                </Badge>
-              </Link>
+            {isAuthenticated && pendingChallenges.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="relative inline-flex items-center">
+                    <BellDot className="h-6 w-6 text-blue-500 animate-pulse" />
+                    <Badge 
+                      variant="destructive" 
+                      className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs ring-2 ring-white"
+                    >
+                      {pendingChallenges.length}
+                    </Badge>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-t-lg border-b border-blue-200">
+                    <h3 className="font-semibold text-blue-800">
+                      Pending Match Challenges
+                    </h3>
+                    <p className="text-sm text-blue-600">
+                      You have {pendingChallenges.length} pending challenge{pendingChallenges.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {pendingChallenges.map((challenge) => (
+                      <Card key={challenge.id} className="m-2 p-3 bg-white hover:bg-blue-50 transition-colors border-blue-100">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-blue-900">
+                            {challenge.challenger.username} challenged you
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            League: {challenge.league.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {format(new Date(challenge.proposed_time), 'PPp')}
+                          </p>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                  <div className="p-2 bg-gradient-to-br from-blue-50 to-blue-100 rounded-b-lg border-t border-blue-200">
+                    <Link to="/match-requests">
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                        View All Challenges
+                      </Button>
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
             )}
             <NavbarAuth isAuthenticated={isAuthenticated} />
           </div>
