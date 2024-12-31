@@ -6,27 +6,107 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+
+const LEAGUES_PER_PAGE = 10;
+
+export type LeagueFilters = {
+  location?: string;
+  sportType?: string;
+  skillLevel?: string;
+  genderCategory?: string;
+  startDate?: Date;
+  endDate?: Date;
+  status?: 'active' | 'upcoming' | 'completed';
+  hasSpots?: boolean;
+};
 
 const Index = () => {
-  const { data: leagues, isLoading, error } = useQuery({
-    queryKey: ['leagues'],
+  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState<LeagueFilters>({});
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['leagues', page, filters],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('leagues')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*, league_participants(count)')
+        .order('created_at', { ascending: false })
+        .range((page - 1) * LEAGUES_PER_PAGE, page * LEAGUES_PER_PAGE - 1);
+
+      if (filters.location) {
+        query = query.eq('location', filters.location);
+      }
+      if (filters.sportType) {
+        query = query.eq('sport_type', filters.sportType);
+      }
+      if (filters.skillLevel) {
+        const [min, max] = filters.skillLevel.split('-').map(Number);
+        query = query.gte('skill_level_min', min).lte('skill_level_max', max);
+      }
+      if (filters.genderCategory) {
+        query = query.eq('gender_category', filters.genderCategory);
+      }
+      if (filters.startDate) {
+        query = query.gte('start_date', filters.startDate.toISOString());
+      }
+      if (filters.endDate) {
+        query = query.lte('end_date', filters.endDate.toISOString());
+      }
+      if (filters.status) {
+        const now = new Date().toISOString();
+        switch (filters.status) {
+          case 'active':
+            query = query.lte('start_date', now).gte('end_date', now);
+            break;
+          case 'upcoming':
+            query = query.gt('start_date', now);
+            break;
+          case 'completed':
+            query = query.lt('end_date', now);
+            break;
+        }
+      }
+      if (filters.hasSpots === true) {
+        query = query.neq('league_participants.count', 'max_participants');
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         throw error;
       }
 
-      return data as Tables<'leagues'>[];
+      return data as (Tables<'leagues'> & { league_participants: { count: number }[] })[];
+    },
+  });
+
+  const { data: locations } = useQuery({
+    queryKey: ['league-locations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leagues')
+        .select('location')
+        .order('location');
+
+      if (error) {
+        throw error;
+      }
+
+      const uniqueLocations = [...new Set(data.map(l => l.location))];
+      return uniqueLocations;
     },
   });
 
   if (error) {
     toast.error('Failed to load leagues');
   }
+
+  const handleFilterChange = (newFilters: Partial<LeagueFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    setPage(1); // Reset to first page when filters change
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
@@ -40,31 +120,52 @@ const Index = () => {
           </p>
         </div>
 
-        <SearchHeader />
-        <FilterBar />
+        <SearchHeader onLocationChange={(location) => handleFilterChange({ location })} locations={locations || []} />
+        <FilterBar 
+          onFilterChange={handleFilterChange}
+          filters={filters}
+        />
 
         <div className="space-y-4 animate-slide-in">
           {isLoading ? (
             <div className="text-center py-8 text-gray-600">Loading leagues...</div>
-          ) : leagues && leagues.length > 0 ? (
-            leagues.map((league) => (
-              <ResultCard
-                key={league.id}
-                id={league.id}
-                title={league.name}
-                location={league.location}
-                distance={0} // This would need to be calculated based on user's location
-                date={format(new Date(league.start_date), 'MMMM d, yyyy')}
-                type={league.format}
-                sportType={league.sport_type}
-                skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
-                genderCategory={league.gender_category}
-                participants={league.max_participants}
-              />
-            ))
+          ) : data && data.length > 0 ? (
+            <>
+              {data.map((league) => (
+                <ResultCard
+                  key={league.id}
+                  id={league.id}
+                  title={league.name}
+                  location={league.location}
+                  distance={0}
+                  date={format(new Date(league.start_date), 'MMMM d, yyyy')}
+                  type={league.format}
+                  sportType={league.sport_type}
+                  skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
+                  genderCategory={league.gender_category}
+                  participants={league.max_participants}
+                />
+              ))}
+              <div className="flex justify-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={data.length < LEAGUES_PER_PAGE}
+                >
+                  Next
+                </Button>
+              </div>
+            </>
           ) : (
             <div className="text-center py-8 text-gray-600">
-              No leagues found. Create one to get started!
+              No leagues found matching your criteria.
             </div>
           )}
         </div>
