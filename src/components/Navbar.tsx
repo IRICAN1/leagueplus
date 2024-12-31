@@ -5,11 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { NavbarLinks } from "./navbar/NavbarLinks";
 import { NavbarAuth } from "./navbar/NavbarAuth";
 import { Badge } from "./ui/badge";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 
 export const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -61,63 +56,45 @@ export const Navbar = () => {
     };
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
-        setIsAuthenticated(true);
-      }
-      if (event === "SIGNED_OUT") {
-        setIsAuthenticated(false);
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
-    <nav className="border-b">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between items-center">
+    <nav className="fixed top-0 left-0 right-0 bg-white border-b shadow-sm z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
           {/* Left Section */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-8">
+            {/* Logo and App Name */}
             <Link to="/" className="flex items-center space-x-2">
-              <Trophy className="h-6 w-6 text-blue-600" />
-              <span className="text-xl font-bold">Sports League</span>
+              <Trophy className="h-6 w-6 text-purple-600" />
+              <span className="font-bold text-xl text-purple-600">LeaguePlus</span>
             </Link>
+
             <NavbarLinks isAuthenticated={isAuthenticated} />
           </div>
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
             {isAuthenticated && pendingChallenges > 0 && (
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Link 
-                    to="/match-requests" 
-                    className="relative inline-flex items-center p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    <BellDot className="h-6 w-6 text-red-500 animate-pulse" />
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs rounded-full ring-2 ring-white animate-bounce"
-                    >
-                      {pendingChallenges}
-                    </Badge>
-                  </Link>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80 p-0">
-                  <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-t-lg border-b border-red-200">
-                    <h4 className="text-sm font-semibold text-red-700">Pending Match Challenges</h4>
-                    <p className="text-xs text-red-600 mt-1">
-                      You have {pendingChallenges} pending match {pendingChallenges === 1 ? 'request' : 'requests'}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white">
-                    <p className="text-sm text-gray-600">
-                      Click to view and respond to your match challenges
-                    </p>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
+              <Link 
+                to="/match-requests" 
+                className="relative inline-flex items-center"
+              >
+                <BellDot className="h-6 w-6 text-red-500" />
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {pendingChallenges}
+                </Badge>
+              </Link>
             )}
             <NavbarAuth isAuthenticated={isAuthenticated} />
           </div>
