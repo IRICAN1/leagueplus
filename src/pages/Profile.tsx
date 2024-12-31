@@ -17,6 +17,12 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    primaryLocation: "",
+    preferredRegions: [],
+    maxTravelDistance: 0,
+    favoriteVenues: [],
+    availabilitySchedule: { selectedSlots: [] },
+    weekdayPreference: "both",
   });
 
   useEffect(() => {
@@ -49,6 +55,12 @@ const Profile = () => {
       setFormData({
         fullName: profile.full_name || "",
         email: session.user.email || "",
+        primaryLocation: profile.primary_location || "",
+        preferredRegions: profile.preferred_regions || [],
+        maxTravelDistance: profile.max_travel_distance || 0,
+        favoriteVenues: profile.favorite_venues || [],
+        availabilitySchedule: profile.availability_schedule || { selectedSlots: [] },
+        weekdayPreference: profile.weekday_preference || "both",
       });
     } catch (error: any) {
       toast({
@@ -71,6 +83,12 @@ const Profile = () => {
       const updates = {
         id: session.user.id,
         full_name: formData.fullName,
+        primary_location: formData.primaryLocation,
+        preferred_regions: formData.preferredRegions,
+        max_travel_distance: formData.maxTravelDistance,
+        favorite_venues: formData.favoriteVenues,
+        availability_schedule: formData.availabilitySchedule,
+        weekday_preference: formData.weekdayPreference,
         updated_at: new Date().toISOString(),
       };
 

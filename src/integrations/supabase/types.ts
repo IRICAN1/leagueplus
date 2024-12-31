@@ -254,28 +254,46 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability_schedule: Json | null
           avatar_url: string | null
           created_at: string
+          favorite_venues: string[] | null
           full_name: string | null
           id: string
+          max_travel_distance: number | null
+          preferred_regions: string[] | null
+          primary_location: string | null
           updated_at: string
           username: string | null
+          weekday_preference: string | null
         }
         Insert: {
+          availability_schedule?: Json | null
           avatar_url?: string | null
           created_at?: string
+          favorite_venues?: string[] | null
           full_name?: string | null
           id: string
+          max_travel_distance?: number | null
+          preferred_regions?: string[] | null
+          primary_location?: string | null
           updated_at?: string
           username?: string | null
+          weekday_preference?: string | null
         }
         Update: {
+          availability_schedule?: Json | null
           avatar_url?: string | null
           created_at?: string
+          favorite_venues?: string[] | null
           full_name?: string | null
           id?: string
+          max_travel_distance?: number | null
+          preferred_regions?: string[] | null
+          primary_location?: string | null
           updated_at?: string
           username?: string | null
+          weekday_preference?: string | null
         }
         Relationships: []
       }
