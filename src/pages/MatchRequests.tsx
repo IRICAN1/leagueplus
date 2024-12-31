@@ -10,13 +10,12 @@ import { Loader2 } from "lucide-react";
 const MatchRequests = () => {
   const { toast } = useToast();
 
-  // Fetch both sent and received challenges
-  const { data: session } = await supabase.auth.getSession();
-  const userId = session?.session?.user?.id;
-
   const { data: challenges, isLoading, refetch } = useQuery({
-    queryKey: ['match-challenges', userId],
+    queryKey: ['match-challenges'],
     queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session?.session?.user?.id;
+
       if (!userId) return { sent: [], received: [] };
 
       const [sentResponse, receivedResponse] = await Promise.all([
@@ -48,8 +47,7 @@ const MatchRequests = () => {
         sent: sentResponse.data,
         received: receivedResponse.data
       };
-    },
-    enabled: !!userId
+    }
   });
 
   const handleResponse = async (challengeId: string, accept: boolean) => {
