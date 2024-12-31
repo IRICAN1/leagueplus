@@ -22,7 +22,6 @@ export const AvailabilitySchedule = ({
     slots: Array.from({ length: 12 }, (_, timeIndex) => ({
       time: timeIndex + 8, // Start from 8 AM
       available: true,
-      isMatchingSlot: true, // Set to true for profile settings
     })),
   }));
 
