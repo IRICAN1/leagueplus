@@ -1,15 +1,15 @@
 import { Tables } from "@/integrations/supabase/types";
 
-export type Challenge = Tables<"match_challenges", never> & {
-  challenger: {
-    username: string;
+export type Challenge = Tables<"match_challenges"> & {
+  challenger?: {
+    username: string | null;
     avatar_url: string | null;
   };
-  challenged: {
-    username: string;
+  challenged?: {
+    username: string | null;
     avatar_url: string | null;
   };
-  league: {
+  league?: {
     name: string;
   };
 };

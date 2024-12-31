@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { ChallengeCard } from "@/components/match-requests/ChallengeCard";
+import { Challenge } from "@/types/match";
 
 const MatchRequests = () => {
   const { toast } = useToast();
@@ -22,6 +23,7 @@ const MatchRequests = () => {
           .select(`
             *,
             challenged:profiles!match_challenges_challenged_id_fkey(username, avatar_url),
+            challenger:profiles!match_challenges_challenger_id_fkey(username, avatar_url),
             league:leagues(name)
           `)
           .eq('challenger_id', userId)
@@ -31,6 +33,7 @@ const MatchRequests = () => {
           .from('match_challenges')
           .select(`
             *,
+            challenged:profiles!match_challenges_challenged_id_fkey(username, avatar_url),
             challenger:profiles!match_challenges_challenger_id_fkey(username, avatar_url),
             league:leagues(name)
           `)
@@ -42,8 +45,8 @@ const MatchRequests = () => {
       if (receivedResponse.error) throw receivedResponse.error;
 
       return {
-        sent: sentResponse.data,
-        received: receivedResponse.data
+        sent: sentResponse.data as Challenge[],
+        received: receivedResponse.data as Challenge[]
       };
     }
   });
