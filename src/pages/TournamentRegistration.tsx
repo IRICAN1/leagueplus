@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
@@ -10,17 +10,16 @@ const TournamentRegistration = () => {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<any[]>([]);
-
-  // Initialize available time slots
-  const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
-    day: dayIndex,
-    slots: Array.from({ length: 12 }, (_, timeIndex) => ({
-      time: timeIndex + 8, // Start from 8 AM
-      available: true,
-      isMatchingSlot: true // Add this line
-    })),
-  }));
+  const [availableTimeSlots, setAvailableTimeSlots] = useState(
+    Array.from({ length: 7 }, (_, dayIndex) => ({
+      day: dayIndex,
+      slots: Array.from({ length: 12 }, (_, timeIndex) => ({
+        time: timeIndex + 8, // Start from 8 AM
+        available: true,
+        isMatchingSlot: true
+      })),
+    }))
+  );
 
   const handleChallenge = async () => {
     if (selectedTimeSlots.length === 0 || !selectedLocation) {
