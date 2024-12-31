@@ -7,15 +7,8 @@ import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
 import { supabase } from "@/integrations/supabase/client";
-
-interface PlayerData {
-  id: string;
-  username: string;
-  avatar_url?: string;
-  full_name?: string;
-  primary_location?: string;
-  preferred_regions?: string[];
-}
+import { transformProfileToPlayerData, transformLocationsToSelectableLocations } from "@/utils/playerTransforms";
+import type { PlayerData } from "@/types/player";
 
 const PlayerChallenge = () => {
   const { playerId } = useParams();
@@ -38,9 +31,18 @@ const PlayerChallenge = () => {
           .from('profiles')
           .select('*')
           .eq('id', playerId)
-          .single();
+          .maybeSingle();
 
         if (playerError) throw playerError;
+        if (!playerProfile) {
+          toast({
+            title: "Player not found",
+            description: "The requested player profile could not be found.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         setPlayerData(playerProfile);
 
         // Extract player availability
@@ -63,7 +65,7 @@ const PlayerChallenge = () => {
           .from('profiles')
           .select('availability_schedule')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (myError) throw myError;
 
@@ -142,20 +144,6 @@ const PlayerChallenge = () => {
     setTimeout(() => navigate("/tournament/1"), 2000);
   };
 
-  const handleSelectAllDay = (day: number) => {
-    const daySlots = availableTimeSlots[day].slots
-      .filter(slot => slot.isMatchingSlot)
-      .map(slot => `${day}-${slot.time}`);
-    
-    const allSelected = daySlots.every(slot => selectedTimeSlots.includes(slot));
-    
-    if (allSelected) {
-      setSelectedTimeSlots(prev => prev.filter(slot => !daySlots.includes(slot)));
-    } else {
-      setSelectedTimeSlots(prev => [...new Set([...prev, ...daySlots])]);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
@@ -180,17 +168,17 @@ const PlayerChallenge = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
         <div className="grid gap-6 md:grid-cols-2">
-          <PlayerProfile player={playerData} />
+          <PlayerProfile player={transformProfileToPlayerData(playerData)} />
           
           <WeeklySchedule
             availableTimeSlots={availableTimeSlots}
             selectedTimeSlots={selectedTimeSlots}
             onTimeSlotSelect={setSelectedTimeSlots}
-            onSelectAllDay={handleSelectAllDay}
+            onSelectAllDay={() => {}}
           />
 
           <LocationSelector
-            locations={playerData.preferred_regions || []}
+            locations={transformLocationsToSelectableLocations(playerData.preferred_regions)}
             selectedLocation={selectedLocation}
             onLocationSelect={setSelectedLocation}
           />
