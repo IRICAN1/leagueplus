@@ -7,14 +7,18 @@ import { ProfilePicture } from "@/components/profile/ProfilePicture";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { Edit } from "lucide-react";
 
+interface AvailabilitySchedule {
+  selectedSlots: string[];
+}
+
 const defaultFormData = {
   fullName: "",
   email: "",
   primaryLocation: "",
-  preferredRegions: [],
+  preferredRegions: [] as string[],
   maxTravelDistance: 0,
-  favoriteVenues: [],
-  availabilitySchedule: { selectedSlots: [] },
+  favoriteVenues: [] as string[],
+  availabilitySchedule: { selectedSlots: [] as string[] },
   weekdayPreference: "both",
 };
 
@@ -61,8 +65,8 @@ const Profile = () => {
         preferredRegions: profile.preferred_regions || [],
         maxTravelDistance: profile.max_travel_distance || 0,
         favoriteVenues: profile.favorite_venues || [],
-        availabilitySchedule: profile.availability_schedule ? 
-          { selectedSlots: profile.availability_schedule.selectedSlots || [] } : 
+        availabilitySchedule: profile.availability_schedule && typeof profile.availability_schedule === 'object' ? 
+          { selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || [] } : 
           { selectedSlots: [] },
         weekdayPreference: profile.weekday_preference || "both",
       });
@@ -156,7 +160,9 @@ const Profile = () => {
       preferredRegions: profile?.preferred_regions || [],
       maxTravelDistance: profile?.max_travel_distance || 0,
       favoriteVenues: profile?.favorite_venues || [],
-      availabilitySchedule: profile?.availability_schedule || { selectedSlots: [] },
+      availabilitySchedule: profile?.availability_schedule && typeof profile.availability_schedule === 'object' ? 
+        { selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || [] } : 
+        { selectedSlots: [] },
       weekdayPreference: profile?.weekday_preference || "both",
     });
   };
