@@ -51,19 +51,21 @@ const Login = () => {
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
+      // Check if there's an error response
       if (error) {
-        // Check if the error is due to unconfirmed email
+        // Check if it's an unconfirmed email error
         if (error.message.includes('Email not confirmed')) {
+          // Allow login but show a warning toast
           toast({
             title: "Email Not Confirmed",
             description: (
               <div className="space-y-2">
-                <p>Please check your email inbox and confirm your email address before logging in.</p>
+                <p>You can continue using the app, but please confirm your email to access all features.</p>
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -75,10 +77,12 @@ const Login = () => {
             ),
             duration: 10000, // Keep the toast visible longer
           });
+          // Continue with the login process
+          navigate('/');
           return;
         }
 
-        // Handle invalid credentials specifically
+        // Handle other errors
         if (error.message.includes('Invalid login credentials')) {
           toast({
             title: "Login Failed",
@@ -100,7 +104,7 @@ const Login = () => {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('id', data.user?.id)
         .single();
 
       if (profileError || !profile) {
