@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, RotateCcw } from "lucide-react";
-import { useState } from "react";
 import { LeagueFilters } from "@/pages/Index";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -40,12 +39,12 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
   return (
     <div className="flex flex-wrap items-center gap-4 p-6 bg-gray-50/90 backdrop-blur-sm rounded-lg animate-slide-in shadow-md hover:shadow-lg transition-all duration-300 border border-blue-200">
       <div className="flex-1 flex flex-wrap items-center gap-4">
-        <Select onValueChange={(value) => onFilterChange({ sportType: value || undefined })}>
+        <Select onValueChange={(value) => onFilterChange({ sportType: value === "all" ? undefined : value })}>
           <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
             <SelectValue placeholder="Sport" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Sports</SelectItem>
+            <SelectItem value="all">All Sports</SelectItem>
             <SelectItem value="Tennis">Tennis</SelectItem>
             <SelectItem value="Football">Football</SelectItem>
             <SelectItem value="Basketball">Basketball</SelectItem>
@@ -54,38 +53,38 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
           </SelectContent>
         </Select>
 
-        <Select onValueChange={(value) => onFilterChange({ skillLevel: value || undefined })}>
+        <Select onValueChange={(value) => onFilterChange({ skillLevel: value === "all" ? undefined : value })}>
           <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
             <SelectValue placeholder="Skill Level" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Levels</SelectItem>
+            <SelectItem value="all">All Levels</SelectItem>
             <SelectItem value="1-3">Beginner (1-3)</SelectItem>
             <SelectItem value="4-6">Intermediate (4-6)</SelectItem>
             <SelectItem value="7-10">Advanced (7-10)</SelectItem>
           </SelectContent>
         </Select>
 
-        <Select onValueChange={(value) => onFilterChange({ genderCategory: value || undefined })}>
+        <Select onValueChange={(value) => onFilterChange({ genderCategory: value === "all" ? undefined : value })}>
           <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
             <SelectValue placeholder="Gender Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="Men">Men</SelectItem>
             <SelectItem value="Women">Women</SelectItem>
             <SelectItem value="Mixed">Mixed</SelectItem>
           </SelectContent>
         </Select>
 
-        <Select onValueChange={(value: 'active' | 'upcoming' | 'completed' | '') => 
-          onFilterChange({ status: value || undefined })
+        <Select onValueChange={(value: 'active' | 'upcoming' | 'completed' | 'all') => 
+          onFilterChange({ status: value === "all" ? undefined : value as 'active' | 'upcoming' | 'completed' })
         }>
           <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="upcoming">Upcoming</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
