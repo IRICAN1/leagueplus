@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trophy, Award, Medal, Swords, UserRound } from "lucide-react";
+import { Trophy, Award, Medal, Swords, UserRound, Crown, Star, Flame } from "lucide-react";
 import { PlayerAchievementBadge } from "./PlayerAchievementBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,12 +46,27 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
     navigate(`/player-challenge/${playerId}`);
   };
 
+  const getPlayerAchievements = (player: Player) => {
+    const achievements: Achievement[] = [];
+    
+    // Top 3 achievements
+    if (player.rank === 1) achievements.push({ title: "Champion", icon: Crown });
+    if (player.rank === 2) achievements.push({ title: "Runner Up", icon: Medal });
+    if (player.rank === 3) achievements.push({ title: "Bronze", icon: Medal });
+    
+    // Win-based achievements
+    if (player.wins >= 10) achievements.push({ title: "Victory Master", icon: Trophy });
+    if (player.wins >= 5) achievements.push({ title: "Rising Star", icon: Star });
+    
+    // Points-based achievements
+    if (player.points >= 100) achievements.push({ title: "Point Leader", icon: Flame });
+    
+    return achievements;
+  };
+
   if (!players || players.length === 0) {
     return (
       <Card className="bg-white/80 shadow-md">
-        <CardHeader>
-          <CardTitle></CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-muted-foreground space-y-2">
             <UserRound className="h-12 w-12 text-muted animate-pulse" />
@@ -65,26 +80,22 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1:
-        return "bg-gradient-to-r from-yellow-50 to-yellow-100/50 font-semibold text-yellow-700";
+        return "bg-gradient-to-r from-yellow-50 via-yellow-100/50 to-amber-50 font-semibold text-yellow-700 hover:from-yellow-100 hover:to-amber-100/50";
       case 2:
-        return "bg-gradient-to-r from-gray-50 to-gray-100/50 font-semibold text-gray-700";
+        return "bg-gradient-to-r from-gray-50 via-slate-100/50 to-gray-50 font-semibold text-gray-700 hover:from-gray-100 hover:to-slate-100/50";
       case 3:
-        return "bg-gradient-to-r from-amber-50 to-amber-100/50 font-semibold text-amber-800";
+        return "bg-gradient-to-r from-amber-50 via-orange-100/50 to-amber-50 font-semibold text-amber-800 hover:from-amber-100 hover:to-orange-100/50";
       default:
-        return "hover:bg-gray-50/50";
+        return "hover:bg-gray-50/50 transition-colors duration-200";
     }
   };
 
   return (
-    <Card className="bg-white/80 shadow-md">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-        </CardTitle>
-      </CardHeader>
+    <Card className="bg-white/80 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden border border-blue-100/50">
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/30 hover:bg-muted/30">
+            <TableRow className="bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 hover:from-blue-100 hover:to-purple-100">
               <TableHead className="w-[100px]">Rank</TableHead>
               <TableHead>Player</TableHead>
               <TableHead>Achievements</TableHead>
@@ -97,25 +108,29 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
             {players.map((player) => (
               <TableRow 
                 key={player.id}
-                className={`${getRankStyle(player.rank)} transition-all duration-300 hover:shadow-sm`}
+                className={`${getRankStyle(player.rank)} transition-all duration-300 hover:shadow-md group animate-fade-in`}
               >
                 <TableCell className="font-medium">
-                  {player.rank === 1 && <Trophy className="h-4 w-4 text-yellow-500 inline mr-1" />}
+                  {player.rank === 1 && <Crown className="h-5 w-5 text-yellow-500 inline mr-1 animate-pulse-soft" />}
+                  {player.rank === 2 && <Medal className="h-5 w-5 text-gray-400 inline mr-1" />}
+                  {player.rank === 3 && <Medal className="h-5 w-5 text-amber-500 inline mr-1" />}
                   #{player.rank}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10 border-2 border-white shadow-sm transition-transform hover:scale-105">
+                    <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-100 group-hover:ring-blue-200 transition-all duration-300">
                       <AvatarImage 
                         src={player.avatar_url} 
                         className="object-cover"
                       />
-                      <AvatarFallback className="bg-gradient-to-br from-purple-100 to-blue-100 text-blue-700">
+                      <AvatarFallback className="bg-gradient-to-br from-blue-100 to-purple-100 text-blue-700 font-medium">
                         {player.name[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span className="font-medium text-gray-900">{player.name}</span>
+                      <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {player.name}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {player.points} total points
                       </span>
@@ -123,13 +138,13 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-2">
-                    {player.achievements?.map((achievement, index) => (
+                  <div className="flex gap-2 flex-wrap">
+                    {getPlayerAchievements(player).map((achievement, index) => (
                       <PlayerAchievementBadge
                         key={index}
                         achievement={achievement}
                       />
-                    )) ?? null}
+                    ))}
                   </div>
                 </TableCell>
                 <TableCell className="text-right font-medium">
@@ -138,7 +153,7 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
                   <span className="text-red-600">{player.losses}</span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium text-sm">
+                  <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 font-medium text-sm group-hover:from-blue-200 group-hover:to-purple-200 transition-all duration-300">
                     {player.points}
                   </span>
                 </TableCell>
@@ -147,7 +162,7 @@ export const PlayerRankingsTable = ({ players }: PlayerRankingsTableProps) => {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="w-full bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 transition-colors"
+                      className="w-full bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 transition-colors group-hover:border-blue-300"
                       onClick={() => handleChallenge(player.id)}
                     >
                       <Swords className="h-4 w-4 mr-1" />
