@@ -2,14 +2,19 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Sword, Trophy, Award } from "lucide-react";
+import { Sword } from "lucide-react";
 import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-interface AvailabilitySchedule {
-  selectedSlots: string[];
+interface PlayerData {
+  id: string;
+  username: string;
+  avatar_url?: string;
+  full_name?: string;
+  primary_location?: string;
+  preferred_regions?: string[];
 }
 
 const PlayerChallenge = () => {
@@ -21,28 +26,24 @@ const PlayerChallenge = () => {
   const [playerAvailability, setPlayerAvailability] = useState<string[]>([]);
   const [myAvailability, setMyAvailability] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [playerData, setPlayerData] = useState<PlayerData | null>(null);
 
   useEffect(() => {
     const fetchAvailabilities = async () => {
       try {
-        // Fetch challenged player's availability
-        const { data: playerProfile } = await supabase
+        if (!playerId) return;
+
+        // Fetch challenged player's profile and availability
+        const { data: playerProfile, error: playerError } = await supabase
           .from('profiles')
-          .select('availability_schedule')
+          .select('*')
           .eq('id', playerId)
           .single();
 
-        // Fetch current user's availability
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) return;
+        if (playerError) throw playerError;
+        setPlayerData(playerProfile);
 
-        const { data: myProfile } = await supabase
-          .from('profiles')
-          .select('availability_schedule')
-          .eq('id', session.user.id)
-          .single();
-
-        // Safely handle the availability schedules
+        // Extract player availability
         let playerSlots: string[] = [];
         if (playerProfile?.availability_schedule && 
             typeof playerProfile.availability_schedule === 'object' && 
@@ -52,7 +53,21 @@ const PlayerChallenge = () => {
             playerSlots = scheduleData.selectedSlots.map(slot => String(slot));
           }
         }
+        setPlayerAvailability(playerSlots);
 
+        // Fetch current user's availability
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        const { data: myProfile, error: myError } = await supabase
+          .from('profiles')
+          .select('availability_schedule')
+          .eq('id', session.user.id)
+          .single();
+
+        if (myError) throw myError;
+
+        // Extract my availability
         let mySlots: string[] = [];
         if (myProfile?.availability_schedule && 
             typeof myProfile.availability_schedule === 'object' && 
@@ -62,9 +77,8 @@ const PlayerChallenge = () => {
             mySlots = scheduleData.selectedSlots.map(slot => String(slot));
           }
         }
-
-        setPlayerAvailability(playerSlots);
         setMyAvailability(mySlots);
+
       } catch (error: any) {
         toast({
           title: "Error fetching availability",
@@ -152,11 +166,21 @@ const PlayerChallenge = () => {
     );
   }
 
+  if (!playerData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
+        <div className="container max-w-6xl mx-auto px-4">
+          Player not found
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
         <div className="grid gap-6 md:grid-cols-2">
-          <PlayerProfile player={player} />
+          <PlayerProfile player={playerData} />
           
           <WeeklySchedule
             availableTimeSlots={availableTimeSlots}
@@ -166,7 +190,7 @@ const PlayerChallenge = () => {
           />
 
           <LocationSelector
-            locations={player.preferredLocations}
+            locations={playerData.preferred_regions || []}
             selectedLocation={selectedLocation}
             onLocationSelect={setSelectedLocation}
           />
