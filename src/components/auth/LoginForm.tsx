@@ -37,9 +37,13 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
     },
   });
 
+  const handleSubmit = async (values: LoginFormValues) => {
+    await onSubmit(values);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"

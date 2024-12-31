@@ -145,6 +145,7 @@ const TournamentDetails = () => {
         <TournamentStats 
           playerStats={playerStats}
           isLoading={isLoadingStats}
+          leagueId={id}
         />
       </div>
     </div>

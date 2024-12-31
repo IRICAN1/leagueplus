@@ -31,9 +31,7 @@ export const useAuth = () => {
 
   const handleEmailConfirmation = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resendConfirmationEmail({
-        email,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) throw error;
       
       toast({
@@ -49,7 +47,7 @@ export const useAuth = () => {
     }
   };
 
-  const signIn = async (values: LoginFormValues) => {
+  const signIn = async (values: LoginFormValues): Promise<void> => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -68,9 +66,10 @@ export const useAuth = () => {
             duration: 10000,
           });
           navigate("/");
-          return true;
+          return;
         }
-        return handleAuthError(error);
+        handleAuthError(error);
+        return;
       }
 
       const { data: profile, error: profileError } = await supabase
@@ -85,18 +84,16 @@ export const useAuth = () => {
           description: "Profile not found. Please try again or contact support.",
           variant: "destructive",
         });
-        return false;
+        return;
       }
 
       navigate("/");
-      return true;
     } catch (error) {
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-      return false;
     } finally {
       setIsLoading(false);
     }

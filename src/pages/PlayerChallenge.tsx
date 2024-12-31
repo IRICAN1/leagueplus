@@ -6,38 +6,63 @@ import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Trophy, Award } from "lucide-react";
 
 const PlayerChallenge = () => {
   const { playerId } = useParams();
   const location = useLocation();
   const { playerName, leagueId, fromTournament } = location.state || {};
 
-  const { data: player, isLoading } = useQuery({
-    queryKey: ['player', playerId],
+  const { data: playerData, isLoading } = useQuery({
+    queryKey: ['player', playerId, leagueId],
     queryFn: async () => {
-      if (!playerId) return null;
+      if (!playerId || !leagueId) return null;
 
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', playerId)
-        .single();
+      const [profileResponse, statsResponse] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', playerId)
+          .single(),
+        supabase
+          .from('player_statistics')
+          .select('*')
+          .eq('player_id', playerId)
+          .eq('league_id', leagueId)
+          .single()
+      ]);
 
-      if (error) throw error;
+      if (profileResponse.error) throw profileResponse.error;
+      if (statsResponse.error && !statsResponse.error.message.includes('No rows found')) {
+        throw statsResponse.error;
+      }
+
+      const stats = statsResponse.data || {
+        rank: 0,
+        wins: 0,
+        losses: 0,
+        points: 0
+      };
+
       return {
-        ...profile,
-        name: playerName || profile.username,
+        ...profileResponse.data,
+        name: playerName || profileResponse.data.username,
+        rank: stats.rank,
+        wins: stats.wins,
+        losses: stats.losses,
+        points: stats.points,
+        achievements: stats.points > 100 ? [{ title: "High Scorer", icon: Award }] : [],
         leagueId
       };
     },
-    enabled: !!playerId
+    enabled: !!playerId && !!leagueId
   });
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!player) {
+  if (!playerData) {
     return (
       <Alert variant="destructive">
         <AlertDescription>
@@ -47,12 +72,25 @@ const PlayerChallenge = () => {
     );
   }
 
+  const locations = [
+    { id: "1", name: "Local Court", distance: "2 miles" },
+    { id: "2", name: "Sports Center", distance: "5 miles" },
+    { id: "3", name: "City Stadium", distance: "8 miles" }
+  ];
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <Card className="p-6">
-        <PlayerProfile player={player} />
-        <LocationSelector player={player} />
-        <WeeklySchedule player={player} />
+        <PlayerProfile player={playerData} />
+        <LocationSelector 
+          locations={locations}
+          selectedLocation={locations[0].id}
+          onLocationSelect={(id) => console.log("Selected location:", id)}
+        />
+        <WeeklySchedule 
+          availabilitySchedule={playerData.availability_schedule}
+          onScheduleChange={(schedule) => console.log("Schedule updated:", schedule)}
+        />
       </Card>
     </div>
   );
