@@ -7,13 +7,15 @@ import { LocationSelector } from "@/components/player-challenge/LocationSelector
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trophy, Award } from "lucide-react";
-import { Json } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface AvailabilitySchedule {
   selectedSlots: string[];
 }
 
-const isAvailabilitySchedule = (json: Json | null): json is { selectedSlots: string[] } => {
+const isAvailabilitySchedule = (json: any): json is { selectedSlots: string[] } => {
   if (!json || typeof json !== 'object') return false;
   return Array.isArray((json as { selectedSlots?: unknown }).selectedSlots);
 };
@@ -22,6 +24,9 @@ const PlayerChallenge = () => {
   const { playerId } = useParams();
   const location = useLocation();
   const { playerName, leagueId, fromTournament } = location.state || {};
+  const { toast } = useToast();
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
 
   const { data: playerData, isLoading } = useQuery({
     queryKey: ['player', playerId, leagueId],
@@ -82,47 +87,67 @@ const PlayerChallenge = () => {
     );
   }
 
-  // Initialize default time slots
   const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
     day: dayIndex,
     slots: Array.from({ length: 12 }, (_, timeIndex) => ({
       time: timeIndex + 8, // Start from 8 AM
-      available: true,
+      available: isAvailabilitySchedule(playerData.availability_schedule) && 
+                playerData.availability_schedule.selectedSlots.includes(`${dayIndex}-${timeIndex + 8}`),
     })),
   }));
 
-  const selectedTimeSlots = isAvailabilitySchedule(playerData.availability_schedule) 
-    ? playerData.availability_schedule.selectedSlots 
-    : [];
-
-  const handleScheduleChange = async (slots: string[]) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          availability_schedule: { selectedSlots: slots }
-        })
-        .eq('id', playerData.id);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error updating availability schedule:', error);
-    }
+  const handleScheduleChange = (slots: string[]) => {
+    setSelectedTimeSlot(slots);
   };
 
-  const handleSelectAllDay = async (day: number) => {
-    const daySlots = availableTimeSlots[day].slots.map(slot => `${day}-${slot.time}`);
-    const currentSelected = new Set(selectedTimeSlots);
-    const isDayFullySelected = daySlots.every(slot => currentSelected.has(slot));
+  const handleSelectAllDay = (day: number) => {
+    const daySlots = availableTimeSlots[day].slots
+      .filter(slot => slot.available)
+      .map(slot => `${day}-${slot.time}`);
     
-    let newSelectedSlots;
-    if (isDayFullySelected) {
-      newSelectedSlots = selectedTimeSlots.filter(slot => !daySlots.includes(slot));
-    } else {
-      newSelectedSlots = [...new Set([...selectedTimeSlots, ...daySlots])];
+    if (daySlots.length === 0) return;
+    
+    // In single select mode, just select the first available slot of the day
+    setSelectedTimeSlot([daySlots[0]]);
+  };
+
+  const handleLocationSelect = (locationId: string) => {
+    setSelectedLocation(locationId);
+  };
+
+  const handleChallenge = async () => {
+    if (selectedTimeSlot.length === 0) {
+      toast({
+        title: "Select Time Slot",
+        description: "Please select a time slot for the challenge.",
+        variant: "destructive",
+      });
+      return;
     }
-    
-    await handleScheduleChange(newSelectedSlots);
+
+    if (!selectedLocation) {
+      toast({
+        title: "Select Location",
+        description: "Please select a location for the challenge.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Here you would typically send the challenge request to your backend
+      // For now, we'll just show a success message
+      toast({
+        title: "Challenge Sent!",
+        description: `Challenge request sent to ${playerData.name}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const locations = [
@@ -137,16 +162,24 @@ const PlayerChallenge = () => {
         <PlayerProfile player={playerData} />
         <LocationSelector 
           locations={locations}
-          selectedLocation={locations[0].id}
-          onLocationSelect={(id) => console.log("Selected location:", id)}
+          selectedLocation={selectedLocation}
+          onLocationSelect={handleLocationSelect}
         />
         <WeeklySchedule 
           availableTimeSlots={availableTimeSlots}
-          selectedTimeSlots={selectedTimeSlots}
+          selectedTimeSlots={selectedTimeSlot}
           onTimeSlotSelect={handleScheduleChange}
           onSelectAllDay={handleSelectAllDay}
           singleSelect={true}
         />
+        <div className="mt-6">
+          <Button 
+            className="w-full"
+            onClick={handleChallenge}
+          >
+            Send Challenge Request
+          </Button>
+        </div>
       </Card>
     </div>
   );
