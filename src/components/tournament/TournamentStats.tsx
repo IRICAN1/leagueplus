@@ -3,18 +3,37 @@ import { Trophy, Users, Medal } from "lucide-react";
 import { PlayerRankingsTable } from "./PlayerRankingsTable";
 import { Tables } from "@/integrations/supabase/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type PlayerStatWithProfile = Tables<"player_statistics", never> & {
   profiles: Pick<Tables<"profiles", never>, "username">;
 };
 
 interface TournamentStatsProps {
-  playerStats: PlayerStatWithProfile[] | null;
-  isLoading: boolean;
   leagueId: string;
 }
 
-export const TournamentStats = ({ playerStats, isLoading, leagueId }: TournamentStatsProps) => {
+export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
+  const { data: playerStats, isLoading } = useQuery({
+    queryKey: ['player-statistics', leagueId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('player_statistics')
+        .select(`
+          *,
+          profiles (username)
+        `)
+        .eq('league_id', leagueId)
+        .order('rank', { ascending: true });
+
+      if (error) throw error;
+      return data as PlayerStatWithProfile[];
+    },
+    // Add refetch interval to keep data fresh
+    refetchInterval: 5000,
+  });
+
   if (!playerStats && !isLoading) {
     return (
       <Card className="mt-6 bg-gradient-to-br from-gray-50 to-white/80 shadow-lg">

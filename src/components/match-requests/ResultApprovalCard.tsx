@@ -23,11 +23,17 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
 
       if (error) throw error;
 
-      // Invalidate and refetch relevant queries
+      // Invalidate and refetch ALL relevant queries
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['match-challenges'] }),
         queryClient.invalidateQueries({ queryKey: ['player-statistics'] }),
-        queryClient.invalidateQueries({ queryKey: ['league-rankings'] })
+        queryClient.invalidateQueries({ queryKey: ['league-rankings'] }),
+        queryClient.invalidateQueries({ queryKey: ['match-history'] }),
+        // Force refetch with exact match for the specific league
+        queryClient.invalidateQueries({ 
+          queryKey: ['player-statistics', challenge.league_id],
+          exact: true 
+        })
       ]);
 
       toast({
