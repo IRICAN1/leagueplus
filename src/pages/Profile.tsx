@@ -58,6 +58,18 @@ const Profile = () => {
       if (error) throw error;
 
       setProfile(profile);
+      
+      // Safely handle the availability_schedule conversion
+      let availabilitySchedule = { selectedSlots: [] as string[] };
+      if (profile.availability_schedule && 
+          typeof profile.availability_schedule === 'object' && 
+          !Array.isArray(profile.availability_schedule) && 
+          'selectedSlots' in profile.availability_schedule) {
+        availabilitySchedule = {
+          selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || []
+        };
+      }
+
       setFormData({
         fullName: profile.full_name || "",
         email: session.user.email || "",
@@ -65,9 +77,7 @@ const Profile = () => {
         preferredRegions: profile.preferred_regions || [],
         maxTravelDistance: profile.max_travel_distance || 0,
         favoriteVenues: profile.favorite_venues || [],
-        availabilitySchedule: profile.availability_schedule && typeof profile.availability_schedule === 'object' ? 
-          { selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || [] } : 
-          { selectedSlots: [] },
+        availabilitySchedule,
         weekdayPreference: profile.weekday_preference || "both",
       });
     } catch (error: any) {
@@ -152,6 +162,18 @@ const Profile = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setAvatarFile(null);
+    
+    // Safely handle the availability_schedule conversion for cancel
+    let availabilitySchedule = { selectedSlots: [] as string[] };
+    if (profile?.availability_schedule && 
+        typeof profile.availability_schedule === 'object' && 
+        !Array.isArray(profile.availability_schedule) && 
+        'selectedSlots' in profile.availability_schedule) {
+      availabilitySchedule = {
+        selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || []
+      };
+    }
+
     setFormData({
       ...defaultFormData,
       fullName: profile?.full_name || "",
@@ -160,9 +182,7 @@ const Profile = () => {
       preferredRegions: profile?.preferred_regions || [],
       maxTravelDistance: profile?.max_travel_distance || 0,
       favoriteVenues: profile?.favorite_venues || [],
-      availabilitySchedule: profile?.availability_schedule && typeof profile.availability_schedule === 'object' ? 
-        { selectedSlots: (profile.availability_schedule as AvailabilitySchedule).selectedSlots || [] } : 
-        { selectedSlots: [] },
+      availabilitySchedule,
       weekdayPreference: profile?.weekday_preference || "both",
     });
   };
