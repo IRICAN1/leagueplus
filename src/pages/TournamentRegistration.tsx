@@ -51,8 +51,8 @@ const TournamentRegistration = () => {
     })),
   };
 
-  const handleTimeSlotSelect = (slotId: string) => {
-    setSelectedTimeSlots(slotId ? [slotId] : []);
+  const handleTimeSlotSelect = (newSelectedTimeSlots: string[]) => {
+    setSelectedTimeSlots(newSelectedTimeSlots);
   };
 
   const handleSelectAllDay = (day: number) => {
@@ -171,9 +171,9 @@ const TournamentRegistration = () => {
 
               <WeeklySchedule
                 availableTimeSlots={availability.availableTimeSlots}
-                selectedTimeSlot={selectedTimeSlots[0]}
+                selectedTimeSlots={selectedTimeSlots}
                 onTimeSlotSelect={handleTimeSlotSelect}
-                multiSelect={false}
+                onSelectAllDay={handleSelectAllDay}
               />
 
               <RegistrationButton onClick={handleSubmit} />

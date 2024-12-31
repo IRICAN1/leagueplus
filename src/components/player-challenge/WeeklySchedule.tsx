@@ -2,7 +2,6 @@ import { Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DayHeader } from "./DayHeader";
 import { TimeSlot } from "./TimeSlot";
-import { format } from "date-fns";
 
 interface WeeklyScheduleProps {
   availableTimeSlots: Array<{
@@ -12,52 +11,40 @@ interface WeeklyScheduleProps {
       available: boolean;
     }>;
   }>;
-  selectedTimeSlot?: string | null;
-  selectedTimeSlots?: string[];
-  onTimeSlotSelect: ((slotId: string) => void) | ((slots: string[]) => void);
-  onSelectAllDay?: (day: number) => void;
-  playerAvailability?: string[];
-  multiSelect?: boolean;
+  selectedTimeSlots: string[];
+  onTimeSlotSelect: (value: string[]) => void;
+  onSelectAllDay: (day: number) => void;
+  singleSelect?: boolean;
 }
 
 export const WeeklySchedule = ({
   availableTimeSlots,
-  selectedTimeSlot,
-  selectedTimeSlots = [],
+  selectedTimeSlots,
   onTimeSlotSelect,
   onSelectAllDay,
-  playerAvailability = [],
-  multiSelect = false
+  singleSelect = false,
 }: WeeklyScheduleProps) => {
-  const isPastDate = (day: number, time: number) => {
-    const now = new Date();
-    const slotDate = new Date();
-    slotDate.setDate(slotDate.getDate() + (day - now.getDay()));
-    slotDate.setHours(time, 0, 0, 0);
-    return slotDate < now;
+  const isDayFullySelected = (day: number) => {
+    return availableTimeSlots[day].slots.every((slot) => {
+      const slotId = `${day}-${slot.time}`;
+      return selectedTimeSlots.includes(slotId);
+    });
   };
 
   const handleTimeSlotClick = (slotId: string) => {
-    if (multiSelect) {
-      const updatedSlots = selectedTimeSlots.includes(slotId)
-        ? selectedTimeSlots.filter(slot => slot !== slotId)
-        : [...selectedTimeSlots, slotId];
-      (onTimeSlotSelect as (slots: string[]) => void)(updatedSlots);
+    let newSelectedTimeSlots: string[];
+    
+    if (singleSelect) {
+      // In single select mode, only keep the new selection
+      newSelectedTimeSlots = [slotId];
     } else {
-      if (selectedTimeSlot === slotId) {
-        (onTimeSlotSelect as (slotId: string) => void)(null as any);
-      } else {
-        (onTimeSlotSelect as (slotId: string) => void)(slotId);
-      }
+      // In multi-select mode, toggle the selection
+      newSelectedTimeSlots = selectedTimeSlots.includes(slotId)
+        ? selectedTimeSlots.filter(id => id !== slotId)
+        : [...selectedTimeSlots, slotId];
     }
-  };
-
-  const getSlotDateTime = (day: number, time: number) => {
-    const now = new Date();
-    const slotDate = new Date();
-    slotDate.setDate(slotDate.getDate() + (day - now.getDay()));
-    slotDate.setHours(time, 0, 0, 0);
-    return slotDate;
+    
+    onTimeSlotSelect(newSelectedTimeSlots);
   };
 
   return (
@@ -74,25 +61,20 @@ export const WeeklySchedule = ({
             <div key={day.day} className="space-y-0.5">
               <DayHeader
                 day={day.day}
-                isFullySelected={false}
-                onSelectAll={onSelectAllDay ? () => onSelectAllDay(day.day) : undefined}
+                isFullySelected={isDayFullySelected(day.day)}
+                onSelectAll={() => onSelectAllDay(day.day)}
               />
               <div className="space-y-0.5">
                 {day.slots.map((slot) => {
                   const slotId = `${day.day}-${slot.time}`;
-                  const isSelected = multiSelect 
-                    ? selectedTimeSlots.includes(slotId)
-                    : selectedTimeSlot === slotId;
-                  const isPast = isPastDate(day.day, slot.time);
-                  const isAvailable = slot.available && playerAvailability.includes(slotId);
+                  const isSelected = selectedTimeSlots.includes(slotId);
 
                   return (
                     <TimeSlot
                       key={slotId}
                       time={slot.time}
                       isSelected={isSelected}
-                      isAvailable={isAvailable}
-                      isPast={isPast}
+                      isAvailable={slot.available}
                       onClick={() => handleTimeSlotClick(slotId)}
                     />
                   );
@@ -101,21 +83,6 @@ export const WeeklySchedule = ({
             </div>
           ))}
         </div>
-        {!multiSelect && selectedTimeSlot && (
-          <div className="mt-4 p-3 bg-green-50 rounded-md border border-green-200">
-            <h4 className="text-sm font-medium text-green-800">Selected Time:</h4>
-            {(() => {
-              const [day, time] = selectedTimeSlot.split('-').map(Number);
-              const dateTime = getSlotDateTime(day, Number(time));
-              return (
-                <div className="text-sm text-green-700">
-                  <p>Date: {format(dateTime, 'EEEE, MMMM d, yyyy')}</p>
-                  <p>Time: {format(dateTime, 'h:mm a')} - {format(new Date(dateTime.getTime() + 3600000), 'h:mm a')}</p>
-                </div>
-              );
-            })()}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
