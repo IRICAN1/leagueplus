@@ -13,6 +13,11 @@ interface AvailabilitySchedule {
   selectedSlots: string[];
 }
 
+const isAvailabilitySchedule = (json: Json): json is AvailabilitySchedule => {
+  if (typeof json !== 'object' || !json) return false;
+  return Array.isArray((json as AvailabilitySchedule).selectedSlots);
+};
+
 const PlayerChallenge = () => {
   const { playerId } = useParams();
   const location = useLocation();
@@ -86,9 +91,11 @@ const PlayerChallenge = () => {
     })),
   }));
 
-  // Parse the availability_schedule JSON and extract selectedSlots
-  const availabilitySchedule = playerData.availability_schedule as AvailabilitySchedule;
-  const selectedTimeSlots = availabilitySchedule?.selectedSlots || [];
+  // Safely parse and validate the availability_schedule
+  const availabilitySchedule = isAvailabilitySchedule(playerData.availability_schedule) 
+    ? playerData.availability_schedule 
+    : { selectedSlots: [] };
+  const selectedTimeSlots = availabilitySchedule.selectedSlots;
 
   const handleScheduleChange = (schedule: any) => {
     console.log("Schedule updated:", schedule);
