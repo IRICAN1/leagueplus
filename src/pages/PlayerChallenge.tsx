@@ -7,6 +7,11 @@ import { LocationSelector } from "@/components/player-challenge/LocationSelector
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trophy, Award } from "lucide-react";
+import { Json } from "@/integrations/supabase/types";
+
+interface AvailabilitySchedule {
+  selectedSlots: string[];
+}
 
 const PlayerChallenge = () => {
   const { playerId } = useParams();
@@ -81,7 +86,9 @@ const PlayerChallenge = () => {
     })),
   }));
 
-  const selectedTimeSlots = playerData.availability_schedule?.selectedSlots || [];
+  // Parse the availability_schedule JSON and extract selectedSlots
+  const availabilitySchedule = playerData.availability_schedule as AvailabilitySchedule;
+  const selectedTimeSlots = availabilitySchedule?.selectedSlots || [];
 
   const handleScheduleChange = (schedule: any) => {
     console.log("Schedule updated:", schedule);
