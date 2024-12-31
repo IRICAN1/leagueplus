@@ -20,15 +20,27 @@ interface ResultSubmissionDialogProps {
 export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [winnerScore, setWinnerScore] = useState("");
-  const [loserScore, setLoserScore] = useState("");
+  const [winnerScore1, setWinnerScore1] = useState("");
+  const [loserScore1, setLoserScore1] = useState("");
+  const [winnerScore2, setWinnerScore2] = useState("");
+  const [loserScore2, setLoserScore2] = useState("");
   const [winnerId, setWinnerId] = useState<string>("");
 
   const handleResultSubmit = async () => {
-    if (!winnerScore || !loserScore || !winnerId) {
+    if (!winnerScore1 || !loserScore1 || !winnerScore2 || !loserScore2 || !winnerId) {
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please fill in all scores and select a winner",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate tennis scores
+    if (!isValidTennisScore(winnerScore1, loserScore1) || !isValidTennisScore(winnerScore2, loserScore2)) {
+      toast({
+        title: "Invalid Score",
+        description: "Please enter valid tennis scores (0-7)",
         variant: "destructive",
       });
       return;
@@ -36,6 +48,9 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
 
     setIsSubmitting(true);
     try {
+      const winnerScore = `${winnerScore1}-${winnerScore2}`;
+      const loserScore = `${loserScore1}-${loserScore2}`;
+
       const { error } = await supabase
         .from('match_challenges')
         .update({
@@ -62,6 +77,19 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const isValidTennisScore = (score1: string, score2: string) => {
+    const s1 = parseInt(score1);
+    const s2 = parseInt(score2);
+    
+    if (isNaN(s1) || isNaN(s2)) return false;
+    if (s1 < 0 || s1 > 7 || s2 < 0 || s2 > 7) return false;
+    if (s1 === 7 && s2 > 5) return false;
+    if (s2 === 7 && s1 > 5) return false;
+    if (s1 < 6 && s2 < 6 && Math.abs(s1 - s2) >= 2) return false;
+    
+    return true;
   };
 
   return (
@@ -92,22 +120,49 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
             </div>
           </RadioGroup>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Winner Score</Label>
-              <Input
-                placeholder="6"
-                value={winnerScore}
-                onChange={(e) => setWinnerScore(e.target.value)}
-              />
+          <div className="space-y-4">
+            <Label>First Set</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Winner Score</Label>
+                <Input
+                  placeholder="6"
+                  value={winnerScore1}
+                  onChange={(e) => setWinnerScore1(e.target.value)}
+                  maxLength={1}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Loser Score</Label>
+                <Input
+                  placeholder="4"
+                  value={loserScore1}
+                  onChange={(e) => setLoserScore1(e.target.value)}
+                  maxLength={1}
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Loser Score</Label>
-              <Input
-                placeholder="4"
-                value={loserScore}
-                onChange={(e) => setLoserScore(e.target.value)}
-              />
+
+            <Label>Second Set</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Winner Score</Label>
+                <Input
+                  placeholder="6"
+                  value={winnerScore2}
+                  onChange={(e) => setWinnerScore2(e.target.value)}
+                  maxLength={1}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Loser Score</Label>
+                <Input
+                  placeholder="3"
+                  value={loserScore2}
+                  onChange={(e) => setLoserScore2(e.target.value)}
+                  maxLength={1}
+                />
+              </div>
             </div>
           </div>
 

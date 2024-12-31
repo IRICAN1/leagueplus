@@ -36,6 +36,10 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
     }
   };
 
+  const formatScore = (score: string) => {
+    return score.replace('-', ' - ');
+  };
+
   if (challenge.result_status === 'pending' && challenge.winner_id) {
     // Show approval UI for the opponent
     if (currentUserId !== challenge.winner_id) {
@@ -43,7 +47,7 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
         <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
           <p className="text-sm font-medium mb-2">Match Result Pending Approval</p>
           <p className="text-sm mb-3">
-            Score: {challenge.winner_score} - {challenge.loser_score}
+            Score: {formatScore(challenge.winner_score)} | {formatScore(challenge.loser_score)}
             <br />
             Winner: {challenge.winner_id === challenge.challenger_id 
               ? challenge.challenger.username 
@@ -72,6 +76,9 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
     return (
       <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
         <p className="text-sm">Waiting for opponent to approve the result</p>
+        <p className="text-sm mt-2">
+          Submitted Score: {formatScore(challenge.winner_score)} | {formatScore(challenge.loser_score)}
+        </p>
       </div>
     );
   }
