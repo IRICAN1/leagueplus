@@ -1,17 +1,58 @@
 import { useEffect, useState } from "react";
-import { Trophy } from "lucide-react";
+import { Trophy, BellDot } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { NavbarLinks } from "./navbar/NavbarLinks";
 import { NavbarAuth } from "./navbar/NavbarAuth";
+import { Badge } from "./ui/badge";
 
 export const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [pendingChallenges, setPendingChallenges] = useState<number>(0);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
+
+      if (session) {
+        // Fetch initial pending challenges
+        const { data: challenges } = await supabase
+          .from('match_challenges')
+          .select('*')
+          .eq('challenged_id', session.user.id)
+          .eq('status', 'pending');
+        
+        setPendingChallenges(challenges?.length || 0);
+
+        // Subscribe to real-time updates
+        const channel = supabase
+          .channel('schema-db-changes')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'match_challenges',
+              filter: `challenged_id=eq.${session.user.id}`
+            },
+            async () => {
+              // Refetch challenges count on any changes
+              const { data: updatedChallenges } = await supabase
+                .from('match_challenges')
+                .select('*')
+                .eq('challenged_id', session.user.id)
+                .eq('status', 'pending');
+              
+              setPendingChallenges(updatedChallenges?.length || 0);
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      }
     };
     checkAuth();
 
@@ -40,7 +81,23 @@ export const Navbar = () => {
           </div>
 
           {/* Right Section */}
-          <NavbarAuth isAuthenticated={isAuthenticated} />
+          <div className="flex items-center space-x-4">
+            {isAuthenticated && pendingChallenges > 0 && (
+              <Link 
+                to="/match-requests" 
+                className="relative inline-flex items-center"
+              >
+                <BellDot className="h-6 w-6 text-red-500" />
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {pendingChallenges}
+                </Badge>
+              </Link>
+            )}
+            <NavbarAuth isAuthenticated={isAuthenticated} />
+          </div>
         </div>
       </div>
     </nav>
