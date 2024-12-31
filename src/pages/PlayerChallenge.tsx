@@ -72,6 +72,21 @@ const PlayerChallenge = () => {
     );
   }
 
+  // Initialize default time slots
+  const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
+    day: dayIndex,
+    slots: Array.from({ length: 12 }, (_, timeIndex) => ({
+      time: timeIndex + 8, // Start from 8 AM
+      available: true,
+    })),
+  }));
+
+  const selectedTimeSlots = playerData.availability_schedule?.selectedSlots || [];
+
+  const handleScheduleChange = (schedule: any) => {
+    console.log("Schedule updated:", schedule);
+  };
+
   const locations = [
     { id: "1", name: "Local Court", distance: "2 miles" },
     { id: "2", name: "Sports Center", distance: "5 miles" },
@@ -88,8 +103,12 @@ const PlayerChallenge = () => {
           onLocationSelect={(id) => console.log("Selected location:", id)}
         />
         <WeeklySchedule 
-          availabilitySchedule={playerData.availability_schedule}
-          onScheduleChange={(schedule) => console.log("Schedule updated:", schedule)}
+          availableTimeSlots={availableTimeSlots}
+          selectedTimeSlots={selectedTimeSlots}
+          onTimeSlotSelect={handleScheduleChange}
+          onSelectAllDay={(day) => {
+            console.log("Select all for day:", day);
+          }}
         />
       </Card>
     </div>
