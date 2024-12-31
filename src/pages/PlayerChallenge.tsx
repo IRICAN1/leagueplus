@@ -20,11 +20,15 @@ const PlayerChallenge = () => {
   const [myAvailability, setMyAvailability] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [playerData, setPlayerData] = useState<PlayerData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAvailabilities = async () => {
       try {
-        if (!playerId) return;
+        if (!playerId) {
+          setError("No player ID provided");
+          return;
+        }
 
         // Fetch challenged player's profile and availability
         const { data: playerProfile, error: playerError } = await supabase
@@ -34,7 +38,9 @@ const PlayerChallenge = () => {
           .maybeSingle();
 
         if (playerError) throw playerError;
+        
         if (!playerProfile) {
+          setError("Player not found");
           toast({
             title: "Player not found",
             description: "The requested player profile could not be found.",
@@ -59,7 +65,10 @@ const PlayerChallenge = () => {
 
         // Fetch current user's availability
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) return;
+        if (!session?.user) {
+          setError("Please log in to challenge players");
+          return;
+        }
 
         const { data: myProfile, error: myError } = await supabase
           .from('profiles')
@@ -87,6 +96,7 @@ const PlayerChallenge = () => {
           description: error.message,
           variant: "destructive",
         });
+        setError(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -113,52 +123,26 @@ const PlayerChallenge = () => {
     });
   });
 
-  const handleChallenge = () => {
-    if (selectedTimeSlots.length === 0 || !selectedLocation) {
-      toast({
-        title: "Please select both time and location",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Verify if selected slots are available for both players
-    const invalidSlots = selectedTimeSlots.filter(slot => 
-      !playerAvailability.includes(slot) || !myAvailability.includes(slot)
-    );
-
-    if (invalidSlots.length > 0) {
-      toast({
-        title: "Invalid time slots selected",
-        description: "Please select time slots that are available for both players",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Challenge sent!",
-      description: "Your challenge request has been sent successfully.",
-    });
-
-    setTimeout(() => navigate("/tournament/1"), 2000);
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
         <div className="container max-w-6xl mx-auto px-4">
-          Loading...
+          <div className="flex items-center justify-center min-h-[200px]">
+            Loading...
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!playerData) {
+  if (error || !playerData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
         <div className="container max-w-6xl mx-auto px-4">
-          Player not found
+          <div className="flex flex-col items-center justify-center min-h-[200px] space-y-4">
+            <p className="text-lg text-red-600">{error || "Player not found"}</p>
+            <Button onClick={() => navigate(-1)}>Go Back</Button>
+          </div>
         </div>
       </div>
     );
@@ -178,14 +162,27 @@ const PlayerChallenge = () => {
           />
 
           <LocationSelector
-            locations={transformLocationsToSelectableLocations(playerData.preferred_regions)}
+            locations={transformLocationsToSelectableLocations(playerData.preferred_regions || [])}
             selectedLocation={selectedLocation}
             onLocationSelect={setSelectedLocation}
           />
 
           <div className="md:col-span-2 flex justify-center animate-fade-in">
             <Button
-              onClick={handleChallenge}
+              onClick={() => {
+                if (selectedTimeSlots.length === 0 || !selectedLocation) {
+                  toast({
+                    title: "Please select both time and location",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                toast({
+                  title: "Challenge sent!",
+                  description: "Your challenge request has been sent successfully.",
+                });
+                setTimeout(() => navigate("/tournament/1"), 2000);
+              }}
               className="group relative w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 px-8"
               size="lg"
             >
