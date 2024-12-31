@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ResultApprovalCardProps {
   challenge: any;
@@ -9,6 +10,7 @@ interface ResultApprovalCardProps {
 
 export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalCardProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleResultApproval = async (approved: boolean) => {
     try {
@@ -21,10 +23,17 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
 
       if (error) throw error;
 
+      // Invalidate and refetch relevant queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['match-challenges'] }),
+        queryClient.invalidateQueries({ queryKey: ['player-statistics'] }),
+        queryClient.invalidateQueries({ queryKey: ['league-rankings'] })
+      ]);
+
       toast({
         title: approved ? "Result approved" : "Result disputed",
         description: approved 
-          ? "The match result has been confirmed"
+          ? "The match result has been confirmed and rankings have been updated"
           : "The match result has been marked as disputed",
       });
     } catch (error: any) {

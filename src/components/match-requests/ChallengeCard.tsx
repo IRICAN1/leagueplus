@@ -51,24 +51,24 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     const loserSets = parseScore(challenge.loser_score);
 
     return (
-      <div className="mt-4">
-        <Table className="w-auto min-w-[200px] mx-auto bg-gradient-to-r from-gray-50 to-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
+      <div className="mt-6 px-4">
+        <Table className="w-full bg-gradient-to-r from-gray-50 via-white to-gray-50 rounded-xl overflow-hidden shadow-lg border border-gray-200">
           <TableHeader>
-            <TableRow className="bg-gray-50/50">
-              <TableHead className="w-[140px] font-semibold text-gray-700">Player</TableHead>
+            <TableRow className="bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-blue-50/50">
+              <TableHead className="w-[200px] font-semibold text-gray-700">Player</TableHead>
               {winnerSets.map((_, index) => (
-                <TableHead key={index} className="text-center w-16 font-semibold text-gray-700">
+                <TableHead key={index} className="text-center w-24 font-semibold text-gray-700">
                   Set {index + 1}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow className="hover:bg-blue-50/50 transition-colors">
+            <TableRow className="hover:bg-blue-50/30 transition-colors">
               <TableCell className="font-medium text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  {winnerName}
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500 shadow-sm shadow-green-200"></div>
+                  <span className="font-semibold text-green-700">{winnerName}</span>
                 </div>
               </TableCell>
               {winnerSets.map((score, index) => (
@@ -76,15 +76,17 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
                   key={index} 
                   className="text-center font-bold text-green-600 bg-green-50/50"
                 >
-                  {score}
+                  <div className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 shadow-sm">
+                    {score}
+                  </div>
                 </TableCell>
               ))}
             </TableRow>
-            <TableRow className="hover:bg-blue-50/50 transition-colors">
+            <TableRow className="hover:bg-blue-50/30 transition-colors">
               <TableCell className="font-medium text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  {loserName}
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-200"></div>
+                  <span className="font-semibold text-red-700">{loserName}</span>
                 </div>
               </TableCell>
               {loserSets.map((score, index) => (
@@ -92,7 +94,9 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
                   key={index} 
                   className="text-center font-bold text-red-600 bg-red-50/50"
                 >
-                  {score}
+                  <div className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-50 to-rose-50 shadow-sm">
+                    {score}
+                  </div>
                 </TableCell>
               ))}
             </TableRow>
