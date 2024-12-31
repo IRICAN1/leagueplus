@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +6,11 @@ import { Sword, Trophy, Award } from "lucide-react";
 import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
+import { supabase } from "@/integrations/supabase/client";
+
+interface AvailabilitySchedule {
+  selectedSlots: string[];
+}
 
 const PlayerChallenge = () => {
   const { playerId } = useParams();
@@ -13,43 +18,103 @@ const PlayerChallenge = () => {
   const { toast } = useToast();
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [playerAvailability, setPlayerAvailability] = useState<string[]>([]);
+  const [myAvailability, setMyAvailability] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock player data - in a real app, this would come from an API
-  const player = {
-    name: "John Doe",
-    rank: 1,
-    wins: 15,
-    losses: 3,
-    points: 1500,
-    preferredLocations: [
-      { id: "1", name: "Tennis Club Paris", distance: "2km" },
-      { id: "2", name: "Roland Garros", distance: "5km" },
-      { id: "3", name: "Tennis Academy", distance: "3km" },
-    ],
-    achievements: [
-      { title: "Tournament Winner", icon: Trophy },
-      { title: "Most Improved", icon: Award },
-    ],
-    availability: {
-      workingHours: {
-        start: 8,
-        end: 24,
-      },
-      disabledDays: [0, 6],
-      availableTimeSlots: Array.from({ length: 7 }, (_, dayIndex) => ({
-        day: dayIndex,
-        slots: Array.from({ length: 16 }, (_, hourIndex) => ({
-          time: 8 + hourIndex,
-          available: Math.random() > 0.3,
-        })),
-      })),
-    },
-  };
+  useEffect(() => {
+    const fetchAvailabilities = async () => {
+      try {
+        // Fetch challenged player's availability
+        const { data: playerProfile } = await supabase
+          .from('profiles')
+          .select('availability_schedule')
+          .eq('id', playerId)
+          .single();
+
+        // Fetch current user's availability
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        const { data: myProfile } = await supabase
+          .from('profiles')
+          .select('availability_schedule')
+          .eq('id', session.user.id)
+          .single();
+
+        // Safely handle the availability schedules
+        let playerSlots: string[] = [];
+        if (playerProfile?.availability_schedule && 
+            typeof playerProfile.availability_schedule === 'object' && 
+            !Array.isArray(playerProfile.availability_schedule)) {
+          const scheduleData = playerProfile.availability_schedule as Record<string, unknown>;
+          if ('selectedSlots' in scheduleData && Array.isArray(scheduleData.selectedSlots)) {
+            playerSlots = scheduleData.selectedSlots.map(slot => String(slot));
+          }
+        }
+
+        let mySlots: string[] = [];
+        if (myProfile?.availability_schedule && 
+            typeof myProfile.availability_schedule === 'object' && 
+            !Array.isArray(myProfile.availability_schedule)) {
+          const scheduleData = myProfile.availability_schedule as Record<string, unknown>;
+          if ('selectedSlots' in scheduleData && Array.isArray(scheduleData.selectedSlots)) {
+            mySlots = scheduleData.selectedSlots.map(slot => String(slot));
+          }
+        }
+
+        setPlayerAvailability(playerSlots);
+        setMyAvailability(mySlots);
+      } catch (error: any) {
+        toast({
+          title: "Error fetching availability",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAvailabilities();
+  }, [playerId, toast]);
+
+  // Initialize available time slots
+  const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
+    day: dayIndex,
+    slots: Array.from({ length: 12 }, (_, timeIndex) => ({
+      time: timeIndex + 8, // Start from 8 AM
+      available: true,
+      isMatchingSlot: false
+    })),
+  }));
+
+  // Update slots to show matching availability
+  availableTimeSlots.forEach(day => {
+    day.slots.forEach(slot => {
+      const slotId = `${day.day}-${slot.time}`;
+      slot.isMatchingSlot = playerAvailability.includes(slotId) && myAvailability.includes(slotId);
+    });
+  });
 
   const handleChallenge = () => {
     if (selectedTimeSlots.length === 0 || !selectedLocation) {
       toast({
         title: "Please select both time and location",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Verify if selected slots are available for both players
+    const invalidSlots = selectedTimeSlots.filter(slot => 
+      !playerAvailability.includes(slot) || !myAvailability.includes(slot)
+    );
+
+    if (invalidSlots.length > 0) {
+      toast({
+        title: "Invalid time slots selected",
+        description: "Please select time slots that are available for both players",
         variant: "destructive",
       });
       return;
@@ -64,19 +129,28 @@ const PlayerChallenge = () => {
   };
 
   const handleSelectAllDay = (day: number) => {
-    const daySlots = player.availability.availableTimeSlots[day].slots;
-    const dayTimeSlots = daySlots
-      .filter(slot => slot.available)
+    const daySlots = availableTimeSlots[day].slots
+      .filter(slot => slot.isMatchingSlot)
       .map(slot => `${day}-${slot.time}`);
     
-    const allSelected = dayTimeSlots.every(slot => selectedTimeSlots.includes(slot));
+    const allSelected = daySlots.every(slot => selectedTimeSlots.includes(slot));
     
     if (allSelected) {
-      setSelectedTimeSlots(prev => prev.filter(slot => !dayTimeSlots.includes(slot)));
+      setSelectedTimeSlots(prev => prev.filter(slot => !daySlots.includes(slot)));
     } else {
-      setSelectedTimeSlots(prev => [...new Set([...prev, ...dayTimeSlots])]);
+      setSelectedTimeSlots(prev => [...new Set([...prev, ...daySlots])]);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
+        <div className="container max-w-6xl mx-auto px-4">
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
@@ -85,7 +159,7 @@ const PlayerChallenge = () => {
           <PlayerProfile player={player} />
           
           <WeeklySchedule
-            availableTimeSlots={player.availability.availableTimeSlots}
+            availableTimeSlots={availableTimeSlots}
             selectedTimeSlots={selectedTimeSlots}
             onTimeSlotSelect={setSelectedTimeSlots}
             onSelectAllDay={handleSelectAllDay}

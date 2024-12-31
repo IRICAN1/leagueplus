@@ -9,6 +9,7 @@ interface WeeklyScheduleProps {
     slots: Array<{
       time: number;
       available: boolean;
+      isMatchingSlot: boolean;
     }>;
   }>;
   selectedTimeSlots: string[];
@@ -23,10 +24,12 @@ export const WeeklySchedule = ({
   onSelectAllDay,
 }: WeeklyScheduleProps) => {
   const isDayFullySelected = (day: number) => {
-    return availableTimeSlots[day].slots.every((slot) => {
-      const slotId = `${day}-${slot.time}`;
-      return selectedTimeSlots.includes(slotId);
-    });
+    return availableTimeSlots[day].slots
+      .filter(slot => slot.isMatchingSlot)
+      .every((slot) => {
+        const slotId = `${day}-${slot.time}`;
+        return selectedTimeSlots.includes(slotId);
+      });
   };
 
   const handleTimeSlotClick = (slotId: string) => {
@@ -63,6 +66,7 @@ export const WeeklySchedule = ({
                       key={slotId}
                       time={slot.time}
                       isSelected={isSelected}
+                      isMatchingSlot={slot.isMatchingSlot}
                       onClick={() => handleTimeSlotClick(slotId)}
                     />
                   );
