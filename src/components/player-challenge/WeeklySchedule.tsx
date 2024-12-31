@@ -14,7 +14,6 @@ interface WeeklyScheduleProps {
   selectedTimeSlots: string[];
   onTimeSlotSelect: (value: string[]) => void;
   onSelectAllDay: (day: number) => void;
-  singleSelect?: boolean;
 }
 
 export const WeeklySchedule = ({
@@ -22,7 +21,6 @@ export const WeeklySchedule = ({
   selectedTimeSlots,
   onTimeSlotSelect,
   onSelectAllDay,
-  singleSelect = false,
 }: WeeklyScheduleProps) => {
   const isDayFullySelected = (day: number) => {
     return availableTimeSlots[day].slots.every((slot) => {
@@ -32,18 +30,9 @@ export const WeeklySchedule = ({
   };
 
   const handleTimeSlotClick = (slotId: string) => {
-    let newSelectedTimeSlots: string[];
-    
-    if (singleSelect) {
-      // In single select mode, only keep the new selection
-      newSelectedTimeSlots = [slotId];
-    } else {
-      // In multi-select mode, toggle the selection
-      newSelectedTimeSlots = selectedTimeSlots.includes(slotId)
-        ? selectedTimeSlots.filter(id => id !== slotId)
-        : [...selectedTimeSlots, slotId];
-    }
-    
+    const newSelectedTimeSlots = selectedTimeSlots.includes(slotId)
+      ? selectedTimeSlots.filter(id => id !== slotId)
+      : [...selectedTimeSlots, slotId];
     onTimeSlotSelect(newSelectedTimeSlots);
   };
 
@@ -51,8 +40,8 @@ export const WeeklySchedule = ({
     <Card className="md:col-span-2 bg-white/80 shadow-lg animate-fade-in">
       <CardHeader className="pb-1">
         <CardTitle className="flex items-center gap-1 text-base">
-          <Clock className="h-4 w-4 text-green-500" />
-          Select Time Slot
+          <Clock className="h-4 w-4 text-blue-500" />
+          Select Time Slots
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -74,7 +63,6 @@ export const WeeklySchedule = ({
                       key={slotId}
                       time={slot.time}
                       isSelected={isSelected}
-                      isAvailable={slot.available}
                       onClick={() => handleTimeSlotClick(slotId)}
                     />
                   );

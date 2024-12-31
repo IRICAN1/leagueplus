@@ -145,7 +145,6 @@ const PlayerChallenge = () => {
           selectedTimeSlots={selectedTimeSlots}
           onTimeSlotSelect={handleScheduleChange}
           onSelectAllDay={handleSelectAllDay}
-          singleSelect={true}
         />
       </Card>
     </div>
