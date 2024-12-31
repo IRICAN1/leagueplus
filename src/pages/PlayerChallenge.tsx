@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Trophy, Award, Medal, Crown, Star, Flame } from "lucide-react";
 
 interface AvailabilitySchedule {
   selectedSlots: string[];
@@ -18,6 +19,24 @@ interface AvailabilitySchedule {
 const isAvailabilitySchedule = (json: any): json is { selectedSlots: string[] } => {
   if (!json || typeof json !== 'object') return false;
   return Array.isArray((json as { selectedSlots?: unknown }).selectedSlots);
+};
+
+const getPlayerAchievements = (rank: number, wins: number, points: number) => {
+  const achievements = [];
+  
+  // Top 3 achievements
+  if (rank === 1) achievements.push({ title: "Champion", icon: Crown });
+  if (rank === 2) achievements.push({ title: "Runner Up", icon: Medal });
+  if (rank === 3) achievements.push({ title: "Bronze", icon: Medal });
+  
+  // Win-based achievements
+  if (wins >= 10) achievements.push({ title: "Victory Master", icon: Trophy });
+  if (wins >= 5) achievements.push({ title: "Rising Star", icon: Star });
+  
+  // Points-based achievements
+  if (points >= 100) achievements.push({ title: "Point Leader", icon: Flame });
+  
+  return achievements;
 };
 
 const PlayerChallenge = () => {
@@ -91,6 +110,11 @@ const PlayerChallenge = () => {
       </Alert>
     );
   }
+
+  const playerDataWithAchievements = {
+    ...playerData,
+    achievements: getPlayerAchievements(playerData.rank, playerData.wins, playerData.points)
+  };
 
   const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
     day: dayIndex,
@@ -202,7 +226,7 @@ const PlayerChallenge = () => {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <Card className="p-6">
-        <PlayerProfile player={playerData} />
+        <PlayerProfile player={playerDataWithAchievements} />
         <LocationSelector 
           locations={locations}
           selectedLocation={selectedLocation}
