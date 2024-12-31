@@ -31,7 +31,7 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
               <SelectValue placeholder="Select location..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Locations</SelectItem>
+              <SelectItem value="all">All Locations</SelectItem>
               {locations.map((location) => (
                 <SelectItem key={location} value={location}>
                   {location}
