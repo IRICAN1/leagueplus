@@ -14,7 +14,6 @@ interface TournamentStatsProps {
 }
 
 export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps) => {
-  // Validate that we have valid player stats
   if (!playerStats && !isLoading) {
     return (
       <Card className="mt-6">
@@ -54,11 +53,15 @@ export const TournamentStats = ({ playerStats, isLoading }: TournamentStatsProps
   }
 
   return (
-    <Card className="mt-6">
-      <CardHeader className="border-b bg-muted/50">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Trophy className="h-5 w-5 text-yellow-500" />
-          Player Rankings
+    <Card className="mt-6 overflow-hidden bg-gradient-to-br from-white to-gray-50/80 shadow-xl">
+      <CardHeader className="bg-gradient-to-r from-purple-600/10 via-blue-500/10 to-purple-600/10 border-b border-blue-100">
+        <CardTitle className="flex items-center gap-3 text-lg font-bold">
+          <div className="p-2 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-md">
+            <Trophy className="h-5 w-5 animate-pulse-soft" />
+          </div>
+          <span className="bg-gradient-to-r from-purple-700 to-blue-600 bg-clip-text text-transparent">
+            Tournament Rankings
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
