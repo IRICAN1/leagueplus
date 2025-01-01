@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Search, MapPin } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -22,7 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -31,12 +30,16 @@ interface SearchHeaderProps {
   locations: string[];
 }
 
+interface League {
+  name: string;
+}
+
 export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps) => {
   const [radius, setRadius] = useState([20]);
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const { data: leagues = [] } = useQuery({
+  const { data: leagues = [], isLoading } = useQuery<League[]>({
     queryKey: ['leagues-search'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,7 +48,7 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
         .order('name');
       
       if (error) throw error;
-      return data || [];
+      return (data as League[]) || [];
     },
   });
 
