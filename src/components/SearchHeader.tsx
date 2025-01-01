@@ -48,7 +48,7 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
         .order('name');
       
       if (error) throw error;
-      return (data as League[]) || [];
+      return data || [];
     },
   });
 
