@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Search, MapPin, X } from "lucide-react";
-import { useState } from "react";
+import { Search, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -10,6 +10,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchHeaderProps {
   onLocationChange: (location: string) => void;
@@ -18,11 +33,71 @@ interface SearchHeaderProps {
 
 export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps) => {
   const [radius, setRadius] = useState([20]);
+  const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  const { data: leagues } = useQuery({
+    queryKey: ['leagues-search'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leagues')
+        .select('name')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const filteredLeagues = leagues?.filter(league => 
+    league.name.toLowerCase().includes(searchValue.toLowerCase())
+  ) || [];
 
   return (
-    <div className="w-full space-y-6 p-6 bg-gradient-to-r from-gray-50/90 via-blue-50/90 to-gray-50/90 backdrop-blur-lg rounded-lg shadow-lg border border-blue-200 animate-fade-in hover:shadow-xl transition-all duration-300">
-      <div className="flex gap-4">
+    <div className="w-full space-y-6 p-4 md:p-6 bg-gradient-to-r from-gray-50/90 via-blue-50/90 to-gray-50/90 backdrop-blur-lg rounded-lg shadow-lg border border-blue-200 animate-fade-in hover:shadow-xl transition-all duration-300">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full h-12 justify-start text-left font-normal bg-white/80"
+              >
+                <Search className="mr-2 h-5 w-5 shrink-0 text-blue-500" />
+                {searchValue ? searchValue : "Search leagues..."}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+                <CommandInput
+                  placeholder="Search leagues..."
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                  className="h-9"
+                />
+                <CommandEmpty>No league found.</CommandEmpty>
+                <CommandGroup className="max-h-60 overflow-auto">
+                  {filteredLeagues.map((league) => (
+                    <CommandItem
+                      key={league.name}
+                      value={league.name}
+                      onSelect={(currentValue) => {
+                        setSearchValue(currentValue);
+                        setOpen(false);
+                      }}
+                    >
+                      {league.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="relative md:w-1/3">
           <Select onValueChange={onLocationChange}>
             <SelectTrigger className="h-12 pl-10 text-lg border-blue-200 focus:border-blue-400 focus:ring-blue-400 bg-white/80 text-gray-700">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400">
@@ -40,10 +115,6 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
             </SelectContent>
           </Select>
         </div>
-        <Button className="h-12 px-8 text-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white transition-all duration-300 shadow-md hover:shadow-lg">
-          <Search className="h-5 w-5 mr-2" />
-          Search
-        </Button>
       </div>
       
       <div className="space-y-2">
