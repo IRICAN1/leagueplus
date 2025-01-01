@@ -13,10 +13,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, RotateCcw } from "lucide-react";
+import { Calendar as CalendarIcon, RotateCcw, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { LeagueFilters } from "@/pages/Index";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FilterBarProps {
   onFilterChange: (filters: Partial<LeagueFilters>) => void;
@@ -24,6 +26,9 @@ interface FilterBarProps {
 }
 
 export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isMobile = useIsMobile();
+
   const handleReset = () => {
     onFilterChange({
       sportType: undefined,
@@ -36,22 +41,38 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
     });
   };
 
+  const toggleExpanded = () => setIsExpanded(!isExpanded);
+
   return (
-    <div className="flex flex-wrap items-center gap-4 p-6 bg-gray-50/90 backdrop-blur-sm rounded-lg animate-slide-in shadow-md hover:shadow-lg transition-all duration-300 border border-blue-200">
-      <div className="flex-1 flex flex-wrap items-center gap-4">
-        <Select onValueChange={(value) => onFilterChange({ sportType: value === "all" ? undefined : value })}>
-          <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
-            <SelectValue placeholder="Sport" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Sports</SelectItem>
-            <SelectItem value="Tennis">Tennis</SelectItem>
-            <SelectItem value="Football">Football</SelectItem>
-            <SelectItem value="Basketball">Basketball</SelectItem>
-            <SelectItem value="Volleyball">Volleyball</SelectItem>
-            <SelectItem value="Badminton">Badminton</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="w-full animate-fade-in">
+      <Button
+        variant="outline"
+        onClick={toggleExpanded}
+        className="w-full md:hidden mb-2 flex items-center justify-between bg-white"
+      >
+        <div className="flex items-center">
+          <Filter className="h-4 w-4 mr-2" />
+          Filters
+        </div>
+        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </Button>
+
+      <div className={`${!isExpanded && isMobile ? 'hidden' : 'block'}`}>
+        <div className="flex flex-wrap items-center gap-4 p-4 md:p-6 bg-gray-50/90 backdrop-blur-sm rounded-lg animate-slide-in shadow-md hover:shadow-lg transition-all duration-300 border border-blue-200">
+          <div className="flex-1 flex flex-wrap items-center gap-4">
+            <Select onValueChange={(value) => onFilterChange({ sportType: value === "all" ? undefined : value })}>
+              <SelectTrigger className="w-full md:w-[180px] bg-white/90 text-gray-700 border-blue-100">
+                <SelectValue placeholder="Sport" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sports</SelectItem>
+                <SelectItem value="Tennis">Tennis</SelectItem>
+                <SelectItem value="Football">Football</SelectItem>
+                <SelectItem value="Basketball">Basketball</SelectItem>
+                <SelectItem value="Volleyball">Volleyball</SelectItem>
+                <SelectItem value="Badminton">Badminton</SelectItem>
+              </SelectContent>
+            </Select>
 
         <Select onValueChange={(value) => onFilterChange({ skillLevel: value === "all" ? undefined : value })}>
           <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
@@ -91,75 +112,77 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
           </SelectContent>
         </Select>
 
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="has-spots"
-            checked={filters.hasSpots}
-            onCheckedChange={(checked) => onFilterChange({ hasSpots: checked })}
-          />
-          <Label htmlFor="has-spots">Available Spots</Label>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[180px] justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {filters.startDate ? (
-                  format(filters.startDate, "PPP")
-                ) : (
-                  <span>Start Date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={filters.startDate}
-                onSelect={(date) => onFilterChange({ startDate: date })}
-                initialFocus
+            <div className="flex items-center space-x-2 w-full md:w-auto">
+              <Switch
+                id="has-spots"
+                checked={filters.hasSpots}
+                onCheckedChange={(checked) => onFilterChange({ hasSpots: checked })}
               />
-            </PopoverContent>
-          </Popover>
+              <Label htmlFor="has-spots">Available Spots</Label>
+            </div>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[180px] justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {filters.endDate ? (
-                  format(filters.endDate, "PPP")
-                ) : (
-                  <span>End Date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={filters.endDate}
-                onSelect={(date) => onFilterChange({ endDate: date })}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full md:w-[180px] justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.startDate ? (
+                      format(filters.startDate, "PPP")
+                    ) : (
+                      <span>Start Date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={filters.startDate}
+                    onSelect={(date) => onFilterChange({ startDate: date })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full md:w-[180px] justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.endDate ? (
+                      format(filters.endDate, "PPP")
+                    ) : (
+                      <span>End Date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={filters.endDate}
+                    onSelect={(date) => onFilterChange({ endDate: date })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-blue-50 text-blue-600 w-full md:w-auto"
+            title="Reset filters"
+            onClick={handleReset}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
         </div>
       </div>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="hover:bg-blue-50 text-blue-600"
-        title="Reset filters"
-        onClick={handleReset}
-      >
-        <RotateCcw className="h-4 w-4" />
-      </Button>
     </div>
   );
 };

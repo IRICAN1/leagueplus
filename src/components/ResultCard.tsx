@@ -37,9 +37,9 @@ export const ResultCard = ({
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-xl animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80">
-      <CardContent className="p-6 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
-        <div className="flex justify-between items-start gap-4">
-          <div className="space-y-2 flex-1">
+      <CardContent className="p-4 md:p-6 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <div className="space-y-2 flex-1 w-full">
             <div className="flex flex-wrap gap-2 mb-2">
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200">
                 {type}
@@ -62,7 +62,7 @@ export const ResultCard = ({
                 </Badge>
               )}
             </div>
-            <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+            <h3 className="text-lg md:text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
               {title}
             </h3>
             <p className="text-sm text-gray-600 flex items-center gap-2">
@@ -77,8 +77,8 @@ export const ResultCard = ({
               </p>
             )}
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex gap-2">
+          <div className="flex flex-col items-stretch md:items-end gap-2 w-full md:w-auto">
+            <div className="flex gap-2 w-full md:w-auto">
               <Button
                 variant="ghost"
                 size="icon"
@@ -89,14 +89,14 @@ export const ResultCard = ({
               <Button 
                 variant="default"
                 onClick={handleJoin}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                className="flex-1 md:flex-none bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 View Details
               </Button>
             </div>
             {distance > 0 && (
-              <Badge variant="outline" className="ml-auto bg-blue-50 border-blue-200 text-blue-600">
+              <Badge variant="outline" className="w-full md:w-auto text-center md:ml-auto bg-blue-50 border-blue-200 text-blue-600">
                 {distance} km
               </Badge>
             )}
