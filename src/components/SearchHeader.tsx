@@ -1,15 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { Search, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Command,
   CommandEmpty,
@@ -25,17 +16,16 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface League {
+  name: string;
+}
+
 interface SearchHeaderProps {
   onLocationChange: (location: string) => void;
   locations: string[];
 }
 
-interface League {
-  name: string;
-}
-
 export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps) => {
-  const [radius, setRadius] = useState([20]);
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
@@ -104,39 +94,6 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
             </PopoverContent>
           </Popover>
         </div>
-
-        <div className="relative md:w-1/3">
-          <Select onValueChange={onLocationChange}>
-            <SelectTrigger className="h-12 pl-10 text-lg border-blue-200 focus:border-blue-400 focus:ring-blue-400 bg-white/80 text-gray-700">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <SelectValue placeholder="Select location..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Locations</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location} value={location}>
-                  {location}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Radius</span>
-          <span>{radius[0]} km</span>
-        </div>
-        <Slider
-          value={radius}
-          onValueChange={setRadius}
-          max={100}
-          step={1}
-          className="py-4"
-        />
       </div>
     </div>
   );
