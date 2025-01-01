@@ -36,7 +36,7 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const { data: leagues } = useQuery({
+  const { data: leagues = [] } = useQuery({
     queryKey: ['leagues-search'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,13 +45,13 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
         .order('name');
       
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const filteredLeagues = leagues?.filter(league => 
+  const filteredLeagues = leagues.filter(league => 
     league.name.toLowerCase().includes(searchValue.toLowerCase())
-  ) || [];
+  );
 
   return (
     <div className="w-full space-y-6 p-4 md:p-6 bg-gradient-to-r from-gray-50/90 via-blue-50/90 to-gray-50/90 backdrop-blur-lg rounded-lg shadow-lg border border-blue-200 animate-fade-in hover:shadow-xl transition-all duration-300">
