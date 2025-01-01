@@ -2,6 +2,8 @@ import { Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DayHeader } from "./DayHeader";
 import { TimeSlot } from "./TimeSlot";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WeeklyScheduleProps {
   availableTimeSlots: Array<{
@@ -24,6 +26,8 @@ export const WeeklySchedule = ({
   onSelectAllDay,
   singleSelect = false,
 }: WeeklyScheduleProps) => {
+  const isMobile = useIsMobile();
+
   const isDayFullySelected = (day: number) => {
     return availableTimeSlots[day].slots.every((slot) => {
       const slotId = `${day}-${slot.time}`;
@@ -35,10 +39,8 @@ export const WeeklySchedule = ({
     let newSelectedTimeSlots: string[];
     
     if (singleSelect) {
-      // In single select mode, only keep the new selection
       newSelectedTimeSlots = [slotId];
     } else {
-      // In multi-select mode, toggle the selection
       newSelectedTimeSlots = selectedTimeSlots.includes(slotId)
         ? selectedTimeSlots.filter(id => id !== slotId)
         : [...selectedTimeSlots, slotId];
@@ -56,33 +58,38 @@ export const WeeklySchedule = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-7 gap-1">
-          {availableTimeSlots.map((day) => (
-            <div key={day.day} className="space-y-0.5">
-              <DayHeader
-                day={day.day}
-                isFullySelected={isDayFullySelected(day.day)}
-                onSelectAll={() => onSelectAllDay(day.day)}
-              />
-              <div className="space-y-0.5">
-                {day.slots.map((slot) => {
-                  const slotId = `${day.day}-${slot.time}`;
-                  const isSelected = selectedTimeSlots.includes(slotId);
+        <ScrollArea className="h-[calc(100vh-16rem)] pr-4">
+          <div className={cn(
+            "grid gap-1",
+            isMobile ? "grid-cols-1" : "grid-cols-7"
+          )}>
+            {availableTimeSlots.map((day) => (
+              <div key={day.day} className="space-y-0.5">
+                <DayHeader
+                  day={day.day}
+                  isFullySelected={isDayFullySelected(day.day)}
+                  onSelectAll={() => onSelectAllDay(day.day)}
+                />
+                <div className="space-y-0.5">
+                  {day.slots.map((slot) => {
+                    const slotId = `${day.day}-${slot.time}`;
+                    const isSelected = selectedTimeSlots.includes(slotId);
 
-                  return (
-                    <TimeSlot
-                      key={slotId}
-                      time={slot.time}
-                      isSelected={isSelected}
-                      isAvailable={slot.available}
-                      onClick={() => handleTimeSlotClick(slotId)}
-                    />
-                  );
-                })}
+                    return (
+                      <TimeSlot
+                        key={slotId}
+                        time={slot.time}
+                        isSelected={isSelected}
+                        isAvailable={slot.available}
+                        onClick={() => handleTimeSlotClick(slotId)}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

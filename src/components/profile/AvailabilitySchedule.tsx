@@ -19,8 +19,8 @@ export const AvailabilitySchedule = ({
 }: AvailabilityScheduleProps) => {
   const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
     day: dayIndex,
-    slots: Array.from({ length: 12 }, (_, timeIndex) => ({
-      time: timeIndex + 8, // Start from 8 AM
+    slots: Array.from({ length: 16 }, (_, timeIndex) => ({
+      time: timeIndex + 8, // Start from 8 AM to 12 AM (midnight)
       available: true,
     })),
   }));
@@ -52,7 +52,7 @@ export const AvailabilitySchedule = ({
     <div className="space-y-6">
       <div className="space-y-2">
         <Label>Weekly Schedule</Label>
-        <div className="bg-white rounded-lg p-4">
+        <div className="bg-white rounded-lg">
           <WeeklySchedule
             availableTimeSlots={availableTimeSlots}
             selectedTimeSlots={selectedTimeSlots}
