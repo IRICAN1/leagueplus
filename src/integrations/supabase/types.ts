@@ -446,6 +446,7 @@ export type Database = {
         | "Football"
         | "Volleyball"
         | "Badminton"
+        | "Padel"
       match_result: "win" | "loss" | "draw"
       result_approval_status: "pending" | "approved" | "disputed"
     }
