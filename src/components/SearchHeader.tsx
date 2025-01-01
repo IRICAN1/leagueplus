@@ -72,7 +72,7 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
                 {searchValue ? searchValue : "Search leagues..."}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
+            <PopoverContent className="w-full p-0" align="start">
               <Command>
                 <CommandInput
                   placeholder="Search leagues..."
@@ -82,18 +82,23 @@ export const SearchHeader = ({ onLocationChange, locations }: SearchHeaderProps)
                 />
                 <CommandEmpty>No league found.</CommandEmpty>
                 <CommandGroup className="max-h-60 overflow-auto">
-                  {filteredLeagues.map((league) => (
-                    <CommandItem
-                      key={league.name}
-                      value={league.name}
-                      onSelect={(currentValue) => {
-                        setSearchValue(currentValue);
-                        setOpen(false);
-                      }}
-                    >
-                      {league.name}
-                    </CommandItem>
-                  ))}
+                  {isLoading ? (
+                    <div className="p-4 text-sm text-gray-500">Loading leagues...</div>
+                  ) : (
+                    filteredLeagues.map((league) => (
+                      <CommandItem
+                        key={league.name}
+                        value={league.name}
+                        onSelect={(currentValue) => {
+                          setSearchValue(currentValue);
+                          setOpen(false);
+                        }}
+                        className="cursor-pointer hover:bg-blue-50"
+                      >
+                        {league.name}
+                      </CommandItem>
+                    ))
+                  )}
                 </CommandGroup>
               </Command>
             </PopoverContent>
