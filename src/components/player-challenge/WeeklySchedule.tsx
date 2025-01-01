@@ -4,6 +4,7 @@ import { DayHeader } from "./DayHeader";
 import { TimeSlot } from "./TimeSlot";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 interface WeeklyScheduleProps {
   availableTimeSlots: Array<{
