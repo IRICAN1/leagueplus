@@ -43,9 +43,7 @@ export const BasicInformation = ({ form }: BasicInformationProps) => {
               </FormControl>
               <SelectContent>
                 <SelectItem value="Tennis">Tennis</SelectItem>
-                <SelectItem value="Basketball">Basketball</SelectItem>
-                <SelectItem value="Football">Football</SelectItem>
-                <SelectItem value="Volleyball">Volleyball</SelectItem>
+                <SelectItem value="Padel">Padel</SelectItem>
                 <SelectItem value="Badminton">Badminton</SelectItem>
               </SelectContent>
             </Select>

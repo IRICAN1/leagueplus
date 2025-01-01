@@ -67,9 +67,7 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
               <SelectContent>
                 <SelectItem value="all">All Sports</SelectItem>
                 <SelectItem value="Tennis">Tennis</SelectItem>
-                <SelectItem value="Football">Football</SelectItem>
-                <SelectItem value="Basketball">Basketball</SelectItem>
-                <SelectItem value="Volleyball">Volleyball</SelectItem>
+                <SelectItem value="Padel">Padel</SelectItem>
                 <SelectItem value="Badminton">Badminton</SelectItem>
               </SelectContent>
             </Select>
@@ -170,6 +168,7 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
                 </PopoverContent>
               </Popover>
             </div>
+
           </div>
 
           <Button
