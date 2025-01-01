@@ -2,14 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { ProfilePicture } from "@/components/profile/ProfilePicture";
-import { ProfileForm } from "@/components/profile/ProfileForm";
-import { Edit } from "lucide-react";
-
-interface AvailabilitySchedule {
-  selectedSlots: string[];
-}
+import { ProfileLayout } from "@/components/profile/ProfileLayout";
 
 const defaultFormData = {
   fullName: "",
@@ -59,7 +52,6 @@ const Profile = () => {
 
       setProfile(profile);
       
-      // Safely handle the availability_schedule conversion
       let availabilitySchedule = { selectedSlots: [] as string[] };
       if (profile.availability_schedule && 
           typeof profile.availability_schedule === 'object' && 
@@ -164,31 +156,7 @@ const Profile = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setAvatarFile(null);
-    
-    // Safely handle the availability_schedule conversion for cancel
-    let availabilitySchedule = { selectedSlots: [] as string[] };
-    if (profile?.availability_schedule && 
-        typeof profile.availability_schedule === 'object' && 
-        !Array.isArray(profile.availability_schedule)) {
-      const scheduleData = profile.availability_schedule as Record<string, unknown>;
-      if ('selectedSlots' in scheduleData && Array.isArray(scheduleData.selectedSlots)) {
-        availabilitySchedule = {
-          selectedSlots: scheduleData.selectedSlots.map(slot => String(slot))
-        };
-      }
-    }
-
-    setFormData({
-      ...defaultFormData,
-      fullName: profile?.full_name || "",
-      email: profile?.email || "",
-      primaryLocation: profile?.primary_location || "",
-      preferredRegions: profile?.preferred_regions || [],
-      maxTravelDistance: profile?.max_travel_distance || 0,
-      favoriteVenues: profile?.favorite_venues || [],
-      availabilitySchedule,
-      weekdayPreference: profile?.weekday_preference || "both",
-    });
+    fetchProfile();
   };
 
   if (isLoading) {
@@ -202,38 +170,17 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-to-br from-purple-50 via-white to-purple-50">
-      <div className="container max-w-2xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Profile Settings</h1>
-          {!isEditing && (
-            <Button 
-              variant="outline" 
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          <ProfilePicture
-            currentUrl={profile?.avatar_url}
-            onImageChange={setAvatarFile}
-            isEditing={isEditing}
-          />
-          
-          <ProfileForm
-            isEditing={isEditing}
-            formData={formData}
-            onChange={(field, value) => setFormData(prev => ({ ...prev, [field]: value }))}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        </div>
-      </div>
-    </div>
+    <ProfileLayout
+      isEditing={isEditing}
+      setIsEditing={setIsEditing}
+      profile={profile}
+      formData={formData}
+      setFormData={setFormData}
+      avatarFile={avatarFile}
+      setAvatarFile={setAvatarFile}
+      onSave={handleSave}
+      onCancel={handleCancel}
+    />
   );
 };
 
