@@ -25,15 +25,23 @@ export type LeagueFilters = {
 const Index = () => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<LeagueFilters>({});
+  const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['leagues', page, filters],
+    queryKey: ['leagues', page, filters, selectedLeagueId],
     queryFn: async () => {
       let query = supabase
         .from('leagues')
         .select('*, league_participants(count)')
-        .order('created_at', { ascending: false })
-        .range((page - 1) * LEAGUES_PER_PAGE, page * LEAGUES_PER_PAGE - 1);
+        .order('created_at', { ascending: false });
+
+      // If a specific league is selected through search
+      if (selectedLeagueId) {
+        query = query.eq('id', selectedLeagueId);
+      } else {
+        // Apply pagination only when not searching for a specific league
+        query = query.range((page - 1) * LEAGUES_PER_PAGE, page * LEAGUES_PER_PAGE - 1);
+      }
 
       if (filters.location) {
         query = query.eq('location', filters.location);
@@ -82,29 +90,18 @@ const Index = () => {
     },
   });
 
-  const { data: locations } = useQuery({
-    queryKey: ['league-locations'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('leagues')
-        .select('location')
-        .order('location');
-
-      if (error) {
-        throw error;
-      }
-
-      const uniqueLocations = [...new Set(data.map(l => l.location))];
-      return uniqueLocations;
-    },
-  });
-
   if (error) {
     toast.error('Failed to load leagues');
   }
 
+  const handleSearch = (leagueId: string) => {
+    setSelectedLeagueId(leagueId);
+    setPage(1); // Reset to first page when searching
+  };
+
   const handleFilterChange = (newFilters: Partial<LeagueFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
+    setSelectedLeagueId(null); // Clear selected league when filters change
     setPage(1); // Reset to first page when filters change
   };
 
@@ -120,7 +117,7 @@ const Index = () => {
           </p>
         </div>
 
-        <SearchHeader onLocationChange={(location) => handleFilterChange({ location })} locations={locations || []} />
+        <SearchHeader onSearch={handleSearch} />
         <FilterBar 
           onFilterChange={handleFilterChange}
           filters={filters}
@@ -146,22 +143,24 @@ const Index = () => {
                   participants={league.max_participants}
                 />
               ))}
-              <div className="flex justify-center gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={data.length < LEAGUES_PER_PAGE}
-                >
-                  Next
-                </Button>
-              </div>
+              {!selectedLeagueId && (
+                <div className="flex justify-center gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={data.length < LEAGUES_PER_PAGE}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <div className="text-center py-8 text-gray-600">
