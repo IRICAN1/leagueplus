@@ -3,14 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
-import { LocationSelector } from "@/components/player-challenge/LocationSelector";
 import { ChallengeConfirmationDialog } from "@/components/player-challenge/ChallengeConfirmationDialog";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Trophy, Award, Medal, Crown, Star, Flame } from "lucide-react";
+import { Trophy, Award, Medal, Crown, Star, Flame, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface AvailabilitySchedule {
   selectedSlots: string[];
@@ -24,16 +24,11 @@ const isAvailabilitySchedule = (json: any): json is { selectedSlots: string[] } 
 const getPlayerAchievements = (rank: number, wins: number, points: number) => {
   const achievements = [];
   
-  // Top 3 achievements
   if (rank === 1) achievements.push({ title: "Champion", icon: Crown });
   if (rank === 2) achievements.push({ title: "Runner Up", icon: Medal });
   if (rank === 3) achievements.push({ title: "Bronze", icon: Medal });
-  
-  // Win-based achievements
   if (wins >= 10) achievements.push({ title: "Victory Master", icon: Trophy });
   if (wins >= 5) achievements.push({ title: "Rising Star", icon: Star });
-  
-  // Points-based achievements
   if (points >= 100) achievements.push({ title: "Point Leader", icon: Flame });
   
   return achievements;
@@ -45,7 +40,6 @@ const PlayerChallenge = () => {
   const { playerName, leagueId, fromTournament } = location.state || {};
   const { toast } = useToast();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
 
@@ -85,7 +79,7 @@ const PlayerChallenge = () => {
 
       return {
         ...profileResponse.data,
-        name: playerName || profileResponse.data.username,
+        name: profileResponse.data.full_name || profileResponse.data.username,
         rank: stats.rank,
         wins: stats.wins,
         losses: stats.losses,
@@ -138,24 +132,11 @@ const PlayerChallenge = () => {
     setSelectedTimeSlot([daySlots[0]]);
   };
 
-  const handleLocationSelect = (locationId: string) => {
-    setSelectedLocation(locationId);
-  };
-
   const handleOpenConfirmation = () => {
     if (selectedTimeSlot.length === 0) {
       toast({
         title: "Select Time Slot",
         description: "Please select a time slot for the challenge.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedLocation) {
-      toast({
-        title: "Select Location",
-        description: "Please select a location for the challenge.",
         variant: "destructive",
       });
       return;
@@ -185,7 +166,7 @@ const PlayerChallenge = () => {
           challenger_id: session.session.user.id,
           challenged_id: playerId,
           proposed_time: proposedDate.toISOString(),
-          location: selectedLocation,
+          location: playerData.primary_location || "To be determined",
         })
         .select()
         .single();
@@ -208,12 +189,6 @@ const PlayerChallenge = () => {
     }
   };
 
-  const locations = [
-    { id: "1", name: "Local Court", distance: "2 miles" },
-    { id: "2", name: "Sports Center", distance: "5 miles" },
-    { id: "3", name: "City Stadium", distance: "8 miles" }
-  ];
-
   const [day, hour] = selectedTimeSlot[0]?.split('-').map(Number) || [];
   const proposedDate = new Date();
   if (day !== undefined && hour !== undefined) {
@@ -221,17 +196,31 @@ const PlayerChallenge = () => {
     proposedDate.setHours(hour, 0, 0, 0);
   }
 
-  const selectedLocationDetails = locations.find(loc => loc.id === selectedLocation);
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       <Card className="p-6">
         <PlayerProfile player={playerDataWithAchievements} />
-        <LocationSelector 
-          locations={locations}
-          selectedLocation={selectedLocation}
-          onLocationSelect={handleLocationSelect}
-        />
+        
+        {playerData.primary_location && (
+          <div className="mt-4 flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600">Preferred Location: {playerData.primary_location}</span>
+          </div>
+        )}
+        
+        {playerData.favorite_venues && playerData.favorite_venues.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm text-gray-600 mb-2">Favorite Venues:</p>
+            <div className="flex flex-wrap gap-2">
+              {playerData.favorite_venues.map((venue, index) => (
+                <Badge key={index} variant="secondary" className="text-sm">
+                  {venue}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         <WeeklySchedule 
           availableTimeSlots={availableTimeSlots}
           selectedTimeSlots={selectedTimeSlot}
@@ -257,7 +246,7 @@ const PlayerChallenge = () => {
         challengeDetails={{
           playerName: playerData.name,
           leagueName: playerData.leagueName,
-          location: selectedLocationDetails?.name || "",
+          location: playerData.primary_location || "To be determined",
           proposedTime: proposedDate.toISOString(),
           leagueId: playerData.leagueId,
         }}
