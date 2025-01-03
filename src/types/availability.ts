@@ -2,6 +2,7 @@ import { Json } from "@/integrations/supabase/types";
 
 export interface AvailabilitySchedule {
   selectedSlots: string[];
+  [key: string]: Json | undefined;
 }
 
 export const isAvailabilitySchedule = (value: Json): value is AvailabilitySchedule => {
