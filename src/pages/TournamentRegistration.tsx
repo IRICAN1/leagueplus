@@ -12,6 +12,7 @@ import { RegistrationButton } from "@/components/tournament-registration/Registr
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Loader2 } from "lucide-react";
+import { isAvailabilitySchedule } from "@/types/availability";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -60,9 +61,8 @@ const TournamentRegistration = () => {
 
   useEffect(() => {
     if (profile?.availability_schedule) {
-      const schedule = profile.availability_schedule;
-      if (schedule.selectedSlots && Array.isArray(schedule.selectedSlots)) {
-        setSelectedTimeSlots(schedule.selectedSlots);
+      if (isAvailabilitySchedule(profile.availability_schedule)) {
+        setSelectedTimeSlots(profile.availability_schedule.selectedSlots);
         setHasExistingSchedule(true);
       } else {
         setHasExistingSchedule(false);
@@ -220,7 +220,7 @@ const TournamentRegistration = () => {
       <div className="container max-w-6xl mx-auto px-4">
         <div className="grid gap-6">
           <Card className="bg-white/80 shadow-lg">
-            <TournamentHeader name={league.name} />
+            <TournamentHeader name={league?.name || ''} />
             <CardContent className="grid gap-6">
               <TournamentInfo
                 registrationDeadline={league.registration_deadline}
