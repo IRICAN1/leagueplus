@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +9,9 @@ import { TournamentHeader } from "@/components/tournament-registration/Tournamen
 import { TournamentInfo } from "@/components/tournament-registration/TournamentInfo";
 import { PositionSelector } from "@/components/tournament-registration/PositionSelector";
 import { RegistrationButton } from "@/components/tournament-registration/RegistrationButton";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon, Loader2 } from "lucide-react";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -17,8 +20,10 @@ const TournamentRegistration = () => {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [primaryPosition, setPrimaryPosition] = useState<string>("");
   const [secondaryPosition, setSecondaryPosition] = useState<string>("");
+  const [hasExistingSchedule, setHasExistingSchedule] = useState<boolean | null>(null);
 
-  const { data: league, isLoading } = useQuery({
+  // Query for league data
+  const { data: league, isLoading: isLeagueLoading } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -34,6 +39,38 @@ const TournamentRegistration = () => {
       errorMessage: 'Failed to load league details'
     }
   });
+
+  // Query for user profile and availability
+  const { data: profile, isLoading: isProfileLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (profile?.availability_schedule) {
+      const schedule = profile.availability_schedule;
+      if (schedule.selectedSlots && Array.isArray(schedule.selectedSlots)) {
+        setSelectedTimeSlots(schedule.selectedSlots);
+        setHasExistingSchedule(true);
+      } else {
+        setHasExistingSchedule(false);
+      }
+    } else {
+      setHasExistingSchedule(false);
+    }
+  }, [profile]);
 
   // Mock availability data - in a real app, this would come from the backend
   const availability = {
@@ -70,14 +107,6 @@ const TournamentRegistration = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedTimeSlots.length || !primaryPosition) {
-      toast({
-        title: "Please complete all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -90,7 +119,39 @@ const TournamentRegistration = () => {
         return;
       }
 
-      // First, join the league
+      if (!hasExistingSchedule && selectedTimeSlots.length === 0) {
+        toast({
+          title: "Time slots required",
+          description: "Please select your available time slots before registering.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!primaryPosition) {
+        toast({
+          title: "Position required",
+          description: "Please select your preferred position.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // First, update the user's profile with the time slots if they don't have any
+      if (!hasExistingSchedule) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            availability_schedule: {
+              selectedSlots: selectedTimeSlots,
+            },
+          })
+          .eq('id', user.id);
+
+        if (profileError) throw profileError;
+      }
+
+      // Join the league
       const { error: joinError } = await supabase
         .from('league_participants')
         .insert({
@@ -100,7 +161,7 @@ const TournamentRegistration = () => {
 
       if (joinError) throw joinError;
 
-      // Then, save player statistics with availability
+      // Save player statistics
       const { error: statsError } = await supabase
         .from('player_statistics')
         .insert({
@@ -121,30 +182,37 @@ const TournamentRegistration = () => {
       });
       
       navigate(`/tournament/${id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
       toast({
         title: "Registration failed",
-        description: "Please try again later.",
+        description: error.message || "Please try again later.",
         variant: "destructive",
       });
     }
   };
 
-  if (isLoading) {
-    return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
-      <div className="container max-w-6xl mx-auto px-4">
-        Loading tournament details...
+  if (isLeagueLoading || isProfileLoading || hasExistingSchedule === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
+        <div className="container max-w-6xl mx-auto px-4 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+          <span className="ml-2">Loading...</span>
+        </div>
       </div>
-    </div>;
+    );
   }
 
   if (!league) {
-    return <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
-      <div className="container max-w-6xl mx-auto px-4">
-        Tournament not found
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
+        <div className="container max-w-6xl mx-auto px-4">
+          <Alert variant="destructive">
+            <AlertDescription>Tournament not found</AlertDescription>
+          </Alert>
+        </div>
       </div>
-    </div>;
+    );
   }
 
   return (
@@ -162,6 +230,8 @@ const TournamentRegistration = () => {
                 rules={league.rules}
               />
 
+              <Separator className="my-4" />
+
               <PositionSelector
                 primaryPosition={primaryPosition}
                 setPrimaryPosition={setPrimaryPosition}
@@ -169,12 +239,29 @@ const TournamentRegistration = () => {
                 setSecondaryPosition={setSecondaryPosition}
               />
 
-              <WeeklySchedule
-                availableTimeSlots={availability.availableTimeSlots}
-                selectedTimeSlots={selectedTimeSlots}
-                onTimeSlotSelect={handleTimeSlotSelect}
-                onSelectAllDay={handleSelectAllDay}
-              />
+              {!hasExistingSchedule && (
+                <>
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <InfoIcon className="h-5 w-5" />
+                      <span className="text-sm font-medium">
+                        Please configure your availability schedule below
+                      </span>
+                    </div>
+                    
+                    <WeeklySchedule
+                      availableTimeSlots={availability.availableTimeSlots}
+                      selectedTimeSlots={selectedTimeSlots}
+                      onTimeSlotSelect={handleTimeSlotSelect}
+                      onSelectAllDay={handleSelectAllDay}
+                    />
+                  </div>
+                </>
+              )}
+
+              <Separator className="my-4" />
 
               <RegistrationButton onClick={handleSubmit} />
             </CardContent>
