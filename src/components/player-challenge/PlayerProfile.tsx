@@ -1,4 +1,4 @@
-import { MapPin, Trophy } from "lucide-react";
+import { MapPin, Trophy, Crown, Medal, Swords } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +20,47 @@ interface PlayerProfileProps {
 }
 
 export const PlayerProfile = ({ player }: PlayerProfileProps) => {
+  const getRankBadge = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return (
+          <Badge 
+            variant="outline" 
+            className="bg-gradient-to-r from-yellow-100 to-amber-100 border-yellow-300 text-yellow-700 hover:from-yellow-200 hover:to-amber-200 transition-all duration-300 animate-pulse-soft"
+          >
+            <Crown className="h-4 w-4 mr-1 text-yellow-600" />
+            Champion
+          </Badge>
+        );
+      case 2:
+        return (
+          <Badge 
+            variant="outline" 
+            className="bg-gradient-to-r from-gray-100 to-slate-100 border-gray-300 text-gray-700 hover:from-gray-200 hover:to-slate-200 transition-all duration-300"
+          >
+            <Medal className="h-4 w-4 mr-1 text-gray-600" />
+            Runner Up
+          </Badge>
+        );
+      case 3:
+        return (
+          <Badge 
+            variant="outline" 
+            className="bg-gradient-to-r from-amber-100 to-orange-100 border-amber-300 text-amber-700 hover:from-amber-200 hover:to-orange-200 transition-all duration-300"
+          >
+            <Trophy className="h-4 w-4 mr-1 text-amber-600" />
+            Bronze
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-600">
+            #{player.rank}
+          </Badge>
+        );
+    }
+  };
+
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-start justify-between">
@@ -34,9 +75,7 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-semibold text-gray-800">{player.name}</h2>
-              <Badge variant="secondary" className="text-blue-700">
-                #{player.rank}
-              </Badge>
+              {getRankBadge(player.rank)}
             </div>
             
             {player.primary_location && (

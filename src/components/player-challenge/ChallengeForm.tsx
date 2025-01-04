@@ -4,6 +4,7 @@ import { WeekSelector } from "./WeekSelector";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Swords } from "lucide-react";
 
 interface ChallengeFormProps {
   playerData: any;
@@ -76,9 +77,10 @@ export const ChallengeForm = ({
         selectedWeek={selectedWeek}
       />
       <Button 
-        className="w-full"
+        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
         onClick={handleSubmit}
       >
+        <Swords className="h-5 w-5 mr-2 animate-cross-swords" />
         Send Challenge Request
       </Button>
     </div>
