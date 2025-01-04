@@ -17,6 +17,7 @@ export const NavbarLinks = ({ isAuthenticated }: NavbarLinksProps) => {
       ? [
           { href: "/my-leagues", label: "My Leagues" },
           { href: "/match-requests", label: "Match Requests" },
+          { href: "/messages", label: "Messages" },
           { href: "/friends", label: "Friends" },
           { href: "/history", label: "History" },
         ]
@@ -44,12 +45,10 @@ export const NavbarLinks = ({ isAuthenticated }: NavbarLinksProps) => {
 
   return (
     <>
-      {/* Desktop Navigation */}
       <div className="hidden md:flex space-x-6">
         <NavLinks />
       </div>
 
-      {/* Mobile Navigation */}
       <div className="md:hidden">
         <Sheet>
           <SheetTrigger asChild>
@@ -73,7 +72,6 @@ export const NavbarLinks = ({ isAuthenticated }: NavbarLinksProps) => {
                       : "text-gray-600"
                   )}
                   onClick={(e) => {
-                    // Close the sheet when a link is clicked
                     const closeButton = document.querySelector('[data-radix-collection-item]') as HTMLButtonElement;
                     if (closeButton) closeButton.click();
                   }}

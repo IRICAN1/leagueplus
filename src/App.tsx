@@ -15,6 +15,7 @@ import CreateLeague from "./pages/CreateLeague";
 import MyLeagues from "./pages/MyLeagues";
 import MatchRequests from "./pages/MatchRequests";
 import History from "./pages/History";
+import Messages from "./pages/Messages";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 
@@ -120,6 +121,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PlayerChallenge />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <Messages />
                 </ProtectedRoute>
               }
             />
