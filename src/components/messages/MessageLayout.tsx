@@ -50,24 +50,10 @@ export const MessageLayout = ({
           isMobile && showList ? 'translate-x-[100%]' : 'translate-x-0'
         }`}
       >
-        {isMobile && selectedConversation && (
-          <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50 flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowList(true)}
-              className="p-2"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-            </Button>
-            {otherUser && (
-              <span className="font-semibold text-gray-800">
-                {otherUser.fullName || otherUser.username || "Unknown User"}
-              </span>
-            )}
-          </div>
-        )}
-        <ChatArea conversationId={selectedConversation} />
+        <ChatArea 
+          conversationId={selectedConversation} 
+          onShowList={() => setShowList(true)}
+        />
       </div>
     </div>
   );
