@@ -10,6 +10,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Messages = () => {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [showList, setShowList] = useState(true);
+  const [otherUser, setOtherUser] = useState<{
+    fullName?: string | null;
+    username?: string | null;
+    avatarUrl?: string | null;
+  } | null>(null);
   const { toast } = useToast();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -130,15 +135,44 @@ const Messages = () => {
     void initializeConversation();
   }, [location.state, isMobile, toast]);
 
-  const handleSelectConversation = (id: string) => {
+  const handleSelectConversation = async (id: string) => {
     setSelectedConversation(id);
     if (isMobile) setShowList(false);
+
+    // Fetch other user's information
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: participant } = await supabase
+      .from("conversation_participants")
+      .select(`
+        profiles (
+          full_name,
+          username,
+          avatar_url
+        )
+      `)
+      .eq("conversation_id", id)
+      .neq("profile_id", user.id)
+      .maybeSingle();
+
+    if (participant?.profiles) {
+      setOtherUser({
+        fullName: participant.profiles.full_name,
+        username: participant.profiles.username,
+        avatarUrl: participant.profiles.avatar_url,
+      });
+    }
   };
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <MobileMessageToggle showList={showList} onToggle={() => setShowList(!showList)} />
-      <div className="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border bg-white shadow-lg">
+      <MobileMessageToggle 
+        showList={showList} 
+        onToggle={() => setShowList(!showList)} 
+        otherUser={otherUser}
+      />
+      <div className="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border bg-white shadow-lg mt-16 md:mt-0">
         <div 
           className={`${
             isMobile ? 'w-full fixed inset-0 z-20 bg-white transition-transform duration-300 transform' : 'w-1/3'
