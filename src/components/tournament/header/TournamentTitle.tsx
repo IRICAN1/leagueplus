@@ -7,6 +7,7 @@ interface TournamentTitleProps {
   league: Tables<"leagues", never> & {
     creator: {
       username: string | null;
+      full_name: string | null;
     } | null;
   };
   isAuthenticated: boolean;
@@ -14,13 +15,17 @@ interface TournamentTitleProps {
 }
 
 export const TournamentTitle = ({ league, isAuthenticated, isUserRegistered }: TournamentTitleProps) => {
+  const creatorName = league.creator?.full_name || league.creator?.username || 'Unknown';
+
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="w-full sm:w-auto">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 break-words">
           {league.name}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Created by {league.creator?.username}</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Created by {creatorName}
+        </p>
       </div>
       {isAuthenticated && !isUserRegistered && (
         <Button asChild className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto">

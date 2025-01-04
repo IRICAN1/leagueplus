@@ -9,6 +9,7 @@ interface TournamentHeaderProps {
   league: Tables<"leagues", never> & {
     creator: {
       username: string | null;
+      full_name: string | null;
     } | null;
   };
   isAuthenticated: boolean;
@@ -24,7 +25,7 @@ export const TournamentHeader = ({
 }: TournamentHeaderProps) => {
   return (
     <Card className="bg-gradient-to-br from-white to-gray-50/80 shadow-xl">
-      <CardContent className="p-6 space-y-6">
+      <CardContent className="p-4 md:p-6 space-y-4 md:space-y-6">
         <TournamentTitle 
           league={league} 
           isAuthenticated={isAuthenticated}
@@ -40,8 +41,8 @@ export const TournamentHeader = ({
           <TournamentDetails league={league} />
 
           {league.description && (
-            <div className="flex items-start space-x-3 bg-muted/50 p-4 rounded-lg mt-4">
-              <Info className="h-5 w-5 text-purple-600 mt-1" />
+            <div className="flex items-start space-x-3 bg-muted/50 p-3 md:p-4 rounded-lg mt-4">
+              <Info className="h-5 w-5 text-purple-600 mt-1 flex-shrink-0" />
               <p className="text-sm text-muted-foreground">{league.description}</p>
             </div>
           )}
