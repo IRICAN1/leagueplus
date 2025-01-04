@@ -33,28 +33,34 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
 
   return (
     <div
-      className={`flex items-start gap-3 ${
+      className={`flex items-end gap-2 ${
         isCurrentUser ? "flex-row-reverse" : ""
-      }`}
+      } animate-fade-in`}
     >
       <Avatar className="h-8 w-8">
         <AvatarImage
           src={message.profiles.avatar_url}
           alt={message.profiles.username}
         />
-        <AvatarFallback>
+        <AvatarFallback className="bg-gradient-to-br from-purple-100 to-blue-100">
           {message.profiles.username.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div
-        className={`max-w-[70%] rounded-lg p-3 ${
-          isCurrentUser
-            ? "bg-blue-500 text-white"
-            : "bg-gray-100"
+        className={`group max-w-[70%] space-y-1 ${
+          isCurrentUser ? "items-end" : "items-start"
         }`}
       >
-        <p className="text-sm break-words">{message.content}</p>
-        <span className={`mt-1 text-xs ${isCurrentUser ? "text-blue-100" : "text-gray-500"}`}>
+        <div
+          className={`rounded-2xl px-4 py-2 ${
+            isCurrentUser
+              ? "bg-purple-500 text-white"
+              : "bg-gray-100 text-gray-800"
+          }`}
+        >
+          <p className="text-sm break-words">{message.content}</p>
+        </div>
+        <span className={`text-xs ${isCurrentUser ? "text-gray-500" : "text-gray-500"}`}>
           {format(new Date(message.created_at), "h:mm a")}
         </span>
       </div>

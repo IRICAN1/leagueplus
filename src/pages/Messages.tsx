@@ -138,14 +138,17 @@ const Messages = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <MobileMessageToggle showList={showList} onToggle={() => setShowList(!showList)} />
-      <div className="flex h-[calc(100vh-8rem)] overflow-hidden rounded-lg border shadow-lg">
+      <div className="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border bg-white shadow-lg">
         <div 
           className={`${
-            isMobile ? 'w-full absolute inset-0 z-20 bg-white transition-transform duration-300 transform' : 'w-1/3'
+            isMobile ? 'w-full fixed inset-0 z-20 bg-white transition-transform duration-300 transform' : 'w-1/3'
           } ${
             isMobile && !showList ? 'translate-x-[-100%]' : 'translate-x-0'
-          } border-r bg-white`}
+          } border-r`}
         >
+          <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50">
+            <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+          </div>
           <MessageList
             selectedConversation={selectedConversation}
             onSelectConversation={handleSelectConversation}
@@ -153,7 +156,7 @@ const Messages = () => {
         </div>
         <div 
           className={`${
-            isMobile ? 'w-full absolute inset-0 bg-white transition-transform duration-300 transform' : 'w-2/3'
+            isMobile ? 'w-full fixed inset-0 bg-white transition-transform duration-300 transform' : 'w-2/3'
           } ${
             isMobile && showList ? 'translate-x-[100%]' : 'translate-x-0'
           }`}

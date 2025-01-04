@@ -2,8 +2,6 @@ import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
 import { ChatInput } from "./ChatInput";
 import { MessageBubble } from "./MessageBubble";
 
@@ -82,20 +80,30 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
 
   if (!conversationId) {
     return (
-      <div className="flex h-full items-center justify-center text-gray-500">
-        Select a conversation to start messaging
+      <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-8">
+        <div className="text-center space-y-4">
+          <div className="text-purple-400">
+            <svg className="w-20 h-20 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800">Select a Conversation</h3>
+          <p className="text-gray-500">Choose a conversation from the list to start messaging</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b p-4">
-        <h3 className="font-semibold">Chat</h3>
+      <div className="border-b p-4 bg-gradient-to-r from-purple-50 to-blue-50">
+        <h3 className="font-semibold text-gray-800">Chat</h3>
       </div>
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
         {!messages ? (
-          <div className="text-center text-gray-500">Loading messages...</div>
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+          </div>
         ) : (
           <div className="space-y-4">
             {messages.map((message) => (
