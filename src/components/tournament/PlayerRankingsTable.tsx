@@ -9,13 +9,13 @@ import { Player } from "./types";
 import { PlayerAchievementsList } from "./PlayerAchievementsList";
 import { PlayerProfile } from "./PlayerProfile";
 import { RankDisplay } from "./RankDisplay";
+import { useQuery } from "@tanstack/react-query";
 
 interface PlayerRankingsTableProps {
-  players: Player[];
   leagueId: string;
 }
 
-export const PlayerRankingsTable = ({ players, leagueId }: PlayerRankingsTableProps) => {
+export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -28,6 +28,39 @@ export const PlayerRankingsTable = ({ players, leagueId }: PlayerRankingsTablePr
     };
     checkUser();
   }, []);
+
+  // Fetch player statistics with profiles data
+  const { data: players, isLoading } = useQuery({
+    queryKey: ['player-rankings', leagueId],
+    queryFn: async () => {
+      const { data: playerStats, error } = await supabase
+        .from('player_statistics')
+        .select(`
+          *,
+          profiles:player_id (
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('league_id', leagueId)
+        .order('rank', { ascending: true });
+
+      if (error) throw error;
+
+      return playerStats.map(stat => ({
+        id: stat.player_id,
+        name: stat.profiles?.full_name || 'Unknown Player',
+        avatar_url: stat.profiles?.avatar_url,
+        rank: stat.rank,
+        wins: stat.wins,
+        losses: stat.losses,
+        points: stat.points,
+        achievements: stat.points > 100 ? [
+          { title: "High Scorer", icon: UserRound }
+        ] : undefined
+      }));
+    }
+  });
 
   const handleChallenge = (playerId: string, playerName: string) => {
     navigate(`/player-challenge/${playerId}`, {
@@ -51,6 +84,19 @@ export const PlayerRankingsTable = ({ players, leagueId }: PlayerRankingsTablePr
         return "hover:bg-gray-50/50 transition-colors duration-200";
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card className="bg-white/80 shadow-md">
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground space-y-2">
+            <UserRound className="h-12 w-12 text-muted animate-pulse" />
+            <p>Loading rankings...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!players || players.length === 0) {
     return (
