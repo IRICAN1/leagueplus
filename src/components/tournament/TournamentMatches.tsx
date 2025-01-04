@@ -16,9 +16,16 @@ export const TournamentMatches = ({ leagueId }: TournamentMatchesProps) => {
       const { data, error } = await supabase
         .from('match_challenges')
         .select(`
-          *,
-          challenger:challenger_id (username, avatar_url),
-          challenged:challenged_id (username, avatar_url)
+          id,
+          proposed_time,
+          challenger:challenger_id (
+            username,
+            avatar_url
+          ),
+          challenged:challenged_id (
+            username,
+            avatar_url
+          )
         `)
         .eq('league_id', leagueId)
         .eq('status', 'accepted')
