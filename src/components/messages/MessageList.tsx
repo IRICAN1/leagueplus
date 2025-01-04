@@ -18,6 +18,7 @@ interface Conversation {
   last_message_at: string;
   participants: {
     profile_id: string;
+    last_read_at: string;
     profiles: {
       id: string;
       username: string;
@@ -82,14 +83,14 @@ export const MessageList = ({ selectedConversation, onSelectConversation }: Mess
       // Calculate unread messages
       let totalUnread = 0;
       data?.forEach(conversation => {
-        const userParticipant = conversation.participants.find(
+        const userParticipant = conversation.participants?.find(
           p => p.profile_id === user.id
         );
         if (userParticipant) {
-          const unreadMessages = conversation.messages.filter(
+          const unreadMessages = conversation.messages?.filter(
             msg => msg.sender_id !== user.id && 
             new Date(msg.created_at) > new Date(userParticipant.last_read_at)
-          ).length;
+          ).length || 0;
           totalUnread += unreadMessages;
         }
       });
@@ -121,6 +122,7 @@ export const MessageList = ({ selectedConversation, onSelectConversation }: Mess
   }, [refetch]);
 
   const getOtherParticipant = (conversation: Conversation) => {
+    if (!conversation?.participants) return null;
     return conversation.participants.find(p => p.profile_id !== currentUserId)?.profiles;
   };
 
@@ -167,14 +169,14 @@ export const MessageList = ({ selectedConversation, onSelectConversation }: Mess
               const otherParticipant = getOtherParticipant(conversation);
               if (!otherParticipant) return null;
 
-              const userParticipant = conversation.participants.find(
+              const userParticipant = conversation.participants?.find(
                 p => p.profile_id === currentUserId
               );
-              const unreadMessages = conversation.messages.filter(
+              const unreadMessages = conversation.messages?.filter(
                 msg => msg.sender_id !== currentUserId && 
                 userParticipant && 
                 new Date(msg.created_at) > new Date(userParticipant.last_read_at)
-              ).length;
+              ).length || 0;
 
               return (
                 <button
@@ -202,14 +204,14 @@ export const MessageList = ({ selectedConversation, onSelectConversation }: Mess
                         </span>
                         <span className="text-xs text-gray-500">
                           {format(
-                            new Date(conversation.messages[0]?.created_at),
+                            new Date(conversation.messages[0]?.created_at || conversation.last_message_at),
                             "MMM d, h:mm a"
                           )}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-600 truncate">
-                          {conversation.messages[0]?.content}
+                          {conversation.messages[0]?.content || "No messages yet"}
                         </p>
                         {unreadMessages > 0 && (
                           <Badge
