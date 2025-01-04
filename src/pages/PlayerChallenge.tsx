@@ -123,13 +123,6 @@ const PlayerChallenge = () => {
       <Card className="p-6">
         <PlayerProfile player={playerDataWithAchievements} />
         
-        {playerData.primary_location && (
-          <div className="mt-4 flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">Preferred Location: {playerData.primary_location}</span>
-          </div>
-        )}
-        
         {playerData.favorite_venues && playerData.favorite_venues.length > 0 && (
           <div className="mt-4">
             <p className="text-sm text-gray-600 mb-2">Favorite Venues:</p>
