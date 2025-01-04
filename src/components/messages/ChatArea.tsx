@@ -27,8 +27,19 @@ interface Message {
 export const ChatArea = ({ conversationId }: ChatAreaProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    void getCurrentUser();
+  }, []);
 
   const { data: messages, refetch } = useQuery({
     queryKey: ["messages", conversationId],
@@ -131,9 +142,7 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
               <div
                 key={message.id}
                 className={`flex items-start gap-3 ${
-                  message.sender_id === supabase.auth.getUser().then(({ data }) => data.user?.id)
-                    ? "flex-row-reverse"
-                    : ""
+                  message.sender_id === currentUserId ? "flex-row-reverse" : ""
                 }`}
               >
                 <Avatar className="h-8 w-8">
@@ -147,7 +156,7 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
                 </Avatar>
                 <div
                   className={`rounded-lg p-3 ${
-                    message.sender_id === supabase.auth.getUser().then(({ data }) => data.user?.id)
+                    message.sender_id === currentUserId
                       ? "bg-blue-500 text-white"
                       : "bg-gray-100"
                   }`}

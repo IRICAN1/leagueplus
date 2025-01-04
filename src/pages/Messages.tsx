@@ -9,32 +9,36 @@ const Messages = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const setupMessaging = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const channel = supabase
-      .channel('messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          if (payload.new.sender_id !== user.id) {
-            toast({
-              title: "New Message",
-              description: "You have received a new message",
-            });
+      const channel = supabase
+        .channel('messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+          },
+          (payload) => {
+            if (payload.new.sender_id !== user.id) {
+              toast({
+                title: "New Message",
+                description: "You have received a new message",
+              });
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
+      return () => {
+        supabase.removeChannel(channel);
+      };
     };
+
+    void setupMessaging();
   }, [toast]);
 
   return (
