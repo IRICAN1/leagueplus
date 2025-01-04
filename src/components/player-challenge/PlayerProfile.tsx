@@ -1,5 +1,5 @@
-import { User, Trophy } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MapPin, Trophy } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface PlayerProfileProps {
@@ -9,6 +9,7 @@ interface PlayerProfileProps {
     wins: number;
     losses: number;
     points: number;
+    primary_location?: string;
     achievements: Array<{
       title: string;
       icon: any;
@@ -19,13 +20,7 @@ interface PlayerProfileProps {
 export const PlayerProfile = ({ player }: PlayerProfileProps) => {
   return (
     <Card className="bg-white/80 shadow-lg animate-fade-in">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5 text-blue-500" />
-          Player Profile
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">{player.name}</h2>
@@ -33,6 +28,13 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
               Rank #{player.rank}
             </Badge>
           </div>
+          
+          {player.primary_location && (
+            <div className="flex items-center gap-2 text-gray-600 text-sm">
+              <MapPin className="h-4 w-4 text-blue-500" />
+              <span>{player.primary_location}</span>
+            </div>
+          )}
           
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="p-3 bg-blue-50 rounded-lg">
