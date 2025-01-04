@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
 import { TournamentStats } from "@/components/tournament/TournamentStats";
 import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
+import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
@@ -127,7 +128,7 @@ const TournamentDetails = () => {
       <TournamentHeader 
         league={league} 
         isAuthenticated={isAuthenticated}
-        isUserRegistered={false} // Placeholder for user registration status
+        isUserRegistered={false}
         registeredPlayers={registeredPlayers}
       />
 
@@ -135,6 +136,7 @@ const TournamentDetails = () => {
         <TabsList className="w-full justify-start">
           <TabsTrigger value="rankings">Rankings</TabsTrigger>
           <TabsTrigger value="matches">Upcoming Matches</TabsTrigger>
+          <TabsTrigger value="history">Match History</TabsTrigger>
         </TabsList>
         
         <TabsContent value="rankings">
@@ -143,6 +145,10 @@ const TournamentDetails = () => {
         
         <TabsContent value="matches">
           <UpcomingMatches leagueId={id} />
+        </TabsContent>
+
+        <TabsContent value="history">
+          <MatchHistoryList leagueId={id} />
         </TabsContent>
       </Tabs>
     </div>
