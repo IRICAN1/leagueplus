@@ -5,12 +5,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatInput } from "./ChatInput";
 import { MessageBubble } from "./MessageBubble";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 interface ChatAreaProps {
   conversationId: string | null;
+  onShowList?: () => void;
 }
 
-export const ChatArea = ({ conversationId }: ChatAreaProps) => {
+export const ChatArea = ({ conversationId, onShowList }: ChatAreaProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: messages, refetch } = useQuery({
@@ -129,6 +132,14 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
     <div className="flex h-full flex-col">
       <div className="border-b p-4 bg-gradient-to-r from-purple-50 to-blue-50">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={onShowList}
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
+          </Button>
           <Avatar className="h-10 w-10">
             <AvatarImage
               src={otherParticipant?.profiles?.avatar_url}
