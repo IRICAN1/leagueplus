@@ -48,18 +48,6 @@ export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
     );
   }
 
-  const formattedPlayerStats = playerStats?.map(player => ({
-    id: player.player_id,
-    name: player.profiles?.username || 'Unknown Player',
-    rank: player.rank,
-    wins: player.wins,
-    losses: player.losses,
-    points: player.points,
-    achievements: player.points > 100 ? [
-      { title: "High Scorer", icon: Medal }
-    ] : undefined
-  })) || [];
-
   if (isLoading) {
     return (
       <Card className="mt-6 bg-gradient-to-br from-gray-50 to-white/80 shadow-lg">
@@ -100,7 +88,7 @@ export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
       <CardContent className="p-0 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-50/30 to-purple-50/30 pointer-events-none" />
         <div className="relative">
-          <PlayerRankingsTable players={formattedPlayerStats} leagueId={leagueId} />
+          <PlayerRankingsTable leagueId={leagueId} />
         </div>
       </CardContent>
     </Card>
