@@ -8,6 +8,8 @@ import { Challenge, ChallengeType } from "@/types/match";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -25,6 +27,7 @@ interface ChallengeCardProps {
 
 export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const currentUserId = type === 'sent' ? challenge.challenger_id : challenge.challenged_id;
   const otherUserId = type === 'sent' ? challenge.challenged_id : challenge.challenger_id;
 
@@ -35,12 +38,80 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
   };
 
   const handleMessageClick = async () => {
-    navigate('/messages', { 
-      state: { 
-        otherUserId,
-        challengeId: challenge.id 
-      } 
-    });
+    try {
+      // First, check if a conversation already exists between these users
+      const { data: existingParticipations } = await supabase
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('profile_id', currentUserId);
+
+      let conversationId = null;
+
+      if (existingParticipations && existingParticipations.length > 0) {
+        // Check each conversation to see if the other user is also a participant
+        for (const participation of existingParticipations) {
+          const { data: otherParticipant } = await supabase
+            .from('conversation_participants')
+            .select('*')
+            .eq('conversation_id', participation.conversation_id)
+            .eq('profile_id', otherUserId)
+            .single();
+
+          if (otherParticipant) {
+            conversationId = participation.conversation_id;
+            break;
+          }
+        }
+      }
+
+      // If no existing conversation found, create a new one
+      if (!conversationId) {
+        // Create new conversation
+        const { data: newConversation, error: conversationError } = await supabase
+          .from('conversations')
+          .insert({})
+          .select()
+          .single();
+
+        if (conversationError) throw conversationError;
+
+        // Add both users as participants
+        const { error: participantsError } = await supabase
+          .from('conversation_participants')
+          .insert([
+            {
+              conversation_id: newConversation.id,
+              profile_id: currentUserId,
+              is_admin: true
+            },
+            {
+              conversation_id: newConversation.id,
+              profile_id: otherUserId,
+              is_admin: true
+            }
+          ]);
+
+        if (participantsError) throw participantsError;
+
+        conversationId = newConversation.id;
+      }
+
+      // Navigate to messages with the conversation ID
+      navigate('/messages', { 
+        state: { 
+          conversationId,
+          otherUserId,
+          challengeId: challenge.id 
+        } 
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to create conversation. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Error creating conversation:', error);
+    }
   };
 
   const renderResultSubmission = () => {
