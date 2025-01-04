@@ -1,235 +1,174 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Bell } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+
+interface Conversation {
+  id: string;
+  title: string | null;
+  last_message_at: string;
+  participants: {
+    profile_id: string;
+    profiles: {
+      username: string;
+      avatar_url: string | null;
+    };
+  }[];
+  messages: {
+    content: string;
+    created_at: string;
+    sender: {
+      username: string;
+    };
+  }[];
+}
 
 interface MessageListProps {
   selectedConversation: string | null;
   onSelectConversation: (id: string) => void;
 }
 
-interface Conversation {
-  id: string;
-  last_message_at: string;
-  participants: {
-    profile_id: string;
-    last_read_at: string;
-    profiles: {
-      id: string;
-      username: string;
-      full_name: string;
-      avatar_url: string;
-    };
-  }[];
-  messages: {
-    id: string;
-    content: string;
-    created_at: string;
-    sender_id: string;
-  }[];
-}
-
-export const MessageList = ({ selectedConversation, onSelectConversation }: MessageListProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [unreadCount, setUnreadCount] = useState(0);
+export const MessageList = ({
+  selectedConversation,
+  onSelectConversation,
+}: MessageListProps) => {
+  const { toast } = useToast();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const getUser = async () => {
+    const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setCurrentUserId(user.id);
       }
     };
-    getUser();
+    void getCurrentUser();
   }, []);
 
-  const { data: conversations, refetch } = useQuery({
+  const { data: conversations, isLoading } = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      if (!user) return [];
 
-      const { data, error } = await supabase
-        .from("conversations")
+      const { data: userConversations, error } = await supabase
+        .from("conversation_participants")
         .select(`
-          *,
-          participants:conversation_participants(
-            profile_id,
-            last_read_at,
-            profiles(
-              id,
-              username,
-              full_name,
-              avatar_url
-            )
-          ),
-          messages!inner(
+          conversation:conversations (
             id,
-            content,
-            created_at,
-            sender_id
+            title,
+            last_message_at,
+            participants:conversation_participants (
+              profile_id,
+              profiles (
+                username,
+                avatar_url
+              )
+            ),
+            messages:messages (
+              content,
+              created_at,
+              sender:profiles (
+                username
+              )
+            )
           )
         `)
-        .order("last_message_at", { ascending: false });
+        .eq("profile_id", user.id)
+        .order("conversation(last_message_at)", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching conversations:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load conversations",
+          variant: "destructive",
+        });
+        return [];
+      }
 
-      // Calculate unread messages
-      let totalUnread = 0;
-      data?.forEach(conversation => {
-        const userParticipant = conversation.participants?.find(
-          p => p.profile_id === user.id
-        );
-        if (userParticipant) {
-          const unreadMessages = conversation.messages?.filter(
-            msg => msg.sender_id !== user.id && 
-            new Date(msg.created_at) > new Date(userParticipant.last_read_at)
-          ).length || 0;
-          totalUnread += unreadMessages;
-        }
-      });
-      setUnreadCount(totalUnread);
-
-      return data as Conversation[];
+      return userConversations
+        .map((uc) => uc.conversation)
+        .filter((c): c is Conversation => c !== null);
     },
+    enabled: !!currentUserId,
   });
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("conversations")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "messages",
-        },
-        () => {
-          void refetch();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [refetch]);
 
   const getOtherParticipant = (conversation: Conversation) => {
-    if (!conversation?.participants) return null;
-    return conversation.participants.find(p => p.profile_id !== currentUserId)?.profiles;
+    if (!currentUserId || !conversation.participants) return null;
+    
+    const otherParticipant = conversation.participants.find(
+      (p) => p.profile_id !== currentUserId
+    );
+    
+    return otherParticipant?.profiles;
   };
 
-  const filteredConversations = conversations?.filter(conversation => {
-    const otherParticipant = getOtherParticipant(conversation);
-    return otherParticipant && 
-      (otherParticipant.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       otherParticipant.full_name?.toLowerCase().includes(searchQuery.toLowerCase()));
-  });
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[200px]" />
+              <Skeleton className="h-4 w-[150px]" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!conversations?.length) {
+    return (
+      <div className="flex h-full items-center justify-center text-gray-500">
+        No conversations yet
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Messages</h2>
-          <div className="relative">
-            <Bell className="h-6 w-6 text-gray-500" />
-            {unreadCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
-              >
-                {unreadCount}
-              </Badge>
-            )}
-          </div>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <Input
-            placeholder="Search conversations..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+    <ScrollArea className="h-[calc(100vh-4rem)]">
+      <div className="space-y-4 p-4">
+        {conversations.map((conversation) => {
+          const otherParticipant = getOtherParticipant(conversation);
+          const lastMessage = conversation.messages?.[0];
+
+          return (
+            <button
+              key={conversation.id}
+              onClick={() => onSelectConversation(conversation.id)}
+              className={`w-full rounded-lg p-4 text-left transition-colors hover:bg-gray-100 ${
+                selectedConversation === conversation.id
+                  ? "bg-gray-100"
+                  : "bg-white"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">
+                  {conversation.title || otherParticipant?.username || "Unknown User"}
+                </span>
+                {lastMessage && (
+                  <span className="text-xs text-gray-500">
+                    {new Date(lastMessage.created_at).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+              {lastMessage && (
+                <p className="mt-1 text-sm text-gray-600 line-clamp-1">
+                  <span className="font-medium">
+                    {lastMessage.sender.username}:
+                  </span>{" "}
+                  {lastMessage.content}
+                </p>
+              )}
+            </button>
+          );
+        })}
       </div>
-      <ScrollArea className="flex-1">
-        {!conversations ? (
-          <div className="p-4 text-center text-gray-500">Loading conversations...</div>
-        ) : (
-          <div className="divide-y">
-            {filteredConversations?.map((conversation) => {
-              const otherParticipant = getOtherParticipant(conversation);
-              if (!otherParticipant) return null;
-
-              const userParticipant = conversation.participants?.find(
-                p => p.profile_id === currentUserId
-              );
-              const unreadMessages = conversation.messages?.filter(
-                msg => msg.sender_id !== currentUserId && 
-                userParticipant && 
-                new Date(msg.created_at) > new Date(userParticipant.last_read_at)
-              ).length || 0;
-
-              return (
-                <button
-                  key={conversation.id}
-                  onClick={() => onSelectConversation(conversation.id)}
-                  className={`w-full p-4 hover:bg-gray-50 transition-colors ${
-                    selectedConversation === conversation.id ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={otherParticipant.avatar_url}
-                        alt={otherParticipant.username}
-                      />
-                      <AvatarFallback>
-                        {otherParticipant.full_name?.[0]?.toUpperCase() || 
-                         otherParticipant.username[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 text-left">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">
-                          {otherParticipant.full_name || otherParticipant.username}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {format(
-                            new Date(conversation.messages[0]?.created_at || conversation.last_message_at),
-                            "MMM d, h:mm a"
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600 truncate">
-                          {conversation.messages[0]?.content || "No messages yet"}
-                        </p>
-                        {unreadMessages > 0 && (
-                          <Badge
-                            variant="destructive"
-                            className="ml-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                          >
-                            {unreadMessages}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </ScrollArea>
-    </div>
+    </ScrollArea>
   );
 };
