@@ -13,30 +13,45 @@ interface MessageListProps {
   onSelectConversation: (id: string) => void;
 }
 
+interface Conversation {
+  id: string;
+  last_message_at: string;
+  messages: {
+    id: string;
+    content: string;
+    created_at: string;
+    profiles: {
+      username: string;
+      avatar_url: string;
+    };
+  }[];
+}
+
 export const MessageList = ({ selectedConversation, onSelectConversation }: MessageListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const { data: conversations, isLoading } = useQuery({
+  const { data: conversations, refetch } = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("conversations")
         .select(`
           *,
-          conversation_participants!inner(profile_id),
-          messages!inner(
+          messages!inner (
             id,
             content,
             created_at,
-            sender_id,
-            profiles!inner(username, avatar_url)
+            profiles!inner (
+              username,
+              avatar_url
+            )
           )
         `)
         .order("last_message_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Conversation[];
     },
   });
 
@@ -51,8 +66,7 @@ export const MessageList = ({ selectedConversation, onSelectConversation }: Mess
           table: "messages",
         },
         () => {
-          // Refetch conversations on any message changes
-          void conversations?.refetch();
+          void refetch();
         }
       )
       .subscribe();
@@ -60,7 +74,7 @@ export const MessageList = ({ selectedConversation, onSelectConversation }: Mess
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversations]);
+  }, [refetch]);
 
   const filteredConversations = conversations?.filter((conversation) =>
     conversation.messages[0]?.profiles.username
@@ -96,7 +110,7 @@ export const MessageList = ({ selectedConversation, onSelectConversation }: Mess
         </div>
       </div>
       <ScrollArea className="flex-1">
-        {isLoading ? (
+        {!conversations ? (
           <div className="p-4 text-center text-gray-500">Loading conversations...</div>
         ) : (
           <div className="divide-y">

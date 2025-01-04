@@ -13,13 +13,24 @@ interface ChatAreaProps {
   conversationId: string | null;
 }
 
+interface Message {
+  id: string;
+  content: string;
+  created_at: string;
+  sender_id: string;
+  profiles: {
+    username: string;
+    avatar_url: string;
+  };
+}
+
 export const ChatArea = ({ conversationId }: ChatAreaProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const { data: messages, isLoading } = useQuery({
+  const { data: messages, refetch } = useQuery({
     queryKey: ["messages", conversationId],
     queryFn: async () => {
       if (!conversationId) return null;
@@ -28,7 +39,7 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
         .select(
           `
           *,
-          profiles!inner(
+          profiles (
             username,
             avatar_url
           )
@@ -38,7 +49,7 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as Message[];
     },
     enabled: !!conversationId,
   });
@@ -63,8 +74,7 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
           filter: `conversation_id=eq.${conversationId}`,
         },
         () => {
-          // Refetch messages on any changes
-          void messages?.refetch();
+          void refetch();
         }
       )
       .subscribe();
@@ -72,16 +82,19 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, messages]);
+  }, [conversationId, refetch]);
 
   const handleSendMessage = async () => {
     if (!conversationId || !newMessage.trim()) return;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { error } = await supabase.from("messages").insert({
         conversation_id: conversationId,
         content: newMessage.trim(),
-        sender_id: (await supabase.auth.getUser()).data.user?.id,
+        sender_id: user.id,
       });
 
       if (error) throw error;
@@ -110,15 +123,15 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
         <h3 className="font-semibold">Chat</h3>
       </div>
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
-        {isLoading ? (
+        {!messages ? (
           <div className="text-center text-gray-500">Loading messages...</div>
         ) : (
           <div className="space-y-4">
-            {messages?.map((message) => (
+            {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex items-start gap-3 ${
-                  message.sender_id === supabase.auth.user()?.id
+                  message.sender_id === supabase.auth.getUser().then(({ data }) => data.user?.id)
                     ? "flex-row-reverse"
                     : ""
                 }`}
@@ -134,7 +147,7 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
                 </Avatar>
                 <div
                   className={`rounded-lg p-3 ${
-                    message.sender_id === supabase.auth.user()?.id
+                    message.sender_id === supabase.auth.getUser().then(({ data }) => data.user?.id)
                       ? "bg-blue-500 text-white"
                       : "bg-gray-100"
                   }`}
@@ -157,12 +170,12 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={(e) => {
               if (e.key === "Enter") {
-                handleSendMessage();
+                void handleSendMessage();
               }
             }}
           />
           <Button
-            onClick={handleSendMessage}
+            onClick={() => void handleSendMessage()}
             disabled={!newMessage.trim()}
             className="bg-blue-500 hover:bg-blue-600"
           >

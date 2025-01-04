@@ -9,24 +9,24 @@ const Messages = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const channel = supabase
       .channel('messages')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'messages'
         },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
-            const { sender_id, conversation_id } = payload.new;
-            if (sender_id !== supabase.auth.user()?.id) {
-              toast({
-                title: "New Message",
-                description: "You have received a new message",
-              });
-            }
+          if (payload.new.sender_id !== user.id) {
+            toast({
+              title: "New Message",
+              description: "You have received a new message",
+            });
           }
         }
       )
