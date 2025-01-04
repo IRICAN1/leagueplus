@@ -5,6 +5,9 @@ import { ChallengeHeader } from "./ChallengeHeader";
 import { ChallengeDetails } from "./ChallengeDetails";
 import { ChallengeStatus } from "./ChallengeStatus";
 import { Challenge, ChallengeType } from "@/types/match";
+import { Button } from "@/components/ui/button";
+import { MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -21,12 +24,23 @@ interface ChallengeCardProps {
 }
 
 export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProps) => {
+  const navigate = useNavigate();
   const currentUserId = type === 'sent' ? challenge.challenger_id : challenge.challenged_id;
+  const otherUserId = type === 'sent' ? challenge.challenged_id : challenge.challenger_id;
 
   const isMatchTime = () => {
     const now = new Date();
     const matchTime = new Date(challenge.proposed_time);
     return now >= matchTime;
+  };
+
+  const handleMessageClick = async () => {
+    navigate('/messages', { 
+      state: { 
+        otherUserId,
+        challengeId: challenge.id 
+      } 
+    });
   };
 
   const renderResultSubmission = () => {
@@ -113,11 +127,22 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
           <ChallengeHeader challenge={challenge} type={type} />
           <ChallengeDetails challenge={challenge} />
         </div>
-        <ChallengeStatus 
-          challenge={challenge} 
-          type={type} 
-          onResponse={onResponse} 
-        />
+        <div className="flex flex-col gap-2">
+          <ChallengeStatus 
+            challenge={challenge} 
+            type={type} 
+            onResponse={onResponse} 
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={handleMessageClick}
+          >
+            <MessageSquare className="h-4 w-4" />
+            Message
+          </Button>
+        </div>
       </div>
       {renderScores()}
       {renderResultSubmission()}

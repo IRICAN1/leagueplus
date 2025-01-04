@@ -25,6 +25,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
   const [winnerScore2, setWinnerScore2] = useState("");
   const [loserScore2, setLoserScore2] = useState("");
   const [winnerId, setWinnerId] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleResultSubmit = async () => {
     if (!winnerScore1 || !loserScore1 || !winnerScore2 || !loserScore2 || !winnerId) {
@@ -68,6 +69,13 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
         title: "Result submitted",
         description: "Waiting for opponent's approval",
       });
+      
+      // Reset form but don't close dialog
+      setWinnerScore1("");
+      setWinnerScore2("");
+      setLoserScore1("");
+      setLoserScore2("");
+      setWinnerId("");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -93,7 +101,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="mt-4 w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700">
           Submit Match Result
