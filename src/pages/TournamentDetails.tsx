@@ -3,11 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
 import { TournamentStats } from "@/components/tournament/TournamentStats";
+import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -54,6 +55,17 @@ const TournamentDetails = () => {
       return data;
     },
     enabled: !!id
+  });
+
+  const { data: registeredPlayers } = useQuery({
+    queryKey: ['registeredPlayers', id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('league_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('league_id', id);
+      return count || 0;
+    }
   });
 
   if (!id || !UUID_REGEX.test(id)) {
@@ -111,17 +123,28 @@ const TournamentDetails = () => {
           </AlertDescription>
         </Alert>
       )}
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="p-6">
-            <TournamentHeader 
-              league={league} 
-              isAuthenticated={isAuthenticated}
-            />
-          </CardContent>
-        </Card>
-        <TournamentStats leagueId={id} />
-      </div>
+      
+      <TournamentHeader 
+        league={league} 
+        isAuthenticated={isAuthenticated}
+        isUserRegistered={false} // Placeholder for user registration status
+        registeredPlayers={registeredPlayers}
+      />
+
+      <Tabs defaultValue="rankings" className="space-y-6">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="rankings">Rankings</TabsTrigger>
+          <TabsTrigger value="matches">Upcoming Matches</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="rankings">
+          <TournamentStats leagueId={id} />
+        </TabsContent>
+        
+        <TabsContent value="matches">
+          <UpcomingMatches leagueId={id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
