@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Tennis, Dumbbell, Trophy } from "lucide-react";
+import { Trophy, Dumbbell, Volleyball } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 interface SportTypeFilterProps {
@@ -9,8 +9,8 @@ interface SportTypeFilterProps {
 
 export const SportTypeFilter = ({ selectedSport, onSportSelect }: SportTypeFilterProps) => {
   const sportTypes = [
-    { id: 'Tennis', label: 'Tennis', icon: Tennis },
-    { id: 'Padel', label: 'Padel', icon: Trophy },
+    { id: 'Tennis', label: 'Tennis', icon: Trophy },
+    { id: 'Padel', label: 'Padel', icon: Volleyball },
     { id: 'Badminton', label: 'Badminton', icon: Dumbbell },
   ];
 
