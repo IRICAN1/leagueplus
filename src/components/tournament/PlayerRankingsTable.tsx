@@ -10,6 +10,7 @@ import { PlayerAchievementsList } from "./PlayerAchievementsList";
 import { PlayerProfile } from "./PlayerProfile";
 import { RankDisplay } from "./RankDisplay";
 import { useQuery } from "@tanstack/react-query";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PlayerRankingsTableProps {
   leagueId: string;
@@ -18,6 +19,7 @@ interface PlayerRankingsTableProps {
 export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -29,7 +31,6 @@ export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
     checkUser();
   }, []);
 
-  // Fetch player statistics with profiles data
   const { data: players, isLoading } = useQuery({
     queryKey: ['player-rankings', leagueId],
     queryFn: async () => {
@@ -111,62 +112,107 @@ export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
     );
   }
 
-  return (
-    <Card className="bg-white/80 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden border border-blue-100/50">
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 hover:from-blue-100 hover:to-purple-100">
-              <TableHead className="w-[100px]">Rank</TableHead>
-              <TableHead>Player</TableHead>
-              <TableHead>Achievements</TableHead>
-              <TableHead className="text-right">W/L</TableHead>
-              <TableHead className="text-right">Points</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+  if (isMobile) {
+    return (
+      <Card className="bg-white/80 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden border border-blue-100/50">
+        <CardContent className="p-4">
+          <div className="space-y-4">
             {players.map((player) => (
-              <TableRow 
+              <div 
                 key={player.id}
-                className={`${getRankStyle(player.rank)} transition-all duration-300 hover:shadow-md group animate-fade-in`}
+                className={`${getRankStyle(player.rank)} p-4 rounded-lg animate-fade-in`}
               >
-                <TableCell>
+                <div className="flex items-center justify-between mb-2">
                   <RankDisplay rank={player.rank} />
-                </TableCell>
-                <TableCell>
-                  <PlayerProfile player={player} />
-                </TableCell>
-                <TableCell>
-                  <PlayerAchievementsList player={player} />
-                </TableCell>
-                <TableCell className="text-right font-medium">
-                  <span className="text-green-600">{player.wins}</span>
-                  <span className="text-muted-foreground mx-1">/</span>
-                  <span className="text-red-600">{player.losses}</span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 font-medium text-sm group-hover:from-blue-200 group-hover:to-purple-200 transition-all duration-300">
-                    {player.points}
+                  <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 font-medium text-sm">
+                    {player.points} pts
                   </span>
-                </TableCell>
-                <TableCell>
+                </div>
+                <PlayerProfile player={player} />
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="text-sm font-medium">
+                    <span className="text-green-600">{player.wins}</span>
+                    <span className="text-muted-foreground mx-1">/</span>
+                    <span className="text-red-600">{player.losses}</span>
+                  </div>
                   {currentUserId && player.id !== currentUserId && (
                     <Button
                       size="sm"
                       variant="outline"
-                      className="w-full bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 transition-colors group-hover:border-blue-300"
+                      className="bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700"
                       onClick={() => handleChallenge(player.id, player.name)}
                     >
                       <Swords className="h-4 w-4 mr-1" />
                       Challenge
                     </Button>
                   )}
-                </TableCell>
-              </TableRow>
+                </div>
+              </div>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="bg-white/80 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden border border-blue-100/50">
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 hover:from-blue-100 hover:to-purple-100">
+                <TableHead className="w-[100px]">Rank</TableHead>
+                <TableHead>Player</TableHead>
+                <TableHead>Achievements</TableHead>
+                <TableHead className="text-right">W/L</TableHead>
+                <TableHead className="text-right">Points</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {players.map((player) => (
+                <TableRow 
+                  key={player.id}
+                  className={`${getRankStyle(player.rank)} transition-all duration-300 hover:shadow-md group animate-fade-in`}
+                >
+                  <TableCell>
+                    <RankDisplay rank={player.rank} />
+                  </TableCell>
+                  <TableCell>
+                    <PlayerProfile player={player} />
+                  </TableCell>
+                  <TableCell>
+                    <PlayerAchievementsList player={player} />
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    <span className="text-green-600">{player.wins}</span>
+                    <span className="text-muted-foreground mx-1">/</span>
+                    <span className="text-red-600">{player.losses}</span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 font-medium text-sm group-hover:from-blue-200 group-hover:to-purple-200 transition-all duration-300">
+                      {player.points}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {currentUserId && player.id !== currentUserId && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 transition-colors group-hover:border-blue-300"
+                        onClick={() => handleChallenge(player.id, player.name)}
+                      >
+                        <Swords className="h-4 w-4 mr-1" />
+                        Challenge
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
