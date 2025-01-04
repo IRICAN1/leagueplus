@@ -1,5 +1,5 @@
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Calendar, MapPin, Users, Trophy, Bell, BarChart } from "lucide-react";
+import { Calendar, MapPin, Users } from "lucide-react";
 import { format } from "date-fns";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -10,7 +10,7 @@ interface TournamentStatsProps {
 
 export const TournamentStats = ({ league, registeredPlayers }: TournamentStatsProps) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <TooltipProvider>
         <div className="flex items-center space-x-3 bg-muted/50 p-3 rounded-lg">
           <Tooltip>
