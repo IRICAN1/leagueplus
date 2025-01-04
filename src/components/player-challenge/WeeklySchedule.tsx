@@ -18,6 +18,7 @@ interface WeeklyScheduleProps {
   onTimeSlotSelect: (value: string[]) => void;
   onSelectAllDay: (day: number) => void;
   singleSelect?: boolean;
+  selectedWeek?: number;
 }
 
 export const WeeklySchedule = ({
@@ -26,6 +27,7 @@ export const WeeklySchedule = ({
   onTimeSlotSelect,
   onSelectAllDay,
   singleSelect = false,
+  selectedWeek = 0,
 }: WeeklyScheduleProps) => {
   const isMobile = useIsMobile();
 
@@ -70,6 +72,7 @@ export const WeeklySchedule = ({
                   day={day.day}
                   isFullySelected={isDayFullySelected(day.day)}
                   onSelectAll={() => onSelectAllDay(day.day)}
+                  selectedWeek={selectedWeek}
                 />
                 <div className="space-y-0.5">
                   {day.slots.map((slot) => {

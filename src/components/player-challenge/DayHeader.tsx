@@ -1,22 +1,30 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { format, addWeeks, addDays, startOfWeek } from "date-fns";
 
 interface DayHeaderProps {
   day: number;
   isFullySelected: boolean;
   onSelectAll: () => void;
+  selectedWeek?: number;
 }
 
-export const DayHeader = ({ day, isFullySelected, onSelectAll }: DayHeaderProps) => {
-  const getDayName = (dayIndex: number) => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days[dayIndex];
+export const DayHeader = ({ 
+  day, 
+  isFullySelected, 
+  onSelectAll,
+  selectedWeek = 0 
+}: DayHeaderProps) => {
+  const getDate = () => {
+    const baseDate = startOfWeek(addWeeks(new Date(), selectedWeek));
+    return addDays(baseDate, day);
   };
 
   return (
     <div className="flex items-center justify-between gap-1">
       <div className="text-center font-semibold text-gray-700 pb-0.5 border-b text-xs">
-        {getDayName(day)}
+        <div>{format(getDate(), 'EEE')}</div>
+        <div className="text-[10px] text-gray-500">{format(getDate(), 'MMM d')}</div>
       </div>
       <Button
         variant="ghost"
