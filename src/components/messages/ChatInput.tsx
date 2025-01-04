@@ -21,6 +21,23 @@ export const ChatInput = ({ conversationId, onMessageSent }: ChatInputProps) => 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // First, verify that the user is a participant in this conversation
+      const { data: participant } = await supabase
+        .from("conversation_participants")
+        .select("*")
+        .eq("conversation_id", conversationId)
+        .eq("profile_id", user.id)
+        .single();
+
+      if (!participant) {
+        toast({
+          title: "Error",
+          description: "You are not a participant in this conversation.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase.from("messages").insert({
         conversation_id: conversationId,
         content: newMessage.trim(),
