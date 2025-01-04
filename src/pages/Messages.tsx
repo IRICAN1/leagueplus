@@ -49,12 +49,13 @@ const Messages = () => {
 
   useEffect(() => {
     const initializeConversation = async () => {
-      const state = location.state as { otherUserId?: string; challengeId?: string } | null;
+      const state = location.state as { otherUserId?: string } | null;
       if (!state?.otherUserId) return;
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // First, check if a conversation already exists between these users
       const { data: existingConversations } = await supabase
         .from('conversation_participants')
         .select('conversation_id')
@@ -67,7 +68,7 @@ const Messages = () => {
             .select('profile_id')
             .eq('conversation_id', conv.conversation_id)
             .eq('profile_id', state.otherUserId)
-            .single();
+            .maybeSingle();
 
           if (otherParticipant) {
             setSelectedConversation(conv.conversation_id);
@@ -77,47 +78,57 @@ const Messages = () => {
         }
       }
 
-      const { data: newConversation } = await supabase
-        .from('conversations')
-        .insert({})
-        .select()
-        .single();
+      // If no conversation exists, create a new one
+      try {
+        const { data: newConversation, error: conversationError } = await supabase
+          .from('conversations')
+          .insert({})
+          .select()
+          .single();
 
-      if (newConversation) {
-        await Promise.all([
-          supabase
-            .from('conversation_participants')
-            .insert({
-              conversation_id: newConversation.id,
-              profile_id: user.id,
-              is_admin: true
-            }),
-          supabase
-            .from('conversation_participants')
-            .insert({
-              conversation_id: newConversation.id,
-              profile_id: state.otherUserId,
-              is_admin: false
-            })
-        ]);
+        if (conversationError) throw conversationError;
 
-        if (state.challengeId) {
-          await supabase
-            .from('messages')
-            .insert({
-              conversation_id: newConversation.id,
-              sender_id: user.id,
-              content: "Let's discuss the match details!"
-            });
+        if (newConversation) {
+          // Add both users as participants
+          const participantsPromises = [
+            supabase
+              .from('conversation_participants')
+              .insert({
+                conversation_id: newConversation.id,
+                profile_id: user.id,
+                is_admin: true
+              }),
+            supabase
+              .from('conversation_participants')
+              .insert({
+                conversation_id: newConversation.id,
+                profile_id: state.otherUserId,
+                is_admin: false
+              })
+          ];
+
+          await Promise.all(participantsPromises);
+          
+          setSelectedConversation(newConversation.id);
+          if (isMobile) setShowList(false);
+
+          toast({
+            title: "Conversation Created",
+            description: "You can now start messaging",
+          });
         }
-
-        setSelectedConversation(newConversation.id);
-        if (isMobile) setShowList(false);
+      } catch (error) {
+        console.error('Error creating conversation:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create conversation. Please try again.",
+          variant: "destructive",
+        });
       }
     };
 
     void initializeConversation();
-  }, [location.state, isMobile]);
+  }, [location.state, isMobile, toast]);
 
   const handleSelectConversation = (id: string) => {
     setSelectedConversation(id);
