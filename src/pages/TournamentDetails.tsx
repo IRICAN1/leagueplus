@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
+import { TournamentStats } from "@/components/tournament/TournamentStats";
 import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
 import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -44,9 +45,8 @@ const TournamentDetails = () => {
         .from('leagues')
         .select(`
           *,
-          creator:profiles!leagues_creator_id_fkey (
-            username,
-            full_name
+          creator:creator_id (
+            username
           )
         `)
         .eq('id', id)
@@ -67,23 +67,6 @@ const TournamentDetails = () => {
         .eq('league_id', id);
       return count || 0;
     }
-  });
-
-  const { data: isUserRegistered } = useQuery({
-    queryKey: ['isUserRegistered', id],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return false;
-
-      const { count } = await supabase
-        .from('league_participants')
-        .select('*', { count: 'exact', head: true })
-        .eq('league_id', id)
-        .eq('user_id', session.user.id);
-
-      return count ? count > 0 : false;
-    },
-    enabled: isAuthenticated && !!id
   });
 
   if (!id || !UUID_REGEX.test(id)) {
@@ -125,15 +108,15 @@ const TournamentDetails = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto p-4 space-y-6">
       {!isAuthenticated && (
         <Alert>
-          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <AlertDescription className="flex items-center justify-between">
             <span>Sign in to register for this league and access all features.</span>
             <Button 
               variant="outline" 
               onClick={() => navigate('/login', { state: { returnTo: `/tournament/${id}` } })}
-              className="w-full sm:w-auto"
+              className="ml-4"
             >
               <LogIn className="mr-2 h-4 w-4" />
               Sign In
@@ -145,15 +128,20 @@ const TournamentDetails = () => {
       <TournamentHeader 
         league={league} 
         isAuthenticated={isAuthenticated}
-        isUserRegistered={isUserRegistered}
+        isUserRegistered={false}
         registeredPlayers={registeredPlayers}
       />
 
-      <Tabs defaultValue="matches" className="space-y-6">
-        <TabsList className="w-full justify-start overflow-x-auto">
+      <Tabs defaultValue="rankings" className="space-y-6">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="rankings">Rankings</TabsTrigger>
           <TabsTrigger value="matches">Upcoming Matches</TabsTrigger>
           <TabsTrigger value="history">Match History</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="rankings">
+          <TournamentStats leagueId={id} />
+        </TabsContent>
         
         <TabsContent value="matches">
           <UpcomingMatches leagueId={id} />
