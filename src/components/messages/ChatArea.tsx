@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatInput } from "./ChatInput";
 import { MessageBubble } from "./MessageBubble";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChatAreaProps {
   conversationId: string | null;
@@ -27,7 +28,8 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
           *,
           profiles (
             username,
-            avatar_url
+            avatar_url,
+            full_name
           )
         `
         )
@@ -44,6 +46,35 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
         .eq("profile_id", user.id);
 
       return data;
+    },
+    enabled: !!conversationId,
+  });
+
+  // Query to get other participant's info
+  const { data: otherParticipant } = useQuery({
+    queryKey: ["other-participant", conversationId],
+    queryFn: async () => {
+      if (!conversationId) return null;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data: participants, error } = await supabase
+        .from("conversation_participants")
+        .select(`
+          profile_id,
+          profiles (
+            username,
+            avatar_url,
+            full_name
+          )
+        `)
+        .eq("conversation_id", conversationId)
+        .neq("profile_id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return participants;
     },
     enabled: !!conversationId,
   });
@@ -83,7 +114,7 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
       <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-8">
         <div className="text-center space-y-4">
           <div className="text-purple-400">
-            <svg className="w-20 h-20 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-20 h-20 mx-auto animate-float" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </div>
@@ -97,7 +128,24 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-4 bg-gradient-to-r from-purple-50 to-blue-50">
-        <h3 className="font-semibold text-gray-800">Chat</h3>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage
+              src={otherParticipant?.profiles?.avatar_url}
+              alt={otherParticipant?.profiles?.username}
+            />
+            <AvatarFallback className="bg-gradient-to-br from-purple-100 to-blue-100">
+              {otherParticipant?.profiles?.full_name?.charAt(0) || 
+               otherParticipant?.profiles?.username?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h3 className="font-semibold text-gray-800">
+              {otherParticipant?.profiles?.full_name || otherParticipant?.profiles?.username}
+            </h3>
+            <p className="text-sm text-gray-500">Online</p>
+          </div>
+        </div>
       </div>
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
         {!messages ? (

@@ -30,7 +30,6 @@ export const ChatInput = ({ conversationId, onMessageSent }: ChatInputProps) => 
         return;
       }
 
-      // First, verify that the user is a participant in this conversation
       const { data: participant, error: participantError } = await supabase
         .from("conversation_participants")
         .select("*")
@@ -86,7 +85,7 @@ export const ChatInput = ({ conversationId, onMessageSent }: ChatInputProps) => 
 
   return (
     <div className="border-t p-4 bg-white">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 max-w-4xl mx-auto">
         <Input
           placeholder="Type a message..."
           value={newMessage}
@@ -97,13 +96,13 @@ export const ChatInput = ({ conversationId, onMessageSent }: ChatInputProps) => 
               void handleSendMessage();
             }
           }}
-          className="flex-1"
+          className="flex-1 bg-gray-50 border-gray-200 focus:border-purple-300 focus:ring-purple-200"
           disabled={isSending}
         />
         <Button
           onClick={() => void handleSendMessage()}
           disabled={!newMessage.trim() || isSending}
-          className="bg-blue-500 hover:bg-blue-600"
+          className="bg-purple-500 hover:bg-purple-600 transition-colors"
         >
           <Send className="h-4 w-4" />
         </Button>
