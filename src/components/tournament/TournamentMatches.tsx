@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Challenge } from "@/types/match";
 
 interface TournamentMatchesProps {
   leagueId: string;
@@ -18,11 +19,11 @@ export const TournamentMatches = ({ leagueId }: TournamentMatchesProps) => {
         .select(`
           id,
           proposed_time,
-          challenger:challenger_id (
+          challenger:profiles!match_challenges_challenger_id_fkey (
             username,
             avatar_url
           ),
-          challenged:challenged_id (
+          challenged:profiles!match_challenges_challenged_id_fkey (
             username,
             avatar_url
           )
@@ -34,7 +35,7 @@ export const TournamentMatches = ({ leagueId }: TournamentMatchesProps) => {
         .limit(5);
 
       if (error) throw error;
-      return data;
+      return data as Challenge[];
     }
   });
 
