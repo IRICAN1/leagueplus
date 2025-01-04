@@ -46,7 +46,8 @@ const TournamentDetails = () => {
         .select(`
           *,
           creator:creator_id (
-            username
+            username,
+            full_name
           )
         `)
         .eq('id', id)
