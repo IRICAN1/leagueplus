@@ -166,16 +166,16 @@ const Messages = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 pt-0 pb-6">
       <MobileMessageToggle 
         showList={showList} 
         onToggle={() => setShowList(!showList)} 
         otherUser={otherUser}
       />
-      <div className="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border bg-white shadow-lg mt-16 md:mt-0">
+      <div className="flex h-[calc(100vh-10rem)] overflow-hidden rounded-xl border bg-white shadow-lg mt-24 md:mt-0">
         <div 
           className={`${
-            isMobile ? 'w-full fixed inset-0 z-20 bg-white transition-transform duration-300 transform' : 'w-1/3'
+            isMobile ? 'w-full fixed inset-0 z-10 bg-white transition-transform duration-300 transform mt-32' : 'w-1/3'
           } ${
             isMobile && !showList ? 'translate-x-[-100%]' : 'translate-x-0'
           } border-r`}
@@ -190,7 +190,7 @@ const Messages = () => {
         </div>
         <div 
           className={`${
-            isMobile ? 'w-full fixed inset-0 bg-white transition-transform duration-300 transform' : 'w-2/3'
+            isMobile ? 'w-full fixed inset-0 bg-white transition-transform duration-300 transform mt-32' : 'w-2/3'
           } ${
             isMobile && showList ? 'translate-x-[100%]' : 'translate-x-0'
           }`}

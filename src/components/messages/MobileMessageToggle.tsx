@@ -18,7 +18,7 @@ export const MobileMessageToggle = ({
   otherUser 
 }: MobileMessageToggleProps) => {
   return (
-    <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-gradient-to-r from-purple-50 to-blue-50 border-b p-4 flex items-center gap-3">
+    <div className="md:hidden fixed top-16 left-0 right-0 z-20 bg-gradient-to-r from-purple-50 to-blue-50 border-b p-4 flex items-center gap-3">
       <Button 
         variant="ghost" 
         size="sm" 
