@@ -17,16 +17,19 @@ const TournamentDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
+      setUserId(session?.user?.id || null);
     };
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
+      setUserId(session?.user?.id || null);
     });
 
     return () => {
@@ -68,6 +71,24 @@ const TournamentDetails = () => {
         .eq('league_id', id);
       return count || 0;
     }
+  });
+
+  const { data: isUserRegistered } = useQuery({
+    queryKey: ['isUserRegistered', id, userId],
+    queryFn: async () => {
+      if (!userId || !id) return false;
+      
+      const { data, error } = await supabase
+        .from('league_participants')
+        .select('id')
+        .eq('league_id', id)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return !!data;
+    },
+    enabled: !!userId && !!id
   });
 
   if (!id || !UUID_REGEX.test(id)) {
@@ -129,7 +150,7 @@ const TournamentDetails = () => {
       <TournamentHeader 
         league={league} 
         isAuthenticated={isAuthenticated}
-        isUserRegistered={false}
+        isUserRegistered={isUserRegistered}
         registeredPlayers={registeredPlayers}
       />
 
