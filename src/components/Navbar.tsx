@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trophy, BellDot } from "lucide-react";
+import { Trophy, BellDot, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { NavbarLinks } from "./navbar/NavbarLinks";
@@ -13,6 +13,7 @@ import { Button } from "./ui/button";
 export const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [pendingChallenges, setPendingChallenges] = useState<any[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,8 +34,28 @@ export const Navbar = () => {
         
         setPendingChallenges(challenges || []);
 
+        // Fetch unread messages count
+        const { data: participants } = await supabase
+          .from('conversation_participants')
+          .select('conversation_id, last_read_at')
+          .eq('profile_id', session.user.id);
+
+        if (participants) {
+          let unreadCount = 0;
+          for (const participant of participants) {
+            const { count } = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('conversation_id', participant.conversation_id)
+              .gt('created_at', participant.last_read_at);
+            
+            unreadCount += count || 0;
+          }
+          setUnreadMessages(unreadCount);
+        }
+
         // Subscribe to real-time updates
-        const channel = supabase
+        const challengeChannel = supabase
           .channel('schema-db-changes')
           .on(
             'postgres_changes',
@@ -45,7 +66,6 @@ export const Navbar = () => {
               filter: `challenged_id=eq.${session.user.id}`
             },
             async () => {
-              // Refetch challenges on any changes
               const { data: updatedChallenges } = await supabase
                 .from('match_challenges')
                 .select(`
@@ -61,8 +81,27 @@ export const Navbar = () => {
           )
           .subscribe();
 
+        // Subscribe to new messages
+        const messageChannel = supabase
+          .channel('message-changes')
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'messages'
+            },
+            async (payload) => {
+              if (payload.new.sender_id !== session.user.id) {
+                setUnreadMessages(prev => prev + 1);
+              }
+            }
+          )
+          .subscribe();
+
         return () => {
-          supabase.removeChannel(channel);
+          supabase.removeChannel(challengeChannel);
+          supabase.removeChannel(messageChannel);
         };
       }
     };
@@ -93,20 +132,33 @@ export const Navbar = () => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {isAuthenticated && pendingChallenges.length > 0 && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="relative inline-flex items-center">
-                    <BellDot className="h-6 w-6 text-blue-500 animate-pulse" />
+            {isAuthenticated && (
+              <>
+                {unreadMessages > 0 && (
+                  <Link to="/messages" className="relative inline-flex items-center">
+                    <MessageSquare className="h-6 w-6 text-blue-500 animate-pulse" />
                     <Badge 
                       variant="destructive" 
                       className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs ring-2 ring-white"
                     >
-                      {pendingChallenges.length}
+                      {unreadMessages}
                     </Badge>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-0" align="end">
+                  </Link>
+                )}
+                {pendingChallenges.length > 0 && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="relative inline-flex items-center">
+                        <BellDot className="h-6 w-6 text-blue-500 animate-pulse" />
+                        <Badge 
+                          variant="destructive" 
+                          className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs ring-2 ring-white"
+                        >
+                          {pendingChallenges.length}
+                        </Badge>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-0" align="end">
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-t-lg border-b border-blue-200">
                     <h3 className="font-semibold text-blue-800">
                       Pending Match Challenges
@@ -139,8 +191,10 @@ export const Navbar = () => {
                       </Button>
                     </Link>
                   </div>
-                </PopoverContent>
-              </Popover>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </>
             )}
             <NavbarAuth isAuthenticated={isAuthenticated} />
           </div>

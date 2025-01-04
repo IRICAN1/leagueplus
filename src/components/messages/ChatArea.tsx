@@ -26,7 +26,6 @@ interface Message {
 
 export const ChatArea = ({ conversationId }: ChatAreaProps) => {
   const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -60,6 +59,16 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
+
+      // Update last_read_at when messages are fetched
+      if (currentUserId) {
+        await supabase
+          .from("conversation_participants")
+          .update({ last_read_at: new Date().toISOString() })
+          .eq("conversation_id", conversationId)
+          .eq("profile_id", currentUserId);
+      }
+
       return data as Message[];
     },
     enabled: !!conversationId,
@@ -191,9 +200,6 @@ export const ChatArea = ({ conversationId }: ChatAreaProps) => {
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        {isTyping && (
-          <span className="mt-1 text-xs text-gray-500">Someone is typing...</span>
-        )}
       </div>
     </div>
   );
