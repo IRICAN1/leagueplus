@@ -15,9 +15,9 @@ interface FilterControlsProps {
 
 export const FilterControls = ({ filters, onFilterChange }: FilterControlsProps) => {
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
       <Select onValueChange={(value) => onFilterChange({ skillLevel: value === "all" ? undefined : value })}>
-        <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
+        <SelectTrigger className="w-full bg-white/90 text-gray-700 border-blue-100">
           <SelectValue placeholder="Skill Level" />
         </SelectTrigger>
         <SelectContent>
@@ -29,7 +29,7 @@ export const FilterControls = ({ filters, onFilterChange }: FilterControlsProps)
       </Select>
 
       <Select onValueChange={(value) => onFilterChange({ genderCategory: value === "all" ? undefined : value })}>
-        <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
+        <SelectTrigger className="w-full bg-white/90 text-gray-700 border-blue-100">
           <SelectValue placeholder="Gender Category" />
         </SelectTrigger>
         <SelectContent>
@@ -43,7 +43,7 @@ export const FilterControls = ({ filters, onFilterChange }: FilterControlsProps)
       <Select onValueChange={(value: 'active' | 'upcoming' | 'completed' | 'all') => 
         onFilterChange({ status: value === "all" ? undefined : value as 'active' | 'upcoming' | 'completed' })
       }>
-        <SelectTrigger className="w-[180px] bg-white/90 text-gray-700 border-blue-100">
+        <SelectTrigger className="w-full bg-white/90 text-gray-700 border-blue-100">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
@@ -63,19 +63,15 @@ export const FilterControls = ({ filters, onFilterChange }: FilterControlsProps)
         <Label htmlFor="has-spots">Available Spots</Label>
       </div>
 
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+      <div className="flex gap-2">
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full md:w-[180px] justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
+              className="flex-1 justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {filters.startDate ? (
-                format(filters.startDate, "PPP")
-              ) : (
-                <span>Start Date</span>
-              )}
+              {filters.startDate ? format(filters.startDate, "PP") : "Start Date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -92,14 +88,10 @@ export const FilterControls = ({ filters, onFilterChange }: FilterControlsProps)
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full md:w-[180px] justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
+              className="flex-1 justify-start text-left font-normal bg-white/90 text-gray-700 border-blue-100"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {filters.endDate ? (
-                format(filters.endDate, "PPP")
-              ) : (
-                <span>End Date</span>
-              )}
+              {filters.endDate ? format(filters.endDate, "PP") : "End Date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">

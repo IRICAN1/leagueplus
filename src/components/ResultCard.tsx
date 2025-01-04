@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Users } from "lucide-react";
+import { Trophy, Star, Users, CircleDot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface ResultCardProps {
@@ -30,36 +30,50 @@ export const ResultCard = ({
 }: ResultCardProps) => {
   const navigate = useNavigate();
 
+  const getStatusColor = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'open':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'closed':
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 'full':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      default:
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+    }
+  };
+
   return (
     <Card 
-      className="group overflow-hidden transition-all duration-300 hover:shadow-xl animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80 cursor-pointer"
+      className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80 cursor-pointer"
       onClick={() => navigate(`/tournament/${id}`)}
     >
-      <CardContent className="p-3 md:p-4 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
-        <div className="flex justify-between items-start gap-4">
-          <div className="space-y-1 flex-1">
-            <div className="flex flex-wrap gap-1 mb-1">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200">
-                {type}
+      <CardContent className="p-3 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1">
+            <Badge variant="outline" className={getStatusColor(type)}>
+              <CircleDot className="h-3 w-3 mr-1" />
+              {type}
+            </Badge>
+            {sportType && (
+              <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-600">
+                <Trophy className="h-3 w-3 mr-1" />
+                {sportType}
               </Badge>
-              {sportType && (
-                <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-600">
-                  <Trophy className="h-3 w-3 mr-1" />
-                  {sportType}
-                </Badge>
-              )}
-              {skillLevel && (
-                <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-600">
-                  <Star className="h-3 w-3 mr-1" />
-                  Level {skillLevel}
-                </Badge>
-              )}
-            </div>
+            )}
+            {genderCategory && (
+              <Badge variant="outline" className="bg-pink-50 border-pink-200 text-pink-600">
+                {genderCategory}
+              </Badge>
+            )}
+          </div>
+
+          <div>
             <h3 className="text-base font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
               {title}
             </h3>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600 flex items-center gap-2">
+            <div className="flex items-center justify-between text-sm">
+              <p className="text-gray-600 flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-500" />
                 {location}
               </p>
@@ -69,15 +83,24 @@ export const ResultCard = ({
                 </Badge>
               )}
             </div>
-            <div className="flex items-center justify-between text-sm text-gray-500">
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <div className="flex items-center gap-2">
               <span>{date}</span>
-              {participants && (
-                <span className="flex items-center gap-1 text-gray-600">
-                  <Users className="h-3 w-3" />
-                  {participants}
-                </span>
+              {skillLevel && (
+                <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-600">
+                  <Star className="h-3 w-3 mr-1" />
+                  Level {skillLevel}
+                </Badge>
               )}
             </div>
+            {participants && (
+              <span className="flex items-center gap-1 text-gray-600">
+                <Users className="h-3 w-3" />
+                {participants}
+              </span>
+            )}
           </div>
         </div>
       </CardContent>
