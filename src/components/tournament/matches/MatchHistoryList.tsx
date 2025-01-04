@@ -16,9 +16,21 @@ export const MatchHistoryList = ({ leagueId }: MatchHistoryListProps) => {
         .from('match_challenges')
         .select(`
           *,
-          challenger:challenger_id(username, full_name, avatar_url),
-          challenged:challenged_id(username, full_name, avatar_url),
-          winner:winner_id(username, full_name, avatar_url)
+          challenger:challenger_id(
+            username,
+            full_name,
+            avatar_url
+          ),
+          challenged:challenged_id(
+            username,
+            full_name,
+            avatar_url
+          ),
+          winner:winner_id(
+            username,
+            full_name,
+            avatar_url
+          )
         `)
         .eq('league_id', leagueId)
         .eq('result_status', 'approved')
