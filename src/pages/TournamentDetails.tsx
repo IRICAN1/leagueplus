@@ -8,7 +8,7 @@ import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryLi
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
-import { LogIn } from "lucide-react";
+import { LogIn, Trophy, Calendar, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -109,7 +109,7 @@ const TournamentDetails = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6 mt-20 md:mt-24">
+    <div className="container mx-auto p-4 space-y-6 sm:mt-0 mt-20">
       {!isAuthenticated && (
         <Alert>
           <AlertDescription className="flex items-center justify-between">
@@ -134,10 +134,22 @@ const TournamentDetails = () => {
       />
 
       <Tabs defaultValue="rankings" className="space-y-6">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="rankings">Rankings</TabsTrigger>
-          <TabsTrigger value="matches">Upcoming Matches</TabsTrigger>
-          <TabsTrigger value="history">Match History</TabsTrigger>
+        <TabsList className="w-full justify-start bg-background border rounded-lg p-1 flex flex-wrap gap-1">
+          <TabsTrigger value="rankings" className="flex-1 sm:flex-none">
+            <Trophy className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Rankings</span>
+            <span className="sm:hidden">Rank</span>
+          </TabsTrigger>
+          <TabsTrigger value="matches" className="flex-1 sm:flex-none">
+            <Calendar className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Upcoming Matches</span>
+            <span className="sm:hidden">Matches</span>
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex-1 sm:flex-none">
+            <History className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Match History</span>
+            <span className="sm:hidden">History</span>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="rankings">
