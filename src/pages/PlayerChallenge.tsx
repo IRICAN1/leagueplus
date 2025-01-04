@@ -7,8 +7,10 @@ import { ChallengeForm } from "@/components/player-challenge/ChallengeForm";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Crown, Medal, Trophy, Star, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const PlayerChallenge = () => {
   const { playerId } = useParams();
@@ -16,6 +18,8 @@ const PlayerChallenge = () => {
   const { playerName, leagueId } = location.state || {};
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string[]>([]);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: playerData, isLoading } = useQuery({
     queryKey: ['player', playerId, leagueId],
@@ -64,6 +68,36 @@ const PlayerChallenge = () => {
     },
     enabled: !!playerId && !!leagueId
   });
+
+  const handleChallenge = async () => {
+    try {
+      const { error } = await supabase
+        .from('match_challenges')
+        .insert({
+          league_id: leagueId,
+          challenger_id: playerData?.id,
+          challenged_id: playerId,
+          proposed_time: getProposedTime(selectedTimeSlot[0]),
+          location: playerData?.primary_location || "To be determined",
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Challenge Sent",
+        description: "Your challenge request has been sent successfully.",
+      });
+
+      navigate('/match-requests');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send challenge request. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
