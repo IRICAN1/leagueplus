@@ -26,7 +26,9 @@ export const ChallengeConfirmationDialog = ({
   const handleConfirm = async () => {
     try {
       // Get current user session
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) throw sessionError;
       if (!session?.user) {
         throw new Error("You must be logged in to create a challenge");
       }
@@ -38,7 +40,7 @@ export const ChallengeConfirmationDialog = ({
         proposed_time: challengeDetails.proposedTime
       });
 
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('match_challenges')
         .insert({
           challenger_id: session.user.id,
@@ -48,7 +50,7 @@ export const ChallengeConfirmationDialog = ({
           status: 'pending'
         });
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
       toast({
         title: "Challenge Created",
@@ -59,7 +61,7 @@ export const ChallengeConfirmationDialog = ({
       console.error("Challenge creation error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to create challenge",
         variant: "destructive",
       });
     }
