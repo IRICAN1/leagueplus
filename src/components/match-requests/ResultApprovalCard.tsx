@@ -14,12 +14,16 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
 
   const handleResultApproval = async (approved: boolean) => {
     try {
+      // Using a more direct update approach with proper filtering
       const { error } = await supabase
         .from('match_challenges')
-        .update({
-          result_status: approved ? 'approved' : 'disputed'
-        })
-        .match({ id: challenge.id }); // Using .match() for more explicit filtering
+        .update([{ 
+          result_status: approved ? 'approved' : 'disputed',
+          updated_at: new Date().toISOString()
+        }])
+        .eq('id', challenge.id)
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -29,12 +33,10 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
         queryClient.invalidateQueries({ queryKey: ['player-statistics'] }),
         queryClient.invalidateQueries({ queryKey: ['league-rankings'] }),
         queryClient.invalidateQueries({ queryKey: ['match-history'] }),
-        // Force refetch with exact match for the specific league
         queryClient.invalidateQueries({ 
           queryKey: ['player-statistics', challenge.league_id],
           exact: true 
         }),
-        // Invalidate the rankings specifically
         queryClient.invalidateQueries({ 
           queryKey: ['player-rankings', challenge.league_id],
           exact: true 
@@ -48,6 +50,7 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
           : "The match result has been marked as disputed",
       });
     } catch (error: any) {
+      console.error('Error in handleResultApproval:', error);
       toast({
         title: "Error",
         description: error.message,
