@@ -14,13 +14,12 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
 
   const handleResultApproval = async (approved: boolean) => {
     try {
-      // Using a more direct update approach with proper filtering
       const { error } = await supabase
         .from('match_challenges')
-        .update([{ 
+        .update({
           result_status: approved ? 'approved' : 'disputed',
           updated_at: new Date().toISOString()
-        }])
+        })
         .eq('id', challenge.id)
         .select()
         .single();
