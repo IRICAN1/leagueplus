@@ -14,12 +14,23 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
 
   const handleResultApproval = async (approved: boolean) => {
     try {
+      // First, fetch the challenge to ensure it exists
+      const { data: existingChallenge, error: fetchError } = await supabase
+        .from('match_challenges')
+        .select('*')
+        .eq('id', challenge.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (!existingChallenge) throw new Error('Challenge not found');
+
+      // Then perform the update with proper filtering
       const { error } = await supabase
         .from('match_challenges')
         .update({
           result_status: approved ? 'approved' : 'disputed'
         })
-        .eq('id', challenge.id);
+        .eq('id', challenge.id); // This ensures we're updating the specific challenge
 
       if (error) throw error;
 
