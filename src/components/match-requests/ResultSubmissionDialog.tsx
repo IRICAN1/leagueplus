@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { WinnerSelection } from "./WinnerSelection";
 import { SetScoreInput } from "./SetScoreInput";
 import { ThirdSetInput } from "./ThirdSetInput";
-import { isValidTennisScore } from "./utils/scoreValidation";
+import { validateMatchResult } from "./utils/scoreValidation";
 
 interface ResultSubmissionDialogProps {
   challenge: any;
@@ -35,37 +35,74 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
   const [isTiebreak3, setIsTiebreak3] = useState(false);
   const [showThirdSet, setShowThirdSet] = useState(false);
 
-  const handleResultSubmit = async () => {
-    if (!winnerScore1 || !loserScore1 || !winnerScore2 || !loserScore2 || !winnerId) {
+  const resetForm = () => {
+    setWinnerScore1("");
+    setWinnerScore2("");
+    setWinnerScore3("");
+    setLoserScore1("");
+    setLoserScore2("");
+    setLoserScore3("");
+    setWinnerId("");
+    setIsTiebreak1(false);
+    setIsTiebreak2(false);
+    setIsTiebreak3(false);
+    setShowThirdSet(false);
+  };
+
+  const validateForm = () => {
+    if (!winnerId) {
       toast({
         title: "Error",
-        description: "Please fill in all scores and select a winner",
+        description: "Please select a winner",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
-    // Validate tennis scores for both mandatory sets
-    if (!isValidTennisScore(winnerScore1, loserScore1, isTiebreak1) || 
-        !isValidTennisScore(winnerScore2, loserScore2, isTiebreak2)) {
+    if (!winnerScore1 || !loserScore1 || !winnerScore2 || !loserScore2) {
+      toast({
+        title: "Error",
+        description: "Please fill in all scores for the first two sets",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (showThirdSet && (!winnerScore3 || !loserScore3)) {
+      toast({
+        title: "Error",
+        description: "Please fill in all scores for the third set",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const isValid = validateMatchResult(
+      winnerScore1,
+      loserScore1,
+      winnerScore2,
+      loserScore2,
+      showThirdSet ? winnerScore3 : null,
+      showThirdSet ? loserScore3 : null,
+      isTiebreak1,
+      isTiebreak2,
+      isTiebreak3
+    );
+
+    if (!isValid) {
       toast({
         title: "Invalid Score",
         description: "Please enter valid tennis scores",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
-    // Validate third set if it's shown
-    if (showThirdSet && (!winnerScore3 || !loserScore3 || 
-        !isValidTennisScore(winnerScore3, loserScore3, isTiebreak3))) {
-      toast({
-        title: "Invalid Third Set Score",
-        description: "Please enter valid tennis scores for the third set",
-        variant: "destructive",
-      });
-      return;
-    }
+    return true;
+  };
+
+  const handleResultSubmit = async () => {
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
@@ -97,20 +134,10 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
         description: "Waiting for opponent's approval",
       });
       
-      // Reset form and close dialog
-      setWinnerScore1("");
-      setWinnerScore2("");
-      setWinnerScore3("");
-      setLoserScore1("");
-      setLoserScore2("");
-      setLoserScore3("");
-      setWinnerId("");
-      setIsTiebreak1(false);
-      setIsTiebreak2(false);
-      setIsTiebreak3(false);
-      setShowThirdSet(false);
+      resetForm();
       setIsOpen(false);
     } catch (error: any) {
+      console.error('Error submitting result:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -132,7 +159,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
         <DialogHeader>
           <DialogTitle>Submit Match Result</DialogTitle>
           <DialogDescription>
-            Enter the match scores. For tiebreak sets, toggle the switch and enter 7-6 score.
+            Enter the match scores. For tiebreak sets, toggle the switch and enter the final score.
             {!showThirdSet && " Add a third set if the match went to a final set."}
           </DialogDescription>
         </DialogHeader>
@@ -179,7 +206,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
             disabled={isSubmitting}
             className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
           >
-            Submit Result
+            {isSubmitting ? "Submitting..." : "Submit Result"}
           </Button>
         </div>
       </DialogContent>
