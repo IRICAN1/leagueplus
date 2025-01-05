@@ -39,6 +39,10 @@ export const submitMatchResult = async (
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error in submitMatchResult:', error);
+    throw error;
+  }
+  
   return data;
 };
