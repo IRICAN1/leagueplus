@@ -50,7 +50,22 @@ export const ChallengeForm = ({
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // Add authentication check
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      console.error("No authenticated user found");
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to create a challenge",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Current user ID:", session.user.id);
+    console.log("Selected time slot:", selectedTimeSlot);
+
     if (selectedTimeSlot.length === 0) {
       toast({
         title: "Select Time Slot",
@@ -59,6 +74,8 @@ export const ChallengeForm = ({
       });
       return;
     }
+
+    // Proceed with confirmation
     onOpenConfirmation();
   };
 
