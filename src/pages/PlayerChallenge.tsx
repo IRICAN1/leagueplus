@@ -154,6 +154,7 @@ const PlayerChallenge = () => {
           location: playerData.primary_location || "To be determined",
           proposedTime: getProposedTime(selectedTimeSlot[0]),
           leagueId: playerData.leagueId,
+          playerId: playerId || '', // Add the playerId from URL params
         }}
       />
     </div>

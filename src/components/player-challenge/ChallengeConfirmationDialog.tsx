@@ -13,6 +13,7 @@ interface ChallengeConfirmationDialogProps {
     location: string;
     proposedTime: string;
     leagueId: string;
+    playerId: string; // Add this to receive the challenged player's ID
   };
 }
 
@@ -35,6 +36,7 @@ export const ChallengeConfirmationDialog = ({
 
       console.log("Creating challenge with:", {
         challenger_id: session.user.id,
+        challenged_id: challengeDetails.playerId,
         league_id: challengeDetails.leagueId,
         location: challengeDetails.location,
         proposed_time: challengeDetails.proposedTime
@@ -44,6 +46,7 @@ export const ChallengeConfirmationDialog = ({
         .from('match_challenges')
         .insert({
           challenger_id: session.user.id,
+          challenged_id: challengeDetails.playerId,
           league_id: challengeDetails.leagueId,
           location: challengeDetails.location,
           proposed_time: challengeDetails.proposedTime,
