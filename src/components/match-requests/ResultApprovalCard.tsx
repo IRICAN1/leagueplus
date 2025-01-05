@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { PendingApprovalCard } from "./PendingApprovalCard";
+import { MatchScoreDisplay } from "./MatchScoreDisplay";
 
 interface ResultApprovalCardProps {
   challenge: any;
@@ -26,7 +27,6 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
 
       if (error) throw error;
 
-      // Invalidate and refetch ALL relevant queries
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['match-challenges'] }),
         queryClient.invalidateQueries({ queryKey: ['player-statistics'] }),
@@ -58,49 +58,33 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
     }
   };
 
-  const formatScore = (score: string) => {
-    return score.replace('-', ' - ');
-  };
-
   if (challenge.result_status === 'pending' && challenge.winner_id) {
     // Show approval UI for the opponent
     if (currentUserId !== challenge.winner_id) {
+      const winnerUsername = challenge.winner_id === challenge.challenger_id 
+        ? challenge.challenger.username 
+        : challenge.challenged.username;
+
       return (
-        <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
-          <p className="text-sm font-medium mb-2">Match Result Pending Approval</p>
-          <p className="text-sm mb-3">
-            Score: {formatScore(challenge.winner_score)} | {formatScore(challenge.loser_score)}
-            <br />
-            Winner: {challenge.winner_id === challenge.challenger_id 
-              ? challenge.challenger.username 
-              : challenge.challenged.username}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleResultApproval(false)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              Dispute
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => handleResultApproval(true)}
-              className="bg-green-500 hover:bg-green-600"
-            >
-              Approve
-            </Button>
-          </div>
-        </div>
+        <PendingApprovalCard
+          winnerScore={challenge.winner_score}
+          loserScore={challenge.loser_score}
+          winnerUsername={winnerUsername}
+          onApprove={() => handleResultApproval(true)}
+          onDispute={() => handleResultApproval(false)}
+        />
       );
     }
     return (
       <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
         <p className="text-sm">Waiting for opponent to approve the result</p>
-        <p className="text-sm mt-2">
-          Submitted Score: {formatScore(challenge.winner_score)} | {formatScore(challenge.loser_score)}
-        </p>
+        <MatchScoreDisplay
+          winnerScore={challenge.winner_score}
+          loserScore={challenge.loser_score}
+          winnerUsername={challenge.winner_id === challenge.challenger_id 
+            ? challenge.challenger.username 
+            : challenge.challenged.username}
+        />
       </div>
     );
   }
