@@ -33,6 +33,11 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
         queryClient.invalidateQueries({ 
           queryKey: ['player-statistics', challenge.league_id],
           exact: true 
+        }),
+        // Invalidate the rankings specifically
+        queryClient.invalidateQueries({ 
+          queryKey: ['player-rankings', challenge.league_id],
+          exact: true 
         })
       ]);
 
