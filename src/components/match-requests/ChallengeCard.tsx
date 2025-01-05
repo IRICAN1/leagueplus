@@ -135,6 +135,12 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     const winnerSets = parseScore(challenge.winner_score);
     const loserSets = parseScore(challenge.loser_score);
 
+    // Add third set scores if they exist
+    if (challenge.winner_score_set3) {
+      winnerSets.push(challenge.winner_score_set3);
+      loserSets.push(challenge.loser_score_set3);
+    }
+
     return (
       <div className="mt-6 px-4">
         <Table className="w-full bg-gradient-to-r from-gray-50 via-white to-gray-50 rounded-xl overflow-hidden shadow-lg border border-gray-200">

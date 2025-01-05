@@ -209,12 +209,14 @@ export type Database = {
           league_id: string | null
           location: string
           loser_score: string | null
+          loser_score_set3: string | null
           proposed_time: string
           result_status: Database["public"]["Enums"]["challenge_status"] | null
           status: Database["public"]["Enums"]["challenge_status"] | null
           updated_at: string | null
           winner_id: string | null
           winner_score: string | null
+          winner_score_set3: string | null
         }
         Insert: {
           challenged_id?: string | null
@@ -224,12 +226,14 @@ export type Database = {
           league_id?: string | null
           location: string
           loser_score?: string | null
+          loser_score_set3?: string | null
           proposed_time: string
           result_status?: Database["public"]["Enums"]["challenge_status"] | null
           status?: Database["public"]["Enums"]["challenge_status"] | null
           updated_at?: string | null
           winner_id?: string | null
           winner_score?: string | null
+          winner_score_set3?: string | null
         }
         Update: {
           challenged_id?: string | null
@@ -239,12 +243,14 @@ export type Database = {
           league_id?: string | null
           location?: string
           loser_score?: string | null
+          loser_score_set3?: string | null
           proposed_time?: string
           result_status?: Database["public"]["Enums"]["challenge_status"] | null
           status?: Database["public"]["Enums"]["challenge_status"] | null
           updated_at?: string | null
           winner_id?: string | null
           winner_score?: string | null
+          winner_score_set3?: string | null
         }
         Relationships: [
           {

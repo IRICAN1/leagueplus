@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { WinnerSelection } from "./WinnerSelection";
 import { SetScoreInput } from "./SetScoreInput";
+import { ThirdSetInput } from "./ThirdSetInput";
 import { isValidTennisScore } from "./utils/scoreValidation";
 
 interface ResultSubmissionDialogProps {
@@ -25,10 +26,14 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
   const [loserScore1, setLoserScore1] = useState("");
   const [winnerScore2, setWinnerScore2] = useState("");
   const [loserScore2, setLoserScore2] = useState("");
+  const [winnerScore3, setWinnerScore3] = useState("");
+  const [loserScore3, setLoserScore3] = useState("");
   const [winnerId, setWinnerId] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
   const [isTiebreak1, setIsTiebreak1] = useState(false);
   const [isTiebreak2, setIsTiebreak2] = useState(false);
+  const [isTiebreak3, setIsTiebreak3] = useState(false);
+  const [showThirdSet, setShowThirdSet] = useState(false);
 
   const handleResultSubmit = async () => {
     if (!winnerScore1 || !loserScore1 || !winnerScore2 || !loserScore2 || !winnerId) {
@@ -40,7 +45,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
       return;
     }
 
-    // Validate tennis scores for both sets
+    // Validate tennis scores for both mandatory sets
     if (!isValidTennisScore(winnerScore1, loserScore1, isTiebreak1) || 
         !isValidTennisScore(winnerScore2, loserScore2, isTiebreak2)) {
       toast({
@@ -51,20 +56,38 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
       return;
     }
 
+    // Validate third set if it's shown
+    if (showThirdSet && (!winnerScore3 || !loserScore3 || 
+        !isValidTennisScore(winnerScore3, loserScore3, isTiebreak3))) {
+      toast({
+        title: "Invalid Third Set Score",
+        description: "Please enter valid tennis scores for the third set",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const winnerScore = `${winnerScore1}-${winnerScore2}`;
       const loserScore = `${loserScore1}-${loserScore2}`;
 
+      const updateData: any = {
+        winner_id: winnerId,
+        winner_score: winnerScore,
+        loser_score: loserScore,
+        status: 'completed',
+        result_status: 'pending'
+      };
+
+      if (showThirdSet) {
+        updateData.winner_score_set3 = winnerScore3;
+        updateData.loser_score_set3 = loserScore3;
+      }
+
       const { error } = await supabase
         .from('match_challenges')
-        .update({
-          winner_id: winnerId,
-          winner_score: winnerScore,
-          loser_score: loserScore,
-          status: 'completed',
-          result_status: 'pending'
-        })
+        .update(updateData)
         .eq('id', challenge.id);
 
       if (error) throw error;
@@ -77,11 +100,15 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
       // Reset form and close dialog
       setWinnerScore1("");
       setWinnerScore2("");
+      setWinnerScore3("");
       setLoserScore1("");
       setLoserScore2("");
+      setLoserScore3("");
       setWinnerId("");
       setIsTiebreak1(false);
       setIsTiebreak2(false);
+      setIsTiebreak3(false);
+      setShowThirdSet(false);
       setIsOpen(false);
     } catch (error: any) {
       toast({
@@ -106,6 +133,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
           <DialogTitle>Submit Match Result</DialogTitle>
           <DialogDescription>
             Enter the match scores. For tiebreak sets, toggle the switch and enter 7-6 score.
+            {!showThirdSet && " Add a third set if the match went to a final set."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -133,6 +161,17 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
             onWinnerScoreChange={setWinnerScore2}
             onLoserScoreChange={setLoserScore2}
             onTiebreakChange={setIsTiebreak2}
+          />
+
+          <ThirdSetInput
+            showThirdSet={showThirdSet}
+            winnerScore={winnerScore3}
+            loserScore={loserScore3}
+            isTiebreak={isTiebreak3}
+            onWinnerScoreChange={setWinnerScore3}
+            onLoserScoreChange={setLoserScore3}
+            onTiebreakChange={setIsTiebreak3}
+            onToggleThirdSet={() => setShowThirdSet(true)}
           />
 
           <Button
