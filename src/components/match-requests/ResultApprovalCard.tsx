@@ -21,9 +21,7 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
           result_status: approved ? 'approved' : 'disputed',
           updated_at: new Date().toISOString()
         })
-        .eq('id', challenge.id)
-        .select()
-        .single();
+        .eq('id', challenge.id);
 
       if (error) throw error;
 
