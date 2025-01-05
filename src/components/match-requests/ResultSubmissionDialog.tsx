@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -26,6 +28,8 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
   const [loserScore2, setLoserScore2] = useState("");
   const [winnerId, setWinnerId] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isTiebreak1, setIsTiebreak1] = useState(false);
+  const [isTiebreak2, setIsTiebreak2] = useState(false);
 
   const handleResultSubmit = async () => {
     if (!winnerScore1 || !loserScore1 || !winnerScore2 || !loserScore2 || !winnerId) {
@@ -37,11 +41,12 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
       return;
     }
 
-    // Validate tennis scores
-    if (!isValidTennisScore(winnerScore1, loserScore1) || !isValidTennisScore(winnerScore2, loserScore2)) {
+    // Validate tennis scores for both sets
+    if (!isValidTennisScore(winnerScore1, loserScore1, isTiebreak1) || 
+        !isValidTennisScore(winnerScore2, loserScore2, isTiebreak2)) {
       toast({
         title: "Invalid Score",
-        description: "Please enter valid tennis scores (0-7)",
+        description: "Please enter valid tennis scores",
         variant: "destructive",
       });
       return;
@@ -70,12 +75,15 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
         description: "Waiting for opponent's approval",
       });
       
-      // Reset form but don't close dialog
+      // Reset form and close dialog
       setWinnerScore1("");
       setWinnerScore2("");
       setLoserScore1("");
       setLoserScore2("");
       setWinnerId("");
+      setIsTiebreak1(false);
+      setIsTiebreak2(false);
+      setIsOpen(false);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -87,17 +95,25 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
     }
   };
 
-  const isValidTennisScore = (score1: string, score2: string) => {
+  const isValidTennisScore = (score1: string, score2: string, isTiebreak: boolean) => {
     const s1 = parseInt(score1);
     const s2 = parseInt(score2);
     
     if (isNaN(s1) || isNaN(s2)) return false;
-    if (s1 < 0 || s1 > 7 || s2 < 0 || s2 > 7) return false;
-    if (s1 === 7 && s2 > 5) return false;
-    if (s2 === 7 && s1 > 5) return false;
-    if (s1 < 6 && s2 < 6 && Math.abs(s1 - s2) >= 2) return false;
+    if (s1 < 0 || s2 < 0) return false;
+
+    // Regular set rules
+    if (!isTiebreak) {
+      if (s1 > 6 || s2 > 6) return false;
+      if (s1 === 6 && s2 > 4) return true;
+      if (s2 === 6 && s1 > 4) return true;
+      if (Math.abs(s1 - s2) < 2 && Math.max(s1, s2) === 6) return false;
+      return Math.abs(s1 - s2) >= 2;
+    }
     
-    return true;
+    // Tiebreak rules
+    if (Math.max(s1, s2) === 7 && Math.min(s1, s2) === 6) return true;
+    return false;
   };
 
   return (
@@ -110,6 +126,9 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Submit Match Result</DialogTitle>
+          <DialogDescription>
+            Enter the match scores. For tiebreak sets, toggle the switch and enter 7-6 score.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <RadioGroup
@@ -129,12 +148,22 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
           </RadioGroup>
 
           <div className="space-y-4">
-            <Label>First Set</Label>
+            <div className="flex items-center justify-between">
+              <Label>First Set</Label>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="tiebreak1">Tiebreak</Label>
+                <Switch
+                  id="tiebreak1"
+                  checked={isTiebreak1}
+                  onCheckedChange={setIsTiebreak1}
+                />
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Winner Score</Label>
                 <Input
-                  placeholder="6"
+                  placeholder={isTiebreak1 ? "7" : "6"}
                   value={winnerScore1}
                   onChange={(e) => setWinnerScore1(e.target.value)}
                   maxLength={1}
@@ -143,7 +172,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
               <div className="space-y-2">
                 <Label>Loser Score</Label>
                 <Input
-                  placeholder="4"
+                  placeholder={isTiebreak1 ? "6" : "4"}
                   value={loserScore1}
                   onChange={(e) => setLoserScore1(e.target.value)}
                   maxLength={1}
@@ -151,12 +180,22 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
               </div>
             </div>
 
-            <Label>Second Set</Label>
+            <div className="flex items-center justify-between">
+              <Label>Second Set</Label>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="tiebreak2">Tiebreak</Label>
+                <Switch
+                  id="tiebreak2"
+                  checked={isTiebreak2}
+                  onCheckedChange={setIsTiebreak2}
+                />
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Winner Score</Label>
                 <Input
-                  placeholder="6"
+                  placeholder={isTiebreak2 ? "7" : "6"}
                   value={winnerScore2}
                   onChange={(e) => setWinnerScore2(e.target.value)}
                   maxLength={1}
@@ -165,7 +204,7 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
               <div className="space-y-2">
                 <Label>Loser Score</Label>
                 <Input
-                  placeholder="3"
+                  placeholder={isTiebreak2 ? "6" : "4"}
                   value={loserScore2}
                   onChange={(e) => setLoserScore2(e.target.value)}
                   maxLength={1}
