@@ -23,34 +23,47 @@ export const submitMatchResult = async (
     result.showThirdSet ? `-${result.loserScore3}` : ''
   }`;
 
-  const updateData: any = {
+  console.log('Starting match result submission for challenge:', challenge.id);
+
+  const updateData = {
     winner_id: result.winnerId,
     winner_score: winnerScore,
     loser_score: loserScore,
     status: 'completed',
     result_status: 'pending',
     updated_at: new Date().toISOString()
-  };
+  } as const;
 
   if (result.showThirdSet && result.winnerScore3 && result.loserScore3) {
-    updateData.winner_score_set3 = result.winnerScore3;
-    updateData.loser_score_set3 = result.loserScore3;
+    Object.assign(updateData, {
+      winner_score_set3: result.winnerScore3,
+      loser_score_set3: result.loserScore3
+    });
   }
 
-  console.log('Submitting match result for challenge:', challenge.id, updateData);
+  console.log('Update data prepared:', updateData);
 
-  const { data, error } = await supabase
-    .from('match_challenges')
-    .update(updateData)
-    .eq('id', challenge.id) // This is the crucial WHERE clause
-    .select('*, challenger:profiles!match_challenges_challenger_id_fkey(username), challenged:profiles!match_challenges_challenged_id_fkey(username)')
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('match_challenges')
+      .update(updateData)
+      .match({ id: challenge.id })
+      .select(`
+        *,
+        challenger:profiles!match_challenges_challenger_id_fkey(username),
+        challenged:profiles!match_challenges_challenged_id_fkey(username)
+      `)
+      .single();
 
-  if (error) {
-    console.error('Error in submitMatchResult:', error);
+    if (error) {
+      console.error('Error in submitMatchResult:', error);
+      throw error;
+    }
+
+    console.log('Match result submitted successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Failed to submit match result:', error);
     throw error;
   }
-
-  console.log('Match result submitted successfully:', data);
-  return data;
 };
