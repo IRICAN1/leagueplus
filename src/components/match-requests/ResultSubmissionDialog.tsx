@@ -1,9 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { WinnerSelection } from "./WinnerSelection";
+import { SetScoreInput } from "./SetScoreInput";
+import { isValidTennisScore } from "./utils/scoreValidation";
 
 interface ResultSubmissionDialogProps {
   challenge: any;
@@ -95,27 +94,6 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
     }
   };
 
-  const isValidTennisScore = (score1: string, score2: string, isTiebreak: boolean) => {
-    const s1 = parseInt(score1);
-    const s2 = parseInt(score2);
-    
-    if (isNaN(s1) || isNaN(s2)) return false;
-    if (s1 < 0 || s2 < 0) return false;
-
-    // Regular set rules
-    if (!isTiebreak) {
-      if (s1 > 6 || s2 > 6) return false;
-      if (s1 === 6 && s2 > 4) return true;
-      if (s2 === 6 && s1 > 4) return true;
-      if (Math.abs(s1 - s2) < 2 && Math.max(s1, s2) === 6) return false;
-      return Math.abs(s1 - s2) >= 2;
-    }
-    
-    // Tiebreak rules
-    if (Math.max(s1, s2) === 7 && Math.min(s1, s2) === 6) return true;
-    return false;
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -131,87 +109,31 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <RadioGroup
-            value={winnerId}
-            onValueChange={setWinnerId}
-            className="flex flex-col space-y-2"
-          >
-            <Label>Winner</Label>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={challenge.challenger_id} id="challenger" />
-              <Label htmlFor="challenger">{challenge.challenger.username}</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={challenge.challenged_id} id="challenged" />
-              <Label htmlFor="challenged">{challenge.challenged.username}</Label>
-            </div>
-          </RadioGroup>
+          <WinnerSelection
+            challenge={challenge}
+            winnerId={winnerId}
+            setWinnerId={setWinnerId}
+          />
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>First Set</Label>
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="tiebreak1">Tiebreak</Label>
-                <Switch
-                  id="tiebreak1"
-                  checked={isTiebreak1}
-                  onCheckedChange={setIsTiebreak1}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Winner Score</Label>
-                <Input
-                  placeholder={isTiebreak1 ? "7" : "6"}
-                  value={winnerScore1}
-                  onChange={(e) => setWinnerScore1(e.target.value)}
-                  maxLength={1}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Loser Score</Label>
-                <Input
-                  placeholder={isTiebreak1 ? "6" : "4"}
-                  value={loserScore1}
-                  onChange={(e) => setLoserScore1(e.target.value)}
-                  maxLength={1}
-                />
-              </div>
-            </div>
+          <SetScoreInput
+            setNumber={1}
+            winnerScore={winnerScore1}
+            loserScore={loserScore1}
+            isTiebreak={isTiebreak1}
+            onWinnerScoreChange={setWinnerScore1}
+            onLoserScoreChange={setLoserScore1}
+            onTiebreakChange={setIsTiebreak1}
+          />
 
-            <div className="flex items-center justify-between">
-              <Label>Second Set</Label>
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="tiebreak2">Tiebreak</Label>
-                <Switch
-                  id="tiebreak2"
-                  checked={isTiebreak2}
-                  onCheckedChange={setIsTiebreak2}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Winner Score</Label>
-                <Input
-                  placeholder={isTiebreak2 ? "7" : "6"}
-                  value={winnerScore2}
-                  onChange={(e) => setWinnerScore2(e.target.value)}
-                  maxLength={1}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Loser Score</Label>
-                <Input
-                  placeholder={isTiebreak2 ? "6" : "4"}
-                  value={loserScore2}
-                  onChange={(e) => setLoserScore2(e.target.value)}
-                  maxLength={1}
-                />
-              </div>
-            </div>
-          </div>
+          <SetScoreInput
+            setNumber={2}
+            winnerScore={winnerScore2}
+            loserScore={loserScore2}
+            isTiebreak={isTiebreak2}
+            onWinnerScoreChange={setWinnerScore2}
+            onLoserScoreChange={setLoserScore2}
+            onTiebreakChange={setIsTiebreak2}
+          />
 
           <Button
             onClick={handleResultSubmit}
