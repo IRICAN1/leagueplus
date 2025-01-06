@@ -9,6 +9,7 @@ import { TournamentHeader } from "@/components/tournament-registration/Tournamen
 import { TournamentInfo } from "@/components/tournament-registration/TournamentInfo";
 import { PositionSelector } from "@/components/tournament-registration/PositionSelector";
 import { RegistrationButton } from "@/components/tournament-registration/RegistrationButton";
+import { RegistrationHandler } from "@/components/tournament-registration/RegistrationHandler";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Loader2 } from "lucide-react";
@@ -22,9 +23,12 @@ const TournamentRegistration = () => {
   const [primaryPosition, setPrimaryPosition] = useState<string>("");
   const [secondaryPosition, setSecondaryPosition] = useState<string>("");
   const [hasExistingSchedule, setHasExistingSchedule] = useState<boolean | null>(null);
+  const [league, setLeague] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showRegistrationHandler, setShowRegistrationHandler] = useState(false);
 
   // Query for league data
-  const { data: league, isLoading: isLeagueLoading } = useQuery({
+  const { data: leagueData, isLoading: isLeagueLoading } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,9 +40,6 @@ const TournamentRegistration = () => {
       if (error) throw error;
       return data;
     },
-    meta: {
-      errorMessage: 'Failed to load league details'
-    }
   });
 
   // Query for user profile and availability
@@ -72,39 +73,11 @@ const TournamentRegistration = () => {
     }
   }, [profile]);
 
-  // Mock availability data - in a real app, this would come from the backend
-  const availability = {
-    workingHours: {
-      start: 8,
-      end: 24,
-    },
-    disabledDays: [0, 6],
-    availableTimeSlots: Array.from({ length: 7 }, (_, dayIndex) => ({
-      day: dayIndex,
-      slots: Array.from({ length: 16 }, (_, hourIndex) => ({
-        time: 8 + hourIndex,
-        available: Math.random() > 0.3,
-      })),
-    })),
-  };
-
-  const handleTimeSlotSelect = (newSelectedTimeSlots: string[]) => {
-    setSelectedTimeSlots(newSelectedTimeSlots);
-  };
-
-  const handleSelectAllDay = (day: number) => {
-    const daySlots = availability.availableTimeSlots[day].slots
-      .filter(slot => slot.available)
-      .map(slot => `${day}-${slot.time}`);
-
-    setSelectedTimeSlots(prev => {
-      const isFullySelected = daySlots.every(slot => prev.includes(slot));
-      if (isFullySelected) {
-        return prev.filter(slot => !daySlots.includes(slot));
-      }
-      return [...new Set([...prev, ...daySlots])];
-    });
-  };
+  useEffect(() => {
+    if (leagueData) {
+      setLeague(leagueData);
+    }
+  }, [leagueData]);
 
   const handleSubmit = async () => {
     try {
@@ -137,7 +110,7 @@ const TournamentRegistration = () => {
         return;
       }
 
-      // First, update the user's profile with the time slots if they don't have any
+      // Update profile if needed
       if (!hasExistingSchedule) {
         const { error: profileError } = await supabase
           .from('profiles')
@@ -151,7 +124,13 @@ const TournamentRegistration = () => {
         if (profileError) throw profileError;
       }
 
-      // Join the league
+      // For doubles leagues, show the registration handler
+      if (league?.is_doubles) {
+        setShowRegistrationHandler(true);
+        return;
+      }
+
+      // For individual leagues, proceed with direct registration
       const { error: joinError } = await supabase
         .from('league_participants')
         .insert({
@@ -267,6 +246,18 @@ const TournamentRegistration = () => {
             </CardContent>
           </Card>
         </div>
+
+        {showRegistrationHandler && league && (
+          <RegistrationHandler
+            leagueId={league.id}
+            isDoubles={league.is_doubles}
+            requirements={{
+              skillLevel: `${league.skill_level_min}-${league.skill_level_max}`,
+              ageCategory: league.age_category,
+              genderCategory: league.gender_category,
+            }}
+          />
+        )}
       </div>
     </div>
   );

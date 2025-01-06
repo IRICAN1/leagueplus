@@ -196,24 +196,34 @@ export type Database = {
       }
       league_participants: {
         Row: {
+          duo_partnership_id: string | null
           id: string
           joined_at: string | null
           league_id: string | null
           user_id: string | null
         }
         Insert: {
+          duo_partnership_id?: string | null
           id?: string
           joined_at?: string | null
           league_id?: string | null
           user_id?: string | null
         }
         Update: {
+          duo_partnership_id?: string | null
           id?: string
           joined_at?: string | null
           league_id?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "league_participants_duo_partnership_id_fkey"
+            columns: ["duo_partnership_id"]
+            isOneToOne: false
+            referencedRelation: "duo_partnerships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "league_participants_league_id_fkey"
             columns: ["league_id"]
@@ -242,6 +252,7 @@ export type Database = {
           format: Database["public"]["Enums"]["league_format"]
           gender_category: Database["public"]["Enums"]["league_gender_category"]
           id: string
+          is_doubles: boolean | null
           location: string
           match_format: Database["public"]["Enums"]["league_match_format"]
           max_participants: number
@@ -268,6 +279,7 @@ export type Database = {
           format?: Database["public"]["Enums"]["league_format"]
           gender_category: Database["public"]["Enums"]["league_gender_category"]
           id?: string
+          is_doubles?: boolean | null
           location: string
           match_format: Database["public"]["Enums"]["league_match_format"]
           max_participants: number
@@ -294,6 +306,7 @@ export type Database = {
           format?: Database["public"]["Enums"]["league_format"]
           gender_category?: Database["public"]["Enums"]["league_gender_category"]
           id?: string
+          is_doubles?: boolean | null
           location?: string
           match_format?: Database["public"]["Enums"]["league_match_format"]
           max_participants?: number
