@@ -15,9 +15,10 @@ interface PlayerRankingsTableProps {
   leagueId: string;
   sortBy: "points" | "matches";
   playerStats?: any[];
+  isDoubles?: boolean;
 }
 
-export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats }: PlayerRankingsTableProps) => {
+export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }: PlayerRankingsTableProps) => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const isMobile = useIsMobile();
@@ -149,6 +150,8 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats }: PlayerRan
                   onChallenge={handleChallenge}
                   getRankStyle={(rank) => getRankStyle(rank, sortBy)}
                   sortBy={sortBy}
+                  isDoubles={isDoubles}
+                  leagueId={leagueId}
                 />
               ))}
             </TableBody>

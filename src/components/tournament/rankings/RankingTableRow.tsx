@@ -5,6 +5,8 @@ import { PlayerProfile } from "../PlayerProfile";
 import { PlayerAchievementsList } from "../PlayerAchievementsList";
 import { RankDisplay } from "../RankDisplay";
 import { Player } from "../types";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RankingTableRowProps {
   player: Player;
@@ -12,6 +14,8 @@ interface RankingTableRowProps {
   onChallenge: (playerId: string, playerName: string) => void;
   getRankStyle: (rank: number) => string;
   sortBy: "points" | "matches";
+  isDoubles?: boolean;
+  leagueId: string;
 }
 
 export const RankingTableRow = ({ 
@@ -19,11 +23,57 @@ export const RankingTableRow = ({
   currentUserId, 
   onChallenge, 
   getRankStyle,
-  sortBy
+  sortBy,
+  isDoubles,
+  leagueId
 }: RankingTableRowProps) => {
   const winRate = player.matches_played > 0 
     ? ((player.wins / player.matches_played) * 100).toFixed(1)
     : "0.0";
+
+  const { data: duoPartner } = useQuery({
+    queryKey: ['duo-partner', player.id, leagueId],
+    queryFn: async () => {
+      if (!isDoubles) return null;
+
+      const { data: participant } = await supabase
+        .from('league_participants')
+        .select(`
+          duo_partnership_id,
+          duo_partnerships!inner(
+            player1_id,
+            player2_id,
+            profiles!duo_partnerships_player1_id_fkey(
+              username,
+              full_name,
+              avatar_url
+            ),
+            profiles!duo_partnerships_player2_id_fkey(
+              username,
+              full_name,
+              avatar_url
+            )
+          )
+        `)
+        .eq('league_id', leagueId)
+        .eq('user_id', player.id)
+        .single();
+
+      if (!participant?.duo_partnership_id) return null;
+
+      const partnership = participant.duo_partnerships;
+      const isPlayer1 = partnership.player1_id === player.id;
+      const partnerProfile = isPlayer1 
+        ? partnership.profiles!duo_partnerships_player2_id_fkey 
+        : partnership.profiles!duo_partnerships_player1_id_fkey;
+
+      return {
+        name: partnerProfile.full_name || partnerProfile.username,
+        avatar_url: partnerProfile.avatar_url
+      };
+    },
+    enabled: isDoubles
+  });
 
   return (
     <TableRow 
@@ -34,7 +84,11 @@ export const RankingTableRow = ({
         <RankDisplay rank={player.rank} />
       </TableCell>
       <TableCell>
-        <PlayerProfile player={player} />
+        <PlayerProfile 
+          player={player} 
+          isDuo={isDoubles}
+          duoPartner={duoPartner}
+        />
       </TableCell>
       <TableCell>
         <PlayerAchievementsList player={player} />
