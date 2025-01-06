@@ -78,8 +78,9 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
 
   return (
     <div className="space-y-4">
-      {duos.map((duo) => {
-        const partner = duo.player1.id === supabase.auth.user()?.id ? duo.player2 : duo.player1;
+      {duos.map(async (duo) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        const partner = duo.player1.id === user?.id ? duo.player2 : duo.player1;
         const stats = duo.duo_statistics[0];
 
         return (

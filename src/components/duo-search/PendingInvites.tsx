@@ -13,7 +13,8 @@ interface PendingInvitesProps {
 
 export const PendingInvites = ({ invites, isLoading, onInviteUpdated }: PendingInvitesProps) => {
   const { toast } = useToast();
-  const currentUserId = supabase.auth.user()?.id;
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentUserId = user?.id;
 
   const handleInviteResponse = async (inviteId: string, status: 'accepted' | 'rejected') => {
     try {
