@@ -200,6 +200,89 @@ export type Database = {
           },
         ]
       }
+      match_challenges: {
+        Row: {
+          challenged_id: string
+          challenger_id: string
+          created_at: string | null
+          id: string
+          league_id: string
+          location: string
+          loser_score: string | null
+          loser_score_set3: string | null
+          proposed_time: string
+          result_status: string | null
+          status: string
+          updated_at: string | null
+          winner_id: string | null
+          winner_score: string | null
+          winner_score_set3: string | null
+        }
+        Insert: {
+          challenged_id: string
+          challenger_id: string
+          created_at?: string | null
+          id?: string
+          league_id: string
+          location: string
+          loser_score?: string | null
+          loser_score_set3?: string | null
+          proposed_time: string
+          result_status?: string | null
+          status?: string
+          updated_at?: string | null
+          winner_id?: string | null
+          winner_score?: string | null
+          winner_score_set3?: string | null
+        }
+        Update: {
+          challenged_id?: string
+          challenger_id?: string
+          created_at?: string | null
+          id?: string
+          league_id?: string
+          location?: string
+          loser_score?: string | null
+          loser_score_set3?: string | null
+          proposed_time?: string
+          result_status?: string | null
+          status?: string
+          updated_at?: string | null
+          winner_id?: string | null
+          winner_score?: string | null
+          winner_score_set3?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_challenges_challenged_id_fkey"
+            columns: ["challenged_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_challenges_challenger_id_fkey"
+            columns: ["challenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_challenges_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_challenges_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_history: {
         Row: {
           created_at: string | null
