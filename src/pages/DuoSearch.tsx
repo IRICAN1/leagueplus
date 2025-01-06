@@ -5,9 +5,8 @@ import { DuoSearchFilters } from "@/components/duo-search/DuoSearchFilters";
 import { PlayerResultCard } from "@/components/duo-search/PlayerResultCard";
 import { ActiveDuosList } from "@/components/duo-search/ActiveDuosList";
 import { PendingInvites } from "@/components/duo-search/PendingInvites";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { DuoSearchHeader } from "@/components/duo-search/DuoSearchHeader";
+import { DuoSearchTabs } from "@/components/duo-search/DuoSearchTabs";
 
 export type DuoSearchFilters = {
   skillLevel?: string;
@@ -57,7 +56,6 @@ const DuoSearch = () => {
       const { data, error } = await query;
 
       if (error) {
-        toast.error("Failed to fetch players");
         throw error;
       }
 
@@ -108,61 +106,24 @@ const DuoSearch = () => {
     <div className="min-h-screen pt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <div className="space-y-6">
-          <div className="text-center space-y-4 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 text-transparent bg-clip-text">
-              Tennis Duo System
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Find your perfect tennis partner or manage your existing partnerships
-            </p>
-          </div>
+          <DuoSearchHeader 
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
 
-          {/* Navigation Tabs */}
-          <div className="flex space-x-4 mb-6">
-            <button 
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'search' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-              }`}
-              onClick={() => setActiveTab('search')}
-            >
-              Find Partners
-            </button>
-            <button 
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'myDuos' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-              }`}
-              onClick={() => setActiveTab('myDuos')}
-            >
-              My Duos
-            </button>
-          </div>
+          <DuoSearchTabs 
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
 
           {activeTab === 'search' && (
-            <div className="space-y-6">
-              {/* Search Bar */}
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search for players..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-4 pr-12"
-                />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-blue-600">
-                  <Search className="h-5 w-5" />
-                </button>
-              </div>
-
+            <div className="space-y-6 animate-fade-in">
               <DuoSearchFilters
                 filters={filters}
                 onFilterChange={handleFilterChange}
               />
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {playersLoading ? (
                   <div className="col-span-full text-center py-8 text-gray-600">
                     Loading players...
@@ -172,6 +133,7 @@ const DuoSearch = () => {
                     <PlayerResultCard
                       key={player.id}
                       player={player}
+                      className="animate-fade-in"
                     />
                   ))
                 ) : (
@@ -184,8 +146,8 @@ const DuoSearch = () => {
           )}
 
           {activeTab === 'myDuos' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="space-y-6 animate-fade-in">
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Pending Invites</h2>
                 <PendingInvites
                   invites={pendingInvites || []}
@@ -196,7 +158,7 @@ const DuoSearch = () => {
                 />
               </div>
 
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Active Partnerships</h2>
                 <ActiveDuosList
                   duos={duos || []}
