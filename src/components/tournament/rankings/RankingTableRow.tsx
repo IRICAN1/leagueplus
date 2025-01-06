@@ -31,10 +31,24 @@ export const RankingTableRow = ({
     ? ((player.wins / player.matches_played) * 100).toFixed(1)
     : "0.0";
 
+  // First, fetch the league format
+  const { data: league } = useQuery({
+    queryKey: ['league-format', leagueId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('leagues')
+        .select('format')
+        .eq('id', leagueId)
+        .single();
+      return data;
+    }
+  });
+
   const { data: duoPartner } = useQuery({
     queryKey: ['duo-partner', player.id, leagueId],
     queryFn: async () => {
-      if (!isDoubles) return null;
+      // Only fetch duo partner if it's a team format or doubles
+      if (!isDoubles && league?.format !== 'Team') return null;
 
       const { data: participant } = await supabase
         .from('league_participants')
@@ -70,8 +84,11 @@ export const RankingTableRow = ({
         avatar_url: partnerProfile.avatar_url
       };
     },
-    enabled: isDoubles
+    enabled: isDoubles || league?.format === 'Team'
   });
+
+  // Show loading state or error handling if needed
+  if (!league) return null;
 
   return (
     <TableRow 
@@ -84,7 +101,7 @@ export const RankingTableRow = ({
       <TableCell>
         <PlayerProfile 
           player={player} 
-          isDuo={isDoubles}
+          isDuo={isDoubles || league.format === 'Team'}
           duoPartner={duoPartner}
         />
       </TableCell>
