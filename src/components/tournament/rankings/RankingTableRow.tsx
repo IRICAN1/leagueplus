@@ -40,15 +40,15 @@ export const RankingTableRow = ({
         .from('league_participants')
         .select(`
           duo_partnership_id,
-          duo_partnerships!inner(
+          duo_partnerships:duo_partnerships!inner (
             player1_id,
             player2_id,
-            player1:profiles!duo_partnerships_player1_id_fkey(
+            player1:profiles!duo_partnerships_player1_id_fkey (
               username,
               full_name,
               avatar_url
             ),
-            player2:profiles!duo_partnerships_player2_id_fkey(
+            player2:profiles!duo_partnerships_player2_id_fkey (
               username,
               full_name,
               avatar_url
@@ -57,15 +57,13 @@ export const RankingTableRow = ({
         `)
         .eq('league_id', leagueId)
         .eq('user_id', player.id)
-        .single();
+        .maybeSingle();
 
-      if (!participant?.duo_partnership_id) return null;
+      if (!participant?.duo_partnership_id || !participant.duo_partnerships) return null;
 
       const partnership = participant.duo_partnerships;
       const isPlayer1 = partnership.player1_id === player.id;
-      const partnerProfile = isPlayer1 
-        ? partnership.player2
-        : partnership.player1;
+      const partnerProfile = isPlayer1 ? partnership.player2 : partnership.player1;
 
       return {
         name: partnerProfile.full_name || partnerProfile.username,
