@@ -40,7 +40,7 @@ export const RankingTableRow = ({
         .from('league_participants')
         .select(`
           duo_partnership_id,
-          duo_partnerships:duo_partnerships!inner (
+          duo_partnerships (
             player1_id,
             player2_id,
             player1:profiles!duo_partnerships_player1_id_fkey (
