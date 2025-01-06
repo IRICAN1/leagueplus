@@ -6,12 +6,14 @@ import { MapPin, Trophy, Send, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface PlayerResultCardProps {
   player: any;
+  className?: string;
 }
 
-export const PlayerResultCard = ({ player }: PlayerResultCardProps) => {
+export const PlayerResultCard = ({ player, className }: PlayerResultCardProps) => {
   const navigate = useNavigate();
 
   const handleSendInvite = async () => {
@@ -48,7 +50,7 @@ export const PlayerResultCard = ({ player }: PlayerResultCardProps) => {
   };
 
   return (
-    <Card className="p-4 bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in">
+    <Card className={cn("p-4 bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in", className)}>
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16 border-2 border-blue-100">
