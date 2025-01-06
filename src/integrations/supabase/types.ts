@@ -159,6 +159,41 @@ export type Database = {
           },
         ]
       }
+      duo_statistics: {
+        Row: {
+          created_at: string
+          id: string
+          losses: number | null
+          partnership_id: string
+          updated_at: string
+          wins: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          losses?: number | null
+          partnership_id: string
+          updated_at?: string
+          wins?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          losses?: number | null
+          partnership_id?: string
+          updated_at?: string
+          wins?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duo_statistics_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "duo_partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       league_participants: {
         Row: {
           id: string

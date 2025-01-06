@@ -5,6 +5,7 @@ import CreateLeague from "@/pages/CreateLeague";
 import MyLeagues from "@/pages/MyLeagues";
 import MatchRequests from "@/pages/MatchRequests";
 import Messages from "@/pages/Messages";
+import MyDuos from "@/pages/MyDuos";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export const protectedRoutes = [
@@ -61,6 +62,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <Messages />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/my-duos",
+    element: (
+      <ProtectedRoute>
+        <MyDuos />
       </ProtectedRoute>
     )
   }
