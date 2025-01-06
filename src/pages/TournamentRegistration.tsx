@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,10 +9,10 @@ import { TournamentInfo } from "@/components/tournament-registration/TournamentI
 import { PositionSelector } from "@/components/tournament-registration/PositionSelector";
 import { RegistrationButton } from "@/components/tournament-registration/RegistrationButton";
 import { RegistrationHandler } from "@/components/tournament-registration/RegistrationHandler";
+import { AvailabilitySection } from "@/components/tournament-registration/AvailabilitySection";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Loader2 } from "lucide-react";
-import { isAvailabilitySchedule } from "@/types/availability";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -78,6 +77,10 @@ const TournamentRegistration = () => {
       setLeague(leagueData);
     }
   }, [leagueData]);
+
+  const handleTimeSlotSelect = (slots: string[]) => {
+    setSelectedTimeSlots(slots);
+  };
 
   const handleSubmit = async () => {
     try {
@@ -230,12 +233,7 @@ const TournamentRegistration = () => {
                       </span>
                     </div>
                     
-                    <WeeklySchedule
-                      availableTimeSlots={availability.availableTimeSlots}
-                      selectedTimeSlots={selectedTimeSlots}
-                      onTimeSlotSelect={handleTimeSlotSelect}
-                      onSelectAllDay={handleSelectAllDay}
-                    />
+                    <AvailabilitySection onTimeSlotSelect={handleTimeSlotSelect} />
                   </div>
                 </>
               )}
