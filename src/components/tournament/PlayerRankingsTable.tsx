@@ -33,6 +33,21 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
     checkUser();
   }, []);
 
+  // Fetch league details to check if it requires duos
+  const { data: league } = useQuery({
+    queryKey: ['league', leagueId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leagues')
+        .select('*')
+        .eq('id', leagueId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const { data: players } = useQuery({
     queryKey: ['player-rankings', leagueId, sortBy, playerStats],
     queryFn: async () => {
@@ -45,14 +60,12 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
           wins: stat.wins || 0,
           losses: stat.losses || 0,
           points: stat.points || 0,
-          matches_played: (stat.wins || 0) + (stat.losses || 0), // Correctly calculate total matches
+          matches_played: (stat.wins || 0) + (stat.losses || 0),
           achievements: getPlayerAchievements(stat)
         }));
 
-        // Sort by matches played if that's the selected criteria
         if (sortBy === 'matches') {
           mappedStats.sort((a, b) => b.matches_played - a.matches_played);
-          // Update ranks after sorting
           mappedStats.forEach((player, index) => {
             player.rank = index + 1;
           });
@@ -114,6 +127,8 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
     );
   }
 
+  const requiresDuo = league?.requires_duo || isDoubles;
+
   if (isMobile) {
     return (
       <Card className="bg-white/80 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden border border-blue-100/50">
@@ -127,6 +142,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
                 onChallenge={handleChallenge}
                 getRankStyle={(rank) => getRankStyle(rank, sortBy)}
                 sortBy={sortBy}
+                requiresDuo={requiresDuo}
               />
             ))}
           </div>
@@ -140,7 +156,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
-            <RankingTableHeader sortBy={sortBy} />
+            <RankingTableHeader sortBy={sortBy} requiresDuo={requiresDuo} />
             <TableBody>
               {players.map((player) => (
                 <RankingTableRow
@@ -150,7 +166,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
                   onChallenge={handleChallenge}
                   getRankStyle={(rank) => getRankStyle(rank, sortBy)}
                   sortBy={sortBy}
-                  isDoubles={isDoubles}
+                  isDoubles={requiresDuo}
                   leagueId={leagueId}
                 />
               ))}
