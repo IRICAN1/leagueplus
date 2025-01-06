@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -13,8 +14,15 @@ interface PendingInvitesProps {
 
 export const PendingInvites = ({ invites, isLoading, onInviteUpdated }: PendingInvitesProps) => {
   const { toast } = useToast();
-  const { data: { user } } = await supabase.auth.getUser();
-  const currentUserId = user?.id;
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    fetchUser();
+  }, []);
 
   const handleInviteResponse = async (inviteId: string, status: 'accepted' | 'rejected') => {
     try {

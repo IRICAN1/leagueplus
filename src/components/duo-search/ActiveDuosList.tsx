@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { MessageSquare, Trophy, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,7 +26,16 @@ interface ActiveDuosListProps {
 
 export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosListProps) => {
   const [dissolvingDuoId, setDissolvingDuoId] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    fetchUser();
+  }, []);
 
   const handleDissolveDuo = async (duoId: string) => {
     try {
@@ -78,9 +87,8 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
 
   return (
     <div className="space-y-4">
-      {duos.map(async (duo) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        const partner = duo.player1.id === user?.id ? duo.player2 : duo.player1;
+      {duos.map((duo) => {
+        const partner = duo.player1.id === currentUserId ? duo.player2 : duo.player1;
         const stats = duo.duo_statistics[0];
 
         return (
