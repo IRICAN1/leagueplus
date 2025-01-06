@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import { LogIn, Trophy, Calendar, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -57,9 +58,11 @@ const TournamentDetails = () => {
         .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('League not found');
       return data;
     },
-    enabled: !!id
+    retry: 1,
+    enabled: !!id && UUID_REGEX.test(id)
   });
 
   const { data: registeredPlayers } = useQuery({
@@ -70,7 +73,8 @@ const TournamentDetails = () => {
         .select('*', { count: 'exact', head: true })
         .eq('league_id', id);
       return count || 0;
-    }
+    },
+    enabled: !!id
   });
 
   const { data: isUserRegistered } = useQuery({
@@ -104,7 +108,11 @@ const TournamentDetails = () => {
   }
 
   if (isLoadingLeague) {
-    return <div className="container mx-auto p-4">Loading...</div>;
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
   }
 
   if (leagueError) {
