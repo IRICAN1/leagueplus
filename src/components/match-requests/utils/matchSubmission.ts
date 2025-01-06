@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Challenge } from "@/types/match";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface MatchResult {
   winnerId: string;
@@ -17,6 +16,11 @@ export const submitMatchResult = async (
   challenge: Challenge,
   result: MatchResult
 ) => {
+  // Validate winner ID
+  if (!result.winnerId) {
+    throw new Error('Winner ID is required');
+  }
+
   const winnerScore = `${result.winnerScore1}-${result.winnerScore2}${
     result.showThirdSet ? `-${result.winnerScore3}` : ''
   }`;
