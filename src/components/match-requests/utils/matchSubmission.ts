@@ -47,7 +47,7 @@ export const submitMatchResult = async (
     const { data, error } = await supabase
       .from('match_challenges')
       .update(updateData)
-      .match({ id: challenge.id })
+      .eq('id', challenge.id)
       .select(`
         *,
         challenger:profiles!match_challenges_challenger_id_fkey(username),
