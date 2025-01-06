@@ -30,6 +30,12 @@ export const ResultCard = ({
 }: ResultCardProps) => {
   const navigate = useNavigate();
 
+  const handleClick = () => {
+    if (id) {
+      navigate(`/tournament/${id}`);
+    }
+  };
+
   const getStatusColor = (type: string) => {
     switch (type.toLowerCase()) {
       case 'open':
@@ -46,7 +52,7 @@ export const ResultCard = ({
   return (
     <Card 
       className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80 cursor-pointer"
-      onClick={() => navigate(`/tournament/${id}`)}
+      onClick={handleClick}
     >
       <CardContent className="p-3 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
         <div className="space-y-2">

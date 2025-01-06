@@ -2,6 +2,7 @@ import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import DuoSearch from "@/pages/DuoSearch";
+import TournamentDetails from "@/pages/TournamentDetails";
 
 export const publicRoutes = [
   {
@@ -19,5 +20,9 @@ export const publicRoutes = [
   {
     path: "/duo-search",
     element: <DuoSearch />,
+  },
+  {
+    path: "/tournament/:id",
+    element: <TournamentDetails />,
   },
 ];
