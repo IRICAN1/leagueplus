@@ -50,6 +50,15 @@ export const ChallengeForm = ({
     }));
   };
 
+  const getProposedTime = (timeSlot: string) => {
+    if (!timeSlot) return new Date().toISOString();
+    const [day, hour] = timeSlot.split('-').map(Number);
+    const proposedDate = new Date();
+    proposedDate.setDate(proposedDate.getDate() + ((7 + day - proposedDate.getDay()) % 7) + (selectedWeek * 7));
+    proposedDate.setHours(hour, 0, 0, 0);
+    return proposedDate.toISOString();
+  };
+
   const handleSubmit = async () => {
     // Add authentication check
     const { data: { session } } = await supabase.auth.getSession();
@@ -74,6 +83,10 @@ export const ChallengeForm = ({
       });
       return;
     }
+
+    // Calculate the proposed time based on selected time slot and week
+    const proposedTime = getProposedTime(selectedTimeSlot[0]);
+    localStorage.setItem('proposedTime', proposedTime);
 
     // Proceed with confirmation
     onOpenConfirmation();
