@@ -134,7 +134,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
       <Card className="bg-white/80 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden border border-blue-100/50">
         <CardContent className="p-4">
           <div className="space-y-4">
-            {players.map((player) => (
+            {players?.map((player) => (
               <MobileRankingCard
                 key={player.id}
                 player={player}
@@ -143,6 +143,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDoubles }
                 getRankStyle={(rank) => getRankStyle(rank, sortBy)}
                 sortBy={sortBy}
                 requiresDuo={requiresDuo}
+                leagueId={leagueId}
               />
             ))}
           </div>
