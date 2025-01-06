@@ -13,6 +13,8 @@ import { AvailabilitySection } from "@/components/tournament-registration/Availa
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Loader2 } from "lucide-react";
+import { isAvailabilitySchedule } from "@/types/availability";
+import type { AvailabilitySchedule } from "@/types/availability";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
