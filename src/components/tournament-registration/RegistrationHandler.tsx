@@ -9,7 +9,8 @@ interface RegistrationHandlerProps {
   isDoubles: boolean;
   requirements?: {
     skillLevel?: string;
-    ageCategory?: string;
+    ageMin?: number;
+    ageMax?: number;
     genderCategory?: string;
   };
 }

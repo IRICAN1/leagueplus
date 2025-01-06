@@ -8,6 +8,7 @@ import { RegistrationForm } from "@/components/tournament-registration/Registrat
 import { RegistrationHandler } from "@/components/tournament-registration/RegistrationHandler";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { isAvailabilitySchedule } from "@/types/availability";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -54,7 +55,7 @@ const TournamentRegistration = () => {
 
   useEffect(() => {
     if (profile?.availability_schedule) {
-      if (typeof profile.availability_schedule === 'object' && 'selectedSlots' in profile.availability_schedule) {
+      if (isAvailabilitySchedule(profile.availability_schedule)) {
         setSelectedTimeSlots(profile.availability_schedule.selectedSlots);
         setHasExistingSchedule(true);
       } else {
@@ -188,7 +189,8 @@ const TournamentRegistration = () => {
             isDoubles={league.is_doubles}
             requirements={{
               skillLevel: `${league.skill_level_min}-${league.skill_level_max}`,
-              ageCategory: league.age_category,
+              ageMin: league.age_min,
+              ageMax: league.age_max,
               genderCategory: league.gender_category,
             }}
           />
