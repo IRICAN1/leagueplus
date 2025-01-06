@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { WeeklySchedule } from "../player-challenge/WeeklySchedule";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isAvailabilitySchedule } from "@/types/availability";
 
 interface DuoSearchTabsProps {
   activeTab: 'search' | 'myDuos';
@@ -59,7 +60,12 @@ export const DuoSearchTabs = ({ activeTab, onTabChange }: DuoSearchTabsProps) =>
 
       if (partnerships) {
         setCurrentDuoId(partnerships.id);
-        setSelectedTimeSlots(partnerships.availability_schedule?.selectedSlots || []);
+        if (partnerships.availability_schedule && 
+            isAvailabilitySchedule(partnerships.availability_schedule)) {
+          setSelectedTimeSlots(partnerships.availability_schedule.selectedSlots);
+        } else {
+          setSelectedTimeSlots([]);
+        }
       }
     } catch (error) {
       console.error('Error loading duo availability:', error);
