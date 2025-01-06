@@ -16,9 +16,7 @@ export const NavbarLinks = ({ isAuthenticated }: NavbarLinksProps) => {
     ...(isAuthenticated
       ? [
           { href: "/my-leagues", label: "My Leagues" },
-          { href: "/match-requests", label: "Match Requests" },
-          { href: "/friends", label: "Friends" },
-          { href: "/history", label: "History" },
+          { href: "/my-matches", label: "My Matches" },
         ]
       : [])
   ];
