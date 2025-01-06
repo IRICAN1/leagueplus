@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Trophy, Send, Calendar } from "lucide-react";
+import { MapPin, Trophy, Send, Calendar, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -50,20 +50,32 @@ export const PlayerResultCard = ({ player, className }: PlayerResultCardProps) =
   };
 
   return (
-    <Card className={cn("p-4 bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in", className)}>
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 border-2 border-blue-100">
+    <Card className={cn(
+      "p-4 bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300",
+      "border-l-4 border-l-blue-500",
+      className
+    )}>
+      <div className="flex flex-col sm:flex-row items-start gap-4">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <Avatar className="h-16 w-16 border-2 border-blue-100 ring-2 ring-blue-50">
             <AvatarImage src={player.avatar_url} />
             <AvatarFallback className="bg-blue-50 text-blue-600">
               {player.username?.[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {player.username || "Anonymous Player"}
-            </h3>
+          <div className="space-y-1 flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {player.username || "Anonymous Player"}
+              </h3>
+              {stats.rank !== '-' && (
+                <Badge variant="secondary" className="bg-blue-50 text-blue-600 ml-2">
+                  <Trophy className="h-3 w-3 mr-1" />
+                  Rank #{stats.rank}
+                </Badge>
+              )}
+            </div>
             
             {player.primary_location && (
               <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -72,34 +84,34 @@ export const PlayerResultCard = ({ player, className }: PlayerResultCardProps) =
               </div>
             )}
 
-            <div className="flex flex-wrap gap-2">
-              {stats.rank !== '-' && (
-                <Badge variant="secondary" className="bg-blue-50 text-blue-600">
-                  <Trophy className="h-3 w-3 mr-1" />
-                  Rank #{stats.rank}
+            <div className="flex flex-wrap items-center gap-3 mt-2">
+              <div className="flex items-center text-sm text-emerald-600">
+                <Star className="h-4 w-4 mr-1" />
+                <span>{stats.wins} Wins</span>
+              </div>
+              <div className="text-sm text-blue-600">
+                {stats.points} Points
+              </div>
+              {player.skill_level && (
+                <Badge variant="outline" className="bg-blue-50/50">
+                  Level {player.skill_level}
                 </Badge>
               )}
-              <Badge variant="secondary" className="bg-green-50 text-green-600">
-                {stats.wins} Wins
-              </Badge>
-              <Badge variant="secondary" className="bg-blue-50 text-blue-600">
-                {stats.points} Points
-              </Badge>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-3 ml-auto mt-4 sm:mt-0">
           {player.availability_schedule && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full">
               <Calendar className="h-4 w-4 text-blue-500" />
-              <span>Available: {player.weekday_preference || "Flexible"}</span>
+              <span>{player.weekday_preference || "Flexible"}</span>
             </div>
           )}
 
           <Button
             onClick={handleSendInvite}
-            className="w-full md:w-auto"
+            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600"
           >
             <Send className="h-4 w-4 mr-2" />
             Send Duo Invite

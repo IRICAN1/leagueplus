@@ -104,7 +104,7 @@ const DuoSearch = () => {
 
   return (
     <div className="min-h-screen pt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container max-w-6xl mx-auto px-4 py-8">
+      <div className="container max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-6">
           <DuoSearchHeader 
             searchQuery={searchQuery}
@@ -123,9 +123,9 @@ const DuoSearch = () => {
                 onFilterChange={handleFilterChange}
               />
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-4">
                 {playersLoading ? (
-                  <div className="col-span-full text-center py-8 text-gray-600">
+                  <div className="text-center py-8 text-gray-600">
                     Loading players...
                   </div>
                 ) : players && players.length > 0 ? (
@@ -133,11 +133,11 @@ const DuoSearch = () => {
                     <PlayerResultCard
                       key={player.id}
                       player={player}
-                      className="animate-fade-in"
+                      className="animate-slide-in"
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-8 text-gray-600">
+                  <div className="text-center py-8 text-gray-600 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
                     No players found matching your criteria.
                   </div>
                 )}
