@@ -7,7 +7,7 @@ import { ChallengeForm } from "@/components/player-challenge/ChallengeForm";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
-import { MapPin, Crown, Medal, Trophy, Star, Flame } from "lucide-react";
+import { MapPin, Crown, Medal, Trophy, Star, Flame, Swords } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +34,12 @@ const PlayerChallenge = () => {
           .single(),
         supabase
           .from('player_statistics')
-          .select('*')
+          .select(`
+            *,
+            league:league_id (
+              name
+            )
+          `)
           .eq('player_id', playerId)
           .eq('league_id', leagueId)
           .single(),
@@ -48,6 +53,7 @@ const PlayerChallenge = () => {
       if (profileResponse.error) throw profileResponse.error;
       if (leagueResponse.error) throw leagueResponse.error;
 
+      // Use the actual statistics from the database, defaulting to 0 if not found
       const stats = statsResponse.data || {
         rank: 0,
         wins: 0,
@@ -63,10 +69,12 @@ const PlayerChallenge = () => {
         losses: stats.losses,
         points: stats.points,
         leagueName: leagueResponse.data.name,
-        leagueId
+        leagueId,
+        primary_location: profileResponse.data.primary_location
       };
     },
-    enabled: !!playerId && !!leagueId
+    enabled: !!playerId && !!leagueId,
+    refetchInterval: 5000 // Refresh every 5 seconds to keep stats current
   });
 
   const handleChallenge = async () => {
@@ -154,7 +162,7 @@ const PlayerChallenge = () => {
           location: playerData.primary_location || "To be determined",
           proposedTime: getProposedTime(selectedTimeSlot[0]),
           leagueId: playerData.leagueId,
-          playerId: playerId || '', // Add the playerId from URL params
+          playerId: playerId || '',
         }}
       />
     </div>
@@ -166,7 +174,7 @@ const getPlayerAchievements = (rank: number, wins: number, points: number) => {
   
   if (rank === 1) achievements.push({ title: "Champion", icon: Crown });
   if (rank === 2) achievements.push({ title: "Runner Up", icon: Medal });
-  if (rank === 3) achievements.push({ title: "Bronze", icon: Medal });
+  if (rank === 3) achievements.push({ title: "Bronze", icon: Trophy });
   if (wins >= 10) achievements.push({ title: "Victory Master", icon: Trophy });
   if (wins >= 5) achievements.push({ title: "Rising Star", icon: Star });
   if (points >= 100) achievements.push({ title: "Point Leader", icon: Flame });
