@@ -261,7 +261,6 @@ export type Database = {
           max_participants: number
           name: string
           registration_deadline: string
-          requires_duo: boolean | null
           rules: string | null
           schedule_preferences: string | null
           skill_level_max: number
@@ -289,7 +288,6 @@ export type Database = {
           max_participants: number
           name: string
           registration_deadline: string
-          requires_duo?: boolean | null
           rules?: string | null
           schedule_preferences?: string | null
           skill_level_max: number
@@ -317,7 +315,6 @@ export type Database = {
           max_participants?: number
           name?: string
           registration_deadline?: string
-          requires_duo?: boolean | null
           rules?: string | null
           schedule_preferences?: string | null
           skill_level_max?: number

@@ -7,7 +7,7 @@ interface PlayerAchievementsListProps {
 }
 
 export const PlayerAchievementsList = ({ player }: PlayerAchievementsListProps) => {
-  const getPlayerAchievements = (player: Player): Achievement[] => {
+  const getPlayerAchievements = (player: Player) => {
     const achievements: Achievement[] = [];
     
     // Top 3 achievements

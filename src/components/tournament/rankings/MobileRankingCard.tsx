@@ -11,8 +11,6 @@ interface MobileRankingCardProps {
   onChallenge: (playerId: string, playerName: string) => void;
   getRankStyle: (rank: number) => string;
   sortBy: "points" | "matches";
-  requiresDuo?: boolean;
-  leagueId: string;
 }
 
 export const MobileRankingCard = ({
@@ -20,9 +18,7 @@ export const MobileRankingCard = ({
   currentUserId,
   onChallenge,
   getRankStyle,
-  sortBy,
-  requiresDuo,
-  leagueId
+  sortBy
 }: MobileRankingCardProps) => {
   const winRate = player.matches_played > 0 
     ? ((player.wins / player.matches_played) * 100).toFixed(1)

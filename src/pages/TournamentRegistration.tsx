@@ -1,14 +1,20 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { RegistrationForm } from "@/components/tournament-registration/RegistrationForm";
+import { TournamentHeader } from "@/components/tournament-registration/TournamentHeader";
+import { TournamentInfo } from "@/components/tournament-registration/TournamentInfo";
+import { PositionSelector } from "@/components/tournament-registration/PositionSelector";
+import { RegistrationButton } from "@/components/tournament-registration/RegistrationButton";
 import { RegistrationHandler } from "@/components/tournament-registration/RegistrationHandler";
+import { AvailabilitySection } from "@/components/tournament-registration/AvailabilitySection";
+import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { InfoIcon, Loader2 } from "lucide-react";
 import { isAvailabilitySchedule } from "@/types/availability";
+import type { AvailabilitySchedule } from "@/types/availability";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -18,10 +24,12 @@ const TournamentRegistration = () => {
   const [primaryPosition, setPrimaryPosition] = useState<string>("");
   const [secondaryPosition, setSecondaryPosition] = useState<string>("");
   const [hasExistingSchedule, setHasExistingSchedule] = useState<boolean | null>(null);
+  const [league, setLeague] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [showRegistrationHandler, setShowRegistrationHandler] = useState(false);
 
   // Query for league data
-  const { data: league, isLoading: isLeagueLoading } = useQuery({
+  const { data: leagueData, isLoading: isLeagueLoading } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -66,6 +74,16 @@ const TournamentRegistration = () => {
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (leagueData) {
+      setLeague(leagueData);
+    }
+  }, [leagueData]);
+
+  const handleTimeSlotSelect = (slots: string[]) => {
+    setSelectedTimeSlots(slots);
+  };
+
   const handleSubmit = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -95,6 +113,20 @@ const TournamentRegistration = () => {
           variant: "destructive",
         });
         return;
+      }
+
+      // Update profile if needed
+      if (!hasExistingSchedule) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            availability_schedule: {
+              selectedSlots: selectedTimeSlots,
+            },
+          })
+          .eq('id', user.id);
+
+        if (profileError) throw profileError;
       }
 
       // For doubles leagues, show the registration handler
@@ -171,16 +203,48 @@ const TournamentRegistration = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
       <div className="container max-w-6xl mx-auto px-4">
         <div className="grid gap-6">
-          <RegistrationForm
-            league={league}
-            primaryPosition={primaryPosition}
-            setPrimaryPosition={setPrimaryPosition}
-            secondaryPosition={secondaryPosition}
-            setSecondaryPosition={setSecondaryPosition}
-            hasExistingSchedule={hasExistingSchedule}
-            onTimeSlotSelect={setSelectedTimeSlots}
-            onSubmit={handleSubmit}
-          />
+          <Card className="bg-white/80 shadow-lg">
+            <TournamentHeader name={league?.name || ''} />
+            <CardContent className="grid gap-6">
+              <TournamentInfo
+                registrationDeadline={league.registration_deadline}
+                startDate={league.start_date}
+                endDate={league.end_date}
+                matchFormat={league.match_format}
+                rules={league.rules}
+              />
+
+              <Separator className="my-4" />
+
+              <PositionSelector
+                primaryPosition={primaryPosition}
+                setPrimaryPosition={setPrimaryPosition}
+                secondaryPosition={secondaryPosition}
+                setSecondaryPosition={setSecondaryPosition}
+              />
+
+              {!hasExistingSchedule && (
+                <>
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <InfoIcon className="h-5 w-5" />
+                      <span className="text-sm font-medium">
+                        Please configure your availability schedule below
+                      </span>
+                    </div>
+                    
+                    <AvailabilitySection onTimeSlotSelect={handleTimeSlotSelect} />
+                  </div>
+                </>
+              )}
+
+              <Separator className="my-4" />
+
+              <RegistrationButton onClick={handleSubmit} />
+            </CardContent>
+          </Card>
         </div>
 
         {showRegistrationHandler && league && (
@@ -189,8 +253,7 @@ const TournamentRegistration = () => {
             isDoubles={league.is_doubles}
             requirements={{
               skillLevel: `${league.skill_level_min}-${league.skill_level_max}`,
-              ageMin: league.age_min,
-              ageMax: league.age_max,
+              ageCategory: league.age_category,
               genderCategory: league.gender_category,
             }}
           />

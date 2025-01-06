@@ -1,123 +1,69 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Swords } from "lucide-react";
+import { PlayerProfile } from "../PlayerProfile";
 import { PlayerAchievementsList } from "../PlayerAchievementsList";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RankDisplay } from "../RankDisplay";
+import { Player } from "../types";
 
 interface RankingTableRowProps {
-  player: any;
+  player: Player;
   currentUserId: string | null;
   onChallenge: (playerId: string, playerName: string) => void;
   getRankStyle: (rank: number) => string;
   sortBy: "points" | "matches";
-  isDoubles?: boolean;
-  leagueId: string;
 }
 
-export const RankingTableRow = ({
-  player,
-  currentUserId,
-  onChallenge,
+export const RankingTableRow = ({ 
+  player, 
+  currentUserId, 
+  onChallenge, 
   getRankStyle,
-  sortBy,
-  isDoubles,
-  leagueId
+  sortBy
 }: RankingTableRowProps) => {
-  const { data: duoPartnership } = useQuery({
-    queryKey: ['duo-partnership', player.id, leagueId],
-    queryFn: async () => {
-      if (!isDoubles) return null;
-
-      const { data, error } = await supabase
-        .from('league_participants')
-        .select(`
-          duo_partnership_id,
-          duo_partnerships!left(
-            player1_id,
-            player2_id,
-            player1:profiles!duo_partnerships_player1_id_fkey(
-              username,
-              full_name,
-              avatar_url
-            ),
-            player2:profiles!duo_partnerships_player2_id_fkey(
-              username,
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq('league_id', leagueId)
-        .eq('user_id', player.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data?.duo_partnerships;
-    },
-    enabled: !!isDoubles && !!player.id && !!leagueId,
-  });
-
-  const winRate = player.matches_played > 0
+  const winRate = player.matches_played > 0 
     ? ((player.wins / player.matches_played) * 100).toFixed(1)
     : "0.0";
 
-  const canChallenge = currentUserId && currentUserId !== player.id;
-
-  const renderPlayerOrTeam = () => {
-    if (isDoubles && duoPartnership) {
-      const partner = duoPartnership.player1_id === player.id
-        ? duoPartnership.player2
-        : duoPartnership.player1;
-
-      return (
-        <div className="flex items-center gap-4">
-          <div className="flex -space-x-2">
-            <Avatar className="h-8 w-8 ring-2 ring-white">
-              <AvatarImage src={player.avatar_url} />
-              <AvatarFallback>{player.name[0]}</AvatarFallback>
-            </Avatar>
-            <Avatar className="h-8 w-8 ring-2 ring-white">
-              <AvatarImage src={partner.avatar_url} />
-              <AvatarFallback>{partner.username[0]}</AvatarFallback>
-            </Avatar>
-          </div>
-          <div>
-            <div className="font-medium">{player.name} & {partner.username}</div>
-            <PlayerAchievementsList player={player} />
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-4">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={player.avatar_url} />
-          <AvatarFallback>{player.name[0]}</AvatarFallback>
-        </Avatar>
-        <div>
-          <div className="font-medium">{player.name}</div>
-          <PlayerAchievementsList player={player} />
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <TableRow className={getRankStyle(player.rank)}>
-      <TableCell className="font-medium">{player.rank}</TableCell>
-      <TableCell>{renderPlayerOrTeam()}</TableCell>
-      <TableCell className="text-right">{player.matches_played}</TableCell>
-      <TableCell className="text-right">{winRate}%</TableCell>
-      <TableCell className="text-right">{player.points}</TableCell>
+    <TableRow 
+      key={player.id}
+      className={`${getRankStyle(player.rank)} transition-all duration-300 hover:shadow-md group animate-fade-in`}
+    >
+      <TableCell>
+        <RankDisplay rank={player.rank} />
+      </TableCell>
+      <TableCell>
+        <PlayerProfile player={player} />
+      </TableCell>
+      <TableCell>
+        <PlayerAchievementsList player={player} />
+      </TableCell>
+      <TableCell className="text-right font-medium">
+        {sortBy === "points" ? (
+          <>
+            <span className="text-green-600">{player.wins}</span>
+            <span className="text-muted-foreground mx-1">/</span>
+            <span className="text-red-600">{player.losses}</span>
+          </>
+        ) : (
+          <span className="text-blue-600">{player.matches_played}</span>
+        )}
+      </TableCell>
       <TableCell className="text-right">
-        {canChallenge && (
+        <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 font-medium text-sm group-hover:from-blue-200 group-hover:to-purple-200 transition-all duration-300">
+          {sortBy === "points" ? player.points : `${winRate}%`}
+        </span>
+      </TableCell>
+      <TableCell>
+        {currentUserId && player.id !== currentUserId && (
           <Button
-            variant="outline"
             size="sm"
+            variant="outline"
+            className="w-full bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700 transition-colors group-hover:border-blue-300"
             onClick={() => onChallenge(player.id, player.name)}
           >
+            <Swords className="h-4 w-4 mr-1" />
             Challenge
           </Button>
         )}
