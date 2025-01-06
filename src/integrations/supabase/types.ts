@@ -576,43 +576,52 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_category: string | null
           availability_schedule: Json | null
           avatar_url: string | null
           created_at: string
           favorite_venues: string[] | null
           full_name: string | null
+          gender: string | null
           id: string
           max_travel_distance: number | null
           preferred_regions: string[] | null
           primary_location: string | null
+          skill_level: number | null
           updated_at: string
           username: string | null
           weekday_preference: string | null
         }
         Insert: {
+          age_category?: string | null
           availability_schedule?: Json | null
           avatar_url?: string | null
           created_at?: string
           favorite_venues?: string[] | null
           full_name?: string | null
+          gender?: string | null
           id: string
           max_travel_distance?: number | null
           preferred_regions?: string[] | null
           primary_location?: string | null
+          skill_level?: number | null
           updated_at?: string
           username?: string | null
           weekday_preference?: string | null
         }
         Update: {
+          age_category?: string | null
           availability_schedule?: Json | null
           avatar_url?: string | null
           created_at?: string
           favorite_venues?: string[] | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           max_travel_distance?: number | null
           preferred_regions?: string[] | null
           primary_location?: string | null
+          skill_level?: number | null
           updated_at?: string
           username?: string | null
           weekday_preference?: string | null

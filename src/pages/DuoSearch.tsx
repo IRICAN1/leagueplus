@@ -31,15 +31,21 @@ const DuoSearch = () => {
           )
         `);
 
-      if (filters.location) {
-        query = query.eq('primary_location', filters.location);
-      }
       if (filters.gender) {
         query = query.eq('gender', filters.gender);
       }
+
+      if (filters.ageCategory) {
+        query = query.eq('age_category', filters.ageCategory);
+      }
+
       if (filters.skillLevel) {
         const [min, max] = filters.skillLevel.split('-').map(Number);
-        query = query.gte('skill_level', min).lte('skill_level', max);
+        if (!isNaN(min) && !isNaN(max)) {
+          query = query
+            .gte('skill_level', min)
+            .lte('skill_level', max);
+        }
       }
 
       const { data, error } = await query;
