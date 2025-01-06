@@ -19,6 +19,7 @@ interface WeeklyScheduleProps {
   onSelectAllDay: (day: number) => void;
   singleSelect?: boolean;
   selectedWeek?: number;
+  isDuo?: boolean;
 }
 
 export const WeeklySchedule = ({
@@ -28,6 +29,7 @@ export const WeeklySchedule = ({
   onSelectAllDay,
   singleSelect = false,
   selectedWeek = 0,
+  isDuo = false,
 }: WeeklyScheduleProps) => {
   const isMobile = useIsMobile();
 
@@ -57,7 +59,7 @@ export const WeeklySchedule = ({
       <CardHeader className="pb-1">
         <CardTitle className="flex items-center gap-1 text-base">
           <Clock className="h-4 w-4 text-green-500" />
-          Select Time Slot
+          {isDuo ? "Select Duo Time Slot" : "Select Time Slot"}
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -123,6 +123,7 @@ export type Database = {
       duo_partnerships: {
         Row: {
           active: boolean | null
+          availability_schedule: Json | null
           created_at: string
           id: string
           player1_id: string
@@ -130,6 +131,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          availability_schedule?: Json | null
           created_at?: string
           id?: string
           player1_id: string
@@ -137,6 +139,7 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          availability_schedule?: Json | null
           created_at?: string
           id?: string
           player1_id?: string
