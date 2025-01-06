@@ -84,7 +84,7 @@ export const RankingTableRow = ({
           </div>
           <div>
             <div className="font-medium">{player.name} & {partner.username}</div>
-            <PlayerAchievementsList achievements={player.achievements} />
+            <PlayerAchievementsList player={player} />
           </div>
         </div>
       );
@@ -98,7 +98,7 @@ export const RankingTableRow = ({
         </Avatar>
         <div>
           <div className="font-medium">{player.name}</div>
-          <PlayerAchievementsList achievements={player.achievements} />
+          <PlayerAchievementsList player={player} />
         </div>
       </div>
     );
