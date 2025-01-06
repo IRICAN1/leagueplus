@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Users, Medal } from "lucide-react";
+import { Trophy, Users, Medal, Swords } from "lucide-react";
 import { PlayerRankingsTable } from "./PlayerRankingsTable";
 import { Tables } from "@/integrations/supabase/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type PlayerStatWithProfile = Tables<"player_statistics", never> & {
   profiles: Pick<Tables<"profiles", never>, "username">;
@@ -30,7 +31,6 @@ export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
       if (error) throw error;
       return data as PlayerStatWithProfile[];
     },
-    // Add refetch interval to keep data fresh
     refetchInterval: 5000,
   });
 
@@ -86,10 +86,46 @@ export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-50/30 to-purple-50/30 pointer-events-none" />
-        <div className="relative">
-          <PlayerRankingsTable leagueId={leagueId} />
-        </div>
+        <Tabs defaultValue="points" className="w-full">
+          <TabsList className="w-full justify-start bg-background/50 border-b p-0 h-12">
+            <TabsTrigger 
+              value="points" 
+              className="flex-1 data-[state=active]:bg-background rounded-none border-r h-full"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              Points Ranking
+            </TabsTrigger>
+            <TabsTrigger 
+              value="matches" 
+              className="flex-1 data-[state=active]:bg-background rounded-none h-full"
+            >
+              <Swords className="h-4 w-4 mr-2" />
+              Matches Played
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="points" className="mt-0">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-50/30 to-purple-50/30 pointer-events-none" />
+              <PlayerRankingsTable 
+                leagueId={leagueId} 
+                sortBy="points"
+                playerStats={playerStats}
+              />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="matches" className="mt-0">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-green-50/30 to-emerald-50/30 pointer-events-none" />
+              <PlayerRankingsTable 
+                leagueId={leagueId}
+                sortBy="matches"
+                playerStats={playerStats?.sort((a, b) => b.matches_played - a.matches_played)}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

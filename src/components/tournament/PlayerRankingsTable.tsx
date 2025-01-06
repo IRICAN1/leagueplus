@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Player } from "./types";
-import { useQuery } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { RankingTableHeader } from "./rankings/RankingTableHeader";
 import { RankingTableRow } from "./rankings/RankingTableRow";
@@ -13,9 +12,11 @@ import { MobileRankingCard } from "./rankings/MobileRankingCard";
 
 interface PlayerRankingsTableProps {
   leagueId: string;
+  sortBy: "points" | "matches";
+  playerStats?: any[];
 }
 
-export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
+export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats }: PlayerRankingsTableProps) => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const isMobile = useIsMobile();
@@ -30,37 +31,25 @@ export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
     checkUser();
   }, []);
 
-  const { data: players, isLoading } = useQuery({
-    queryKey: ['player-rankings', leagueId],
+  const { data: players } = useQuery({
+    queryKey: ['player-rankings', leagueId, sortBy],
     queryFn: async () => {
-      const { data: playerStats, error } = await supabase
-        .from('player_statistics')
-        .select(`
-          *,
-          profiles:player_id (
-            full_name,
-            avatar_url
-          )
-        `)
-        .eq('league_id', leagueId)
-        .order('rank', { ascending: true });
-
-      if (error) throw error;
-
-      return playerStats.map(stat => ({
-        id: stat.player_id,
-        name: stat.profiles?.full_name || 'Unknown Player',
-        avatar_url: stat.profiles?.avatar_url,
-        rank: stat.rank,
-        wins: stat.wins,
-        losses: stat.losses,
-        points: stat.points,
-        achievements: stat.points > 100 ? [
-          { title: "High Scorer", icon: UserRound }
-        ] : undefined
-      }));
+      if (playerStats) {
+        return playerStats.map((stat, index) => ({
+          id: stat.player_id,
+          name: stat.profiles?.username || 'Unknown Player',
+          avatar_url: stat.profiles?.avatar_url,
+          rank: sortBy === 'points' ? stat.rank : index + 1,
+          wins: stat.wins,
+          losses: stat.losses,
+          points: stat.points,
+          matches_played: stat.matches_played,
+          achievements: getPlayerAchievements(stat)
+        }));
+      }
+      return [];
     },
-    refetchInterval: 5000 // Refresh every 5 seconds to keep rankings current
+    enabled: !!playerStats,
   });
 
   const handleChallenge = (playerId: string, playerName: string) => {
@@ -73,31 +62,30 @@ export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
     });
   };
 
-  const getRankStyle = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return "bg-gradient-to-r from-yellow-50 via-yellow-100/50 to-amber-50 font-semibold text-yellow-700 hover:from-yellow-100 hover:to-amber-100/50";
-      case 2:
-        return "bg-gradient-to-r from-gray-50 via-slate-100/50 to-gray-50 font-semibold text-gray-700 hover:from-gray-100 hover:to-slate-100/50";
-      case 3:
-        return "bg-gradient-to-r from-amber-50 via-orange-100/50 to-amber-50 font-semibold text-amber-800 hover:from-amber-100 hover:to-orange-100/50";
-      default:
-        return "hover:bg-gray-50/50 transition-colors duration-200";
-    }
+  const getRankStyle = (rank: number, sortBy: "points" | "matches") => {
+    const baseStyles = {
+      points: {
+        1: "bg-gradient-to-r from-yellow-50 via-yellow-100/50 to-amber-50 font-semibold text-yellow-700 hover:from-yellow-100 hover:to-amber-100/50",
+        2: "bg-gradient-to-r from-gray-50 via-slate-100/50 to-gray-50 font-semibold text-gray-700 hover:from-gray-100 hover:to-slate-100/50",
+        3: "bg-gradient-to-r from-amber-50 via-orange-100/50 to-amber-50 font-semibold text-amber-800 hover:from-amber-100 hover:to-orange-100/50"
+      },
+      matches: {
+        1: "bg-gradient-to-r from-emerald-50 via-green-100/50 to-emerald-50 font-semibold text-emerald-700 hover:from-emerald-100 hover:to-green-100/50",
+        2: "bg-gradient-to-r from-teal-50 via-emerald-100/50 to-teal-50 font-semibold text-teal-700 hover:from-teal-100 hover:to-emerald-100/50",
+        3: "bg-gradient-to-r from-green-50 via-teal-100/50 to-green-50 font-semibold text-green-800 hover:from-green-100 hover:to-teal-100/50"
+      }
+    };
+
+    return rank <= 3 ? baseStyles[sortBy][rank as keyof typeof baseStyles.points] : "hover:bg-gray-50/50 transition-colors duration-200";
   };
 
-  if (isLoading) {
-    return (
-      <Card className="bg-white/80 shadow-md">
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground space-y-2">
-            <UserRound className="h-12 w-12 text-muted animate-pulse" />
-            <p>Loading rankings...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getPlayerAchievements = (stat: any) => {
+    const achievements = [];
+    if (stat.matches_played >= 20) achievements.push({ title: "Veteran", icon: UserRound });
+    if (stat.matches_played >= 10) achievements.push({ title: "Regular", icon: UserRound });
+    if (stat.points > 100) achievements.push({ title: "High Scorer", icon: UserRound });
+    return achievements;
+  };
 
   if (!players || players.length === 0) {
     return (
@@ -123,7 +111,8 @@ export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
                 player={player}
                 currentUserId={currentUserId}
                 onChallenge={handleChallenge}
-                getRankStyle={getRankStyle}
+                getRankStyle={(rank) => getRankStyle(rank, sortBy)}
+                sortBy={sortBy}
               />
             ))}
           </div>
@@ -137,7 +126,7 @@ export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
-            <RankingTableHeader />
+            <RankingTableHeader sortBy={sortBy} />
             <TableBody>
               {players.map((player) => (
                 <RankingTableRow
@@ -145,7 +134,8 @@ export const PlayerRankingsTable = ({ leagueId }: PlayerRankingsTableProps) => {
                   player={player}
                   currentUserId={currentUserId}
                   onChallenge={handleChallenge}
-                  getRankStyle={getRankStyle}
+                  getRankStyle={(rank) => getRankStyle(rank, sortBy)}
+                  sortBy={sortBy}
                 />
               ))}
             </TableBody>
