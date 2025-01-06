@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { MessageSquare, Trophy, XCircle } from "lucide-react";
+import { MessageSquare, Trophy, XCircle, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { isAvailabilitySchedule } from "@/types/availability";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 
 interface ActiveDuosListProps {
   duos: any[];
@@ -27,7 +30,18 @@ interface ActiveDuosListProps {
 export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosListProps) => {
   const [dissolvingDuoId, setDissolvingDuoId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
+  const [currentDuoId, setCurrentDuoId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
+    day: dayIndex,
+    slots: Array.from({ length: 16 }, (_, timeIndex) => ({
+      time: timeIndex + 8,
+      available: true,
+    })),
+  }));
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,6 +73,91 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
       });
     }
     setDissolvingDuoId(null);
+  };
+
+  const loadDuoAvailability = async (duoId: string) => {
+    try {
+      const { data: partnership, error } = await supabase
+        .from('duo_partnerships')
+        .select('*')
+        .eq('id', duoId)
+        .single();
+
+      if (error) throw error;
+
+      if (partnership) {
+        setCurrentDuoId(partnership.id);
+        if (partnership.availability_schedule && 
+            isAvailabilitySchedule(partnership.availability_schedule)) {
+          setSelectedTimeSlots(partnership.availability_schedule.selectedSlots);
+        } else {
+          setSelectedTimeSlots([]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading duo availability:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load duo availability",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveAvailability = async () => {
+    try {
+      if (!currentDuoId) {
+        toast({
+          title: "Error",
+          description: "No active duo partnership found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('duo_partnerships')
+        .update({
+          availability_schedule: {
+            selectedSlots: selectedTimeSlots,
+          },
+        })
+        .eq('id', currentDuoId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Duo availability updated successfully",
+      });
+      setShowSettings(false);
+    } catch (error) {
+      console.error('Error saving duo availability:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update duo availability",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTimeSlotSelect = (slots: string[]) => {
+    setSelectedTimeSlots(slots);
+  };
+
+  const handleSelectAllDay = (day: number) => {
+    const daySlots = availableTimeSlots[day].slots.map(slot => `${day}-${slot.time}`);
+    const currentSelected = new Set(selectedTimeSlots);
+    const isDayFullySelected = daySlots.every(slot => currentSelected.has(slot));
+    
+    let newSelectedSlots;
+    if (isDayFullySelected) {
+      newSelectedSlots = selectedTimeSlots.filter(slot => !daySlots.includes(slot));
+    } else {
+      newSelectedSlots = [...new Set([...selectedTimeSlots, ...daySlots])];
+    }
+    
+    handleTimeSlotSelect(newSelectedSlots);
   };
 
   if (isLoading) {
@@ -112,6 +211,17 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Message
                 </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    loadDuoAvailability(duo.id);
+                    setShowSettings(true);
+                  }}
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  Availability
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -158,6 +268,31 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
           </Card>
         );
       })}
+
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Duo Availability Settings</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <WeeklySchedule
+              availableTimeSlots={availableTimeSlots}
+              selectedTimeSlots={selectedTimeSlots}
+              onTimeSlotSelect={handleTimeSlotSelect}
+              onSelectAllDay={handleSelectAllDay}
+              isDuo={true}
+            />
+
+            <Button
+              className="w-full"
+              onClick={handleSaveAvailability}
+            >
+              Save Availability
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
