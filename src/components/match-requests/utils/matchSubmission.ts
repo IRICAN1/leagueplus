@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Challenge } from "@/types/match";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface MatchResult {
   winnerId: string;

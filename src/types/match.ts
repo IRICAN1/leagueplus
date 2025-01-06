@@ -1,17 +1,19 @@
 import { Tables } from "@/integrations/supabase/types";
 
 export type Challenge = Tables<"match_challenges"> & {
-  challenger?: {
+  challenger: {
     username: string | null;
     avatar_url: string | null;
   };
-  challenged?: {
+  challenged: {
     username: string | null;
     avatar_url: string | null;
   };
-  league?: {
+  league: {
     name: string;
   };
 };
 
 export type ChallengeType = 'sent' | 'received';
+
+export type ChallengeStatus = 'pending' | 'accepted' | 'rejected' | 'completed' | 'disputed';

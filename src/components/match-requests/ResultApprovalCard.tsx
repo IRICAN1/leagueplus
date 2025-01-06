@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { PendingApprovalCard } from "./PendingApprovalCard";
 import { MatchScoreDisplay } from "./MatchScoreDisplay";
+import { Challenge } from "@/types/match";
 
 interface ResultApprovalCardProps {
-  challenge: any;
+  challenge: Challenge;
   currentUserId: string;
 }
 
