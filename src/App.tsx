@@ -85,7 +85,7 @@ const App = () => (
               }
             />
             <Route
-              path="/match-requests"
+              path="/my-matches"
               element={
                 <ProtectedRoute>
                   <MatchRequests />

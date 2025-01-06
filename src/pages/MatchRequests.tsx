@@ -5,11 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { ChallengeCard } from "@/components/match-requests/ChallengeCard";
 import { Challenge } from "@/types/match";
+import { format } from "date-fns";
 
 const MatchRequests = () => {
   const { toast } = useToast();
 
-  const { data: challenges, isLoading, refetch } = useQuery({
+  const { data: challenges, isLoading: challengesLoading, refetch } = useQuery({
     queryKey: ['match-challenges'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -51,6 +52,32 @@ const MatchRequests = () => {
     }
   });
 
+  const { data: matchHistory, isLoading: historyLoading } = useQuery({
+    queryKey: ['match-history'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
+      if (!userId) return [];
+
+      const { data, error } = await supabase
+        .from('match_challenges')
+        .select(`
+          *,
+          challenged:profiles!match_challenges_challenged_id_fkey(username, avatar_url),
+          challenger:profiles!match_challenges_challenger_id_fkey(username, avatar_url),
+          league:leagues(name)
+        `)
+        .or(`challenger_id.eq.${userId},challenged_id.eq.${userId}`)
+        .eq('status', 'completed')
+        .eq('result_status', 'approved')
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const handleResponse = async (challengeId: string, accept: boolean) => {
     try {
       const { error } = await supabase
@@ -77,7 +104,7 @@ const MatchRequests = () => {
     }
   };
 
-  if (isLoading) {
+  if (challengesLoading || historyLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -87,12 +114,13 @@ const MatchRequests = () => {
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Match Requests</h1>
+      <h1 className="text-3xl font-bold mb-6">My Matches</h1>
       
       <Tabs defaultValue="received" className="space-y-6">
         <TabsList>
           <TabsTrigger value="received">Received Challenges</TabsTrigger>
           <TabsTrigger value="sent">Sent Challenges</TabsTrigger>
+          <TabsTrigger value="history">Match History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="received" className="space-y-4">
@@ -119,6 +147,20 @@ const MatchRequests = () => {
                 key={challenge.id}
                 challenge={challenge}
                 type="sent"
+              />
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4">
+          {!matchHistory?.length ? (
+            <p className="text-gray-500 text-center py-8">No completed matches yet</p>
+          ) : (
+            matchHistory.map(match => (
+              <ChallengeCard
+                key={match.id}
+                challenge={match}
+                type={match.challenger_id === match.winner_id ? "sent" : "received"}
               />
             ))
           )}
