@@ -4,7 +4,8 @@ import { WeekSelector } from "./WeekSelector";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Swords } from "lucide-react";
+import { Swords, Clock } from "lucide-react";
+import { format } from "date-fns";
 
 interface ChallengeFormProps {
   playerData: any;
@@ -92,6 +93,12 @@ export const ChallengeForm = ({
     onOpenConfirmation();
   };
 
+  const getFormattedSelectedTime = () => {
+    if (selectedTimeSlot.length === 0) return null;
+    const proposedTime = getProposedTime(selectedTimeSlot[0]);
+    return format(new Date(proposedTime), 'EEEE, MMMM d, yyyy - h:mm a');
+  };
+
   return (
     <div className="space-y-6">
       <WeekSelector
@@ -106,6 +113,12 @@ export const ChallengeForm = ({
         singleSelect={true}
         selectedWeek={selectedWeek}
       />
+      {selectedTimeSlot.length > 0 && (
+        <div className="flex items-center gap-2 text-sm text-green-600 font-medium bg-green-50 p-3 rounded-md">
+          <Clock className="h-4 w-4" />
+          <span>Selected Time: {getFormattedSelectedTime()}</span>
+        </div>
+      )}
       <Button 
         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
         onClick={handleSubmit}

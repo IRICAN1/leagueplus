@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { Clock } from "lucide-react";
 
 interface ChallengeConfirmationDialogProps {
   isOpen: boolean;
@@ -88,7 +89,12 @@ export const ChallengeConfirmationDialog = ({
         <div className="space-y-4">
           <p>Are you sure you want to challenge {challengeDetails.playerName} in {challengeDetails.leagueName}?</p>
           <p>Location: {challengeDetails.location}</p>
-          <p>Proposed Time: {format(new Date(proposedTime), 'PPpp')}</p>
+          <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-md">
+            <Clock className="h-4 w-4" />
+            <p className="font-medium">
+              Proposed Time: {format(new Date(proposedTime), 'EEEE, MMMM d, yyyy - h:mm a')}
+            </p>
+          </div>
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose}>Cancel</Button>
             <Button onClick={handleConfirm}>Confirm Challenge</Button>
