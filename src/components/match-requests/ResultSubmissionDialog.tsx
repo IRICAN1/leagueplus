@@ -15,12 +15,16 @@ import { Challenge } from "@/types/match";
 
 interface ResultSubmissionDialogProps {
   challenge: Challenge;
+  currentUserId: string;
 }
 
-export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProps) => {
+export const ResultSubmissionDialog = ({ challenge, currentUserId }: ResultSubmissionDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Check if the current user is a participant in the match
+  const isParticipant = currentUserId === challenge.challenger_id || currentUserId === challenge.challenged_id;
 
   const handleResultSubmit = async (formData: any) => {
     setIsSubmitting(true);
@@ -44,6 +48,10 @@ export const ResultSubmissionDialog = ({ challenge }: ResultSubmissionDialogProp
       setIsSubmitting(false);
     }
   };
+
+  if (!isParticipant) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -11,8 +11,10 @@ interface MatchActionsProps {
 export const MatchActions = ({ challenge, currentUserId, isMatchTime }: MatchActionsProps) => {
   const renderResultSubmission = () => {
     if (challenge.status !== 'accepted' || !isMatchTime) return null;
+    
+    // Only show submission form if there's no winner yet
     if (!challenge.winner_id) {
-      return <ResultSubmissionDialog challenge={challenge} />;
+      return <ResultSubmissionDialog challenge={challenge} currentUserId={currentUserId} />;
     }
     return null;
   };
