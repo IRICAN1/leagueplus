@@ -12,6 +12,7 @@ export interface Player {
   wins: number;
   losses: number;
   points: number;
+  matches_played: number;
   achievements?: Achievement[];
   avatar_url?: string;
 }

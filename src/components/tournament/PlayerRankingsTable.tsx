@@ -9,6 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { RankingTableHeader } from "./rankings/RankingTableHeader";
 import { RankingTableRow } from "./rankings/RankingTableRow";
 import { MobileRankingCard } from "./rankings/MobileRankingCard";
+import { useQuery } from "@tanstack/react-query";
 
 interface PlayerRankingsTableProps {
   leagueId: string;
