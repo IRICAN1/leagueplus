@@ -18,7 +18,8 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
     try {
       console.log('Updating match challenge:', challenge.id, 'with approval:', approved);
       
-      const { error } = await supabase
+      // First update the match challenge status
+      const { error: updateError } = await supabase
         .from('match_challenges')
         .update({
           result_status: approved ? 'approved' : 'disputed',
@@ -26,7 +27,15 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
         })
         .eq('id', challenge.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // If approved, trigger the recalculation of all player statistics
+      if (approved) {
+        const { error: recalcError } = await supabase
+          .rpc('recalculate_all_player_statistics');
+        
+        if (recalcError) throw recalcError;
+      }
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['match-challenges'] }),
