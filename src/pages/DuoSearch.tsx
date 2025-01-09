@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { DuoSearchFilters } from "@/components/duo-search/DuoSearchFilters";
-import { PlayerResultCard } from "@/components/duo-search/PlayerResultCard";
 import { ActiveDuosList } from "@/components/duo-search/ActiveDuosList";
 import { PendingInvites } from "@/components/duo-search/PendingInvites";
-import { DuoSearchHeader } from "@/components/duo-search/DuoSearchHeader";
 import { DuoSearchTabs } from "@/components/duo-search/DuoSearchTabs";
-import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { SearchSection } from "@/components/duo-search/SearchSection";
+import { ResultsSection } from "@/components/duo-search/ResultsSection";
 
 export type DuoSearchFilters = {
   skillLevel?: string;
@@ -114,7 +110,7 @@ const DuoSearch = () => {
 
   const handleFilterChange = (newFilters: DuoSearchFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleFilterReset = () => {
@@ -148,90 +144,25 @@ const DuoSearch = () => {
             onTabChange={setActiveTab}
           />
 
-          {activeTab === 'search' && (
+          {activeTab === 'search' ? (
             <div className="space-y-6 animate-fade-in">
-              <div className="sticky top-20 z-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-4 border border-blue-100">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <DuoSearchHeader 
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    showFilters={showFilters}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleFilterReset}
-                    className="hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-colors"
-                    title="Reset filters"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                  </Button>
-                </div>
-                {showFilters && (
-                  <DuoSearchFilters
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    showFilters={showFilters}
-                  />
-                )}
-              </div>
-
-              <div className="space-y-3">
-                {playersLoading ? (
-                  <div className="text-center py-8 text-gray-600">
-                    Loading players...
-                  </div>
-                ) : currentPlayers.length > 0 ? (
-                  <>
-                    {currentPlayers.map((player) => (
-                      <PlayerResultCard
-                        key={player.id}
-                        player={player}
-                        className="animate-slide-in"
-                      />
-                    ))}
-                    {totalPages > 1 && (
-                      <Pagination className="mt-6">
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                              className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                            />
-                          </PaginationItem>
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                onClick={() => setCurrentPage(page)}
-                                isActive={currentPage === page}
-                                className="hover:bg-blue-50"
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          <PaginationItem>
-                            <PaginationNext 
-                              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-8 text-gray-600 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-                    No players found matching your criteria.
-                  </div>
-                )}
-              </div>
+              <SearchSection
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filters={filters}
+                handleFilterChange={handleFilterChange}
+                handleFilterReset={handleFilterReset}
+                showFilters={showFilters}
+              />
+              <ResultsSection
+                players={currentPlayers}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+                playersLoading={playersLoading}
+              />
             </div>
-          )}
-
-          {activeTab === 'myDuos' && (
+          ) : (
             <div className="animate-fade-in">
               {!duosLoading && (!duos || duos.length === 0) ? (
                 <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm text-center">
@@ -239,38 +170,40 @@ const DuoSearch = () => {
                   <p className="text-gray-600 mb-4">
                     Start searching for duo partners to create new partnerships!
                   </p>
-                  <Button
+                  <button
                     onClick={() => setActiveTab('search')}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition-colors"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-md hover:from-blue-700 hover:to-blue-800 transition-colors"
                   >
                     Find Partners
-                  </Button>
+                  </button>
                 </div>
               ) : (
-                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
-                  <ActiveDuosList
-                    duos={duos || []}
-                    isLoading={duosLoading}
-                    onDuoUpdated={() => {
-                      // Refetch queries
-                    }}
-                  />
-                </div>
-              )}
+                <>
+                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
+                    <ActiveDuosList
+                      duos={duos || []}
+                      isLoading={duosLoading}
+                      onDuoUpdated={() => {
+                        // Refetch queries
+                      }}
+                    />
+                  </div>
 
-              {pendingInvites && pendingInvites.length > 0 && (
-                <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Pending Invites
-                  </h2>
-                  <PendingInvites
-                    invites={pendingInvites}
-                    isLoading={invitesLoading}
-                    onInviteUpdated={() => {
-                      // Refetch queries
-                    }}
-                  />
-                </div>
+                  {pendingInvites && pendingInvites.length > 0 && (
+                    <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
+                      <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Pending Invites
+                      </h2>
+                      <PendingInvites
+                        invites={pendingInvites}
+                        isLoading={invitesLoading}
+                        onInviteUpdated={() => {
+                          // Refetch queries
+                        }}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
