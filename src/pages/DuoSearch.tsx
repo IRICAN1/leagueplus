@@ -155,6 +155,9 @@ const DuoSearch = () => {
                   <DuoSearchHeader 
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    showFilters={showFilters}
                   />
                   <Button
                     variant="ghost"
@@ -170,6 +173,7 @@ const DuoSearch = () => {
                   <DuoSearchFilters
                     filters={filters}
                     onFilterChange={handleFilterChange}
+                    showFilters={showFilters}
                   />
                 )}
               </div>
