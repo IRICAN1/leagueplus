@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Users, CircleDot, MessageSquare, Check } from "lucide-react";
+import { Trophy, Star, Users, CircleDot, MessageSquare, Check, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChallengeHeader } from "./ChallengeHeader";
 import { ChallengeDetails } from "./ChallengeDetails";
@@ -10,6 +10,7 @@ import { MessageButton } from "./MessageButton";
 import { MatchScoresTable } from "./MatchScoresTable";
 import { MatchActions } from "./MatchActions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { format } from "date-fns";
 
 interface ChallengeCardProps {
   challenge: Challenge & { challengeType?: ChallengeType };
@@ -118,6 +119,16 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
                 challengeId={challenge.id}
                 compact={true}
               />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+            <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">
+              {challenge.league.name}
+            </Badge>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3 text-gray-500" />
+              <span>{format(new Date(challenge.proposed_time), 'PPp')}</span>
             </div>
           </div>
 
