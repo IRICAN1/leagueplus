@@ -65,7 +65,15 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
                   {challenge.challenger.username[0]?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm font-medium">{challenge.challenger.username}</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{challenge.challenger.full_name || challenge.challenger.username}</span>
+                {challenge.winner_id === challenge.challenger_id && (
+                  <div className="flex items-center gap-1 text-yellow-600">
+                    <Trophy className="h-3 w-3" />
+                    <span className="text-xs">Winner</span>
+                  </div>
+                )}
+              </div>
               <span className="text-xs text-gray-500">vs</span>
               <Avatar className="h-8 w-8 border-2 border-purple-100">
                 <AvatarImage src={challenge.challenged.avatar_url || undefined} />
@@ -73,7 +81,15 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
                   {challenge.challenged.username[0]?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm font-medium">{challenge.challenged.username}</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{challenge.challenged.full_name || challenge.challenged.username}</span>
+                {challenge.winner_id === challenge.challenged_id && (
+                  <div className="flex items-center gap-1 text-yellow-600">
+                    <Trophy className="h-3 w-3" />
+                    <span className="text-xs">Winner</span>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-1.5">
               <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${
