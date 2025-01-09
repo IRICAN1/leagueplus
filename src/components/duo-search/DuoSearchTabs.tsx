@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { Settings2 } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { WeeklySchedule } from "../player-challenge/WeeklySchedule";
@@ -100,10 +99,10 @@ export const DuoSearchTabs = ({ activeTab, onTabChange }: DuoSearchTabsProps) =>
 
   return (
     <>
-      <div className="flex items-center space-x-2 mb-6 sticky top-0 bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-sm z-10">
+      <div className="flex items-center space-x-2 mb-4 sticky top-0 bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-sm z-10">
         <button 
           className={cn(
-            "flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200",
+            "flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200",
             activeTab === 'search' 
               ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25 scale-[1.02]' 
               : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
@@ -114,7 +113,7 @@ export const DuoSearchTabs = ({ activeTab, onTabChange }: DuoSearchTabsProps) =>
         </button>
         <button 
           className={cn(
-            "flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200",
+            "flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200",
             activeTab === 'myDuos' 
               ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25 scale-[1.02]' 
               : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
@@ -123,17 +122,6 @@ export const DuoSearchTabs = ({ activeTab, onTabChange }: DuoSearchTabsProps) =>
         >
           My Duos
         </button>
-        {activeTab === 'myDuos' && (
-          <button
-            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-            onClick={() => {
-              loadDuoAvailability();
-              setShowSettings(true);
-            }}
-          >
-            <Settings2 className="h-5 w-5" />
-          </button>
-        )}
       </div>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
