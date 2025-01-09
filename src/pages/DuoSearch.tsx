@@ -7,6 +7,8 @@ import { ActiveDuosList } from "@/components/duo-search/ActiveDuosList";
 import { PendingInvites } from "@/components/duo-search/PendingInvites";
 import { DuoSearchHeader } from "@/components/duo-search/DuoSearchHeader";
 import { DuoSearchTabs } from "@/components/duo-search/DuoSearchTabs";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 export type DuoSearchFilters = {
   skillLevel?: string;
@@ -19,7 +21,7 @@ export type DuoSearchFilters = {
 const DuoSearch = () => {
   const [filters, setFilters] = useState<DuoSearchFilters>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<'search' | 'myDuos'>('myDuos');
+  const [activeTab, setActiveTab] = useState<'myDuos' | 'search'>('myDuos');
 
   const { data: duos, isLoading: duosLoading } = useQuery({
     queryKey: ['active-duos'],
@@ -106,15 +108,14 @@ const DuoSearch = () => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
+  const handleFilterReset = () => {
+    setFilters({});
+  };
+
   return (
     <div className="min-h-screen pt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-6">
-          <DuoSearchHeader 
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-
           <DuoSearchTabs 
             activeTab={activeTab}
             onTabChange={setActiveTab}
@@ -123,13 +124,28 @@ const DuoSearch = () => {
           {activeTab === 'search' && (
             <div className="space-y-6 animate-fade-in">
               <div className="sticky top-20 z-10 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-4 border border-blue-100">
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <DuoSearchHeader 
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleFilterReset}
+                    className="hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-colors"
+                    title="Reset filters"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </div>
                 <DuoSearchFilters
                   filters={filters}
                   onFilterChange={handleFilterChange}
                 />
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {playersLoading ? (
                   <div className="text-center py-8 text-gray-600">
                     Loading players...
@@ -159,18 +175,15 @@ const DuoSearch = () => {
                   <p className="text-gray-600 mb-4">
                     Start searching for duo partners to create new partnerships!
                   </p>
-                  <button
+                  <Button
                     onClick={() => setActiveTab('search')}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition-colors"
                   >
                     Find Partners
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Active Partnerships
-                  </h2>
                   <ActiveDuosList
                     duos={duos || []}
                     isLoading={duosLoading}
