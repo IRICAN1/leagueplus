@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { MessageSquare, Trophy, XCircle, Clock } from "lucide-react";
+import { MessageSquare, Trophy, XCircle, Clock, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { isAvailabilitySchedule } from "@/types/availability";
@@ -164,7 +164,7 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
     return (
       <div className="space-y-4">
         {[1, 2].map((i) => (
-          <Card key={i}>
+          <Card key={i} className="bg-white/80 backdrop-blur-sm border-blue-100 hover:border-blue-200 transition-all duration-300">
             <CardContent className="p-6">
               <Skeleton className="h-24 w-full" />
             </CardContent>
@@ -176,9 +176,10 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
 
   if (duos.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-6 text-center text-gray-500">
-          You don't have any active duo partnerships yet.
+      <Card className="bg-white/80 backdrop-blur-sm border-blue-100">
+        <CardContent className="p-8 text-center">
+          <Users className="h-12 w-12 mx-auto mb-4 text-blue-400 opacity-50" />
+          <p className="text-gray-500">You don't have any active duo partnerships yet.</p>
         </CardContent>
       </Card>
     );
@@ -191,41 +192,46 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
         const stats = duo.duo_statistics[0];
 
         return (
-          <Card key={duo.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
+          <Card key={duo.id} className="bg-white/80 backdrop-blur-sm border-blue-100 hover:border-blue-200 transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between p-6">
               <div className="flex items-center space-x-4">
-                <img
-                  src={partner.avatar_url || "/placeholder.svg"}
-                  alt={partner.username}
-                  className="h-12 w-12 rounded-full"
-                />
+                <div className="relative">
+                  <img
+                    src={partner.avatar_url || "/placeholder.svg"}
+                    alt={partner.username}
+                    className="h-16 w-16 rounded-full border-2 border-blue-100 transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-400 border-2 border-white" />
+                </div>
                 <div>
-                  <h3 className="font-semibold">{partner.username}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="font-semibold text-lg text-gray-800">{partner.full_name || partner.username}</h3>
+                  <p className="text-sm text-blue-600 font-medium">@{partner.username}</p>
+                  <p className="text-sm text-gray-500 mt-1">
                     Partners since {format(new Date(duo.created_at), 'MMM d, yyyy')}
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  <MessageSquare className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" className="bg-white hover:bg-blue-50">
+                  <MessageSquare className="h-4 w-4 mr-2 text-blue-500" />
                   Message
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
+                  className="bg-white hover:bg-blue-50"
                   onClick={() => {
                     loadDuoAvailability(duo.id);
                     setShowSettings(true);
                   }}
                 >
-                  <Clock className="h-4 w-4 mr-2" />
+                  <Clock className="h-4 w-4 mr-2 text-blue-500" />
                   Availability
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <XCircle className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="bg-white hover:bg-red-50">
+                      <XCircle className="h-4 w-4 mr-2 text-red-500" />
                       Dissolve
                     </Button>
                   </AlertDialogTrigger>
@@ -246,22 +252,22 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
                 </AlertDialog>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <Trophy className="h-5 w-5 text-blue-500 mx-auto mb-1" />
-                  <div className="text-lg font-semibold">{stats?.wins || 0}</div>
-                  <div className="text-sm text-gray-500">Wins</div>
+            <CardContent className="px-6 pb-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 text-center">
+                  <Trophy className="h-5 w-5 text-blue-500 mx-auto mb-2" />
+                  <div className="text-xl font-bold text-blue-600">{stats?.wins || 0}</div>
+                  <div className="text-sm text-gray-600">Wins</div>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <div className="text-lg font-semibold">{stats?.losses || 0}</div>
-                  <div className="text-sm text-gray-500">Losses</div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 text-center">
+                  <div className="text-xl font-bold text-red-500">{stats?.losses || 0}</div>
+                  <div className="text-sm text-gray-600">Losses</div>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <div className="text-lg font-semibold">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 text-center">
+                  <div className="text-xl font-bold text-purple-600">
                     {stats ? ((stats.wins / (stats.wins + stats.losses)) * 100).toFixed(1) : 0}%
                   </div>
-                  <div className="text-sm text-gray-500">Win Rate</div>
+                  <div className="text-sm text-gray-600">Win Rate</div>
                 </div>
               </div>
             </CardContent>
@@ -285,7 +291,7 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
             />
 
             <Button
-              className="w-full"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
               onClick={handleSaveAvailability}
             >
               Save Availability

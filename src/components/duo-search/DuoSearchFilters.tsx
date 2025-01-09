@@ -1,6 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { DuoSearchFilters as FilterType } from "@/pages/DuoSearch";
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal } from "lucide-react";
@@ -29,19 +28,19 @@ export const DuoSearchFilters = ({ filters, onFilterChange, showFilters }: DuoSe
           variant="outline" 
           size="icon"
           className={`
-            relative transition-all duration-300
-            ${hasActiveFilters ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : 'bg-white'}
+            relative transition-all duration-300 h-10 w-10
+            ${hasActiveFilters ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : 'bg-white border-blue-100 hover:bg-blue-50'}
           `}
         >
           <SlidersHorizontal className={`h-4 w-4 ${hasActiveFilters ? 'text-blue-600' : 'text-gray-600'}`} />
           {hasActiveFilters && (
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
           )}
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle className="text-gradient bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <SheetTitle className="text-gradient bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Filter Players
           </SheetTitle>
           <SheetDescription>

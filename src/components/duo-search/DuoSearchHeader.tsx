@@ -19,16 +19,16 @@ export const DuoSearchHeader = ({
   showFilters
 }: DuoSearchHeaderProps) => {
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <div className="relative flex-1">
         <Input
           type="text"
           placeholder="Search by name or username..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 pr-4 h-10 text-base shadow-sm bg-white/90 backdrop-blur-sm border-blue-100 focus:border-blue-300 focus:ring-blue-200 transition-all"
+          className="pl-10 h-10 text-base bg-white/90 backdrop-blur-sm border-blue-100 focus:border-blue-300 focus:ring-blue-200 transition-all shadow-sm"
         />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
       </div>
       <DuoSearchFilters 
         filters={filters} 
