@@ -8,15 +8,15 @@ interface MessageButtonProps {
   currentUserId: string;
   otherUserId: string;
   challengeId: string;
+  compact?: boolean;
 }
 
-export const MessageButton = ({ currentUserId, otherUserId, challengeId }: MessageButtonProps) => {
+export const MessageButton = ({ currentUserId, otherUserId, challengeId, compact = false }: MessageButtonProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleMessageClick = async () => {
     try {
-      // First, check if a conversation already exists between these users
       const { data: existingParticipations } = await supabase
         .from('conversation_participants')
         .select('conversation_id')
@@ -25,7 +25,6 @@ export const MessageButton = ({ currentUserId, otherUserId, challengeId }: Messa
       let conversationId = null;
 
       if (existingParticipations && existingParticipations.length > 0) {
-        // Check each conversation to see if the other user is also a participant
         for (const participation of existingParticipations) {
           const { data: otherParticipant } = await supabase
             .from('conversation_participants')
@@ -41,7 +40,6 @@ export const MessageButton = ({ currentUserId, otherUserId, challengeId }: Messa
         }
       }
 
-      // If no existing conversation found, create a new one
       if (!conversationId) {
         const { data: newConversation, error: conversationError } = await supabase
           .from('conversations')
@@ -51,7 +49,6 @@ export const MessageButton = ({ currentUserId, otherUserId, challengeId }: Messa
 
         if (conversationError) throw conversationError;
 
-        // Add both users as participants
         const { error: participantsError } = await supabase
           .from('conversation_participants')
           .insert([
@@ -72,7 +69,6 @@ export const MessageButton = ({ currentUserId, otherUserId, challengeId }: Messa
         conversationId = newConversation.id;
       }
 
-      // Navigate to messages with the conversation ID
       navigate('/messages', { 
         state: { 
           conversationId,
@@ -94,11 +90,11 @@ export const MessageButton = ({ currentUserId, otherUserId, challengeId }: Messa
     <Button
       variant="outline"
       size="sm"
-      className="flex items-center gap-2"
       onClick={handleMessageClick}
+      className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
     >
-      <MessageSquare className="h-4 w-4" />
-      Message
+      <MessageSquare className="h-3.5 w-3.5" />
+      {!compact && <span className="ml-1">Message</span>}
     </Button>
   );
 };

@@ -19,36 +19,36 @@ export const MatchScoresTable = ({
   loserSets,
 }: MatchScoresTableProps) => {
   return (
-    <div className="mt-3">
+    <div className="mt-2">
       <Table className="w-full bg-gradient-to-r from-gray-50/80 via-white/90 to-gray-50/80 rounded-lg overflow-hidden border border-gray-100">
         <TableBody>
           <TableRow className="hover:bg-blue-50/30 transition-colors">
-            <TableCell className="py-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                <span className="font-medium text-green-700">{winnerName}</span>
+            <TableCell className="py-0.5 text-xs">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-green-500"></div>
+                <span className="font-medium text-green-700 truncate">{winnerName}</span>
               </div>
             </TableCell>
             {winnerSets.map((score, index) => (
               <TableCell 
                 key={index} 
-                className="text-center py-1 text-xs font-medium text-green-600"
+                className="text-center py-0.5 text-xs font-medium text-green-600 px-2"
               >
                 {score}
               </TableCell>
             ))}
           </TableRow>
           <TableRow className="hover:bg-blue-50/30 transition-colors">
-            <TableCell className="py-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
-                <span className="font-medium text-red-700">{loserName}</span>
+            <TableCell className="py-0.5 text-xs">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-red-500"></div>
+                <span className="font-medium text-red-700 truncate">{loserName}</span>
               </div>
             </TableCell>
             {loserSets.map((score, index) => (
               <TableCell 
                 key={index} 
-                className="text-center py-1 text-xs font-medium text-red-600"
+                className="text-center py-0.5 text-xs font-medium text-red-600 px-2"
               >
                 {score}
               </TableCell>
