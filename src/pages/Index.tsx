@@ -3,7 +3,7 @@ import { FilterBar } from "@/components/FilterBar";
 import { ResultCard } from "@/components/ResultCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
+import { Tables, Database } from "@/integrations/supabase/types";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,9 @@ const LEAGUES_PER_PAGE = 10;
 
 export type LeagueFilters = {
   location?: string;
-  sportType?: string;
+  sportType?: Database['public']['Enums']['league_sport_type'];
   skillLevel?: string;
-  genderCategory?: string;
+  genderCategory?: Database['public']['Enums']['league_gender_category'];
   startDate?: Date;
   endDate?: Date;
   status?: 'active' | 'upcoming' | 'completed';
@@ -86,7 +86,7 @@ const Index = () => {
         throw error;
       }
 
-      return data as (Tables<'leagues', never> & { league_participants: { count: number }[] })[];
+      return data as (Tables<'leagues'> & { league_participants: { count: number }[] })[];
     },
   });
 
