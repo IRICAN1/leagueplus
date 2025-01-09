@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { LeagueFilters } from "@/pages/Index";
+import { Database } from "@/integrations/supabase/types";
 
 interface FilterControlsProps {
   filters: LeagueFilters;
@@ -14,6 +15,8 @@ interface FilterControlsProps {
 }
 
 export const FilterControls = ({ filters, onFilterChange }: FilterControlsProps) => {
+  const genderCategories: Database['public']['Enums']['league_gender_category'][] = ['Men', 'Women', 'Mixed'];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
       <Select onValueChange={(value) => onFilterChange({ skillLevel: value === "all" ? undefined : value })}>
@@ -28,15 +31,21 @@ export const FilterControls = ({ filters, onFilterChange }: FilterControlsProps)
         </SelectContent>
       </Select>
 
-      <Select onValueChange={(value) => onFilterChange({ genderCategory: value === "all" ? undefined : value })}>
+      <Select 
+        value={filters.genderCategory || "all"}
+        onValueChange={(value) => {
+          const category = value === "all" ? undefined : value as Database['public']['Enums']['league_gender_category'];
+          onFilterChange({ genderCategory: category });
+        }}
+      >
         <SelectTrigger className="w-full bg-white/90 text-gray-700 border-blue-100">
           <SelectValue placeholder="Gender Category" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Categories</SelectItem>
-          <SelectItem value="Men">Men</SelectItem>
-          <SelectItem value="Women">Women</SelectItem>
-          <SelectItem value="Mixed">Mixed</SelectItem>
+          {genderCategories.map((category) => (
+            <SelectItem key={category} value={category}>{category}</SelectItem>
+          ))}
         </SelectContent>
       </Select>
 

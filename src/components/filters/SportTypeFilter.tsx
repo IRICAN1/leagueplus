@@ -1,26 +1,26 @@
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Database } from "@/integrations/supabase/types";
 
 interface SportTypeFilterProps {
-  selectedSport?: string;
-  onSportSelect: (sport: string) => void;
+  selectedSport?: Database['public']['Enums']['league_sport_type'];
+  onSportSelect: (sport: Database['public']['Enums']['league_sport_type']) => void;
 }
 
 export const SportTypeFilter = ({ selectedSport, onSportSelect }: SportTypeFilterProps) => {
-  const sportTypes = [
-    { id: 'Tennis', label: 'Tennis' },
-    { id: 'Padel', label: 'Padel' },
-    { id: 'Badminton', label: 'Badminton' },
+  const sportTypes: Database['public']['Enums']['league_sport_type'][] = [
+    'Tennis',
+    'Padel',
+    'Badminton'
   ];
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
       <div className="flex flex-wrap gap-2">
         {sportTypes.map((sport) => {
-          const isSelected = selectedSport === sport.id;
+          const isSelected = selectedSport === sport;
           return (
             <Button
-              key={sport.id}
+              key={sport}
               variant={isSelected ? "default" : "outline"}
               className={`
                 relative overflow-hidden transition-all duration-300
@@ -30,9 +30,9 @@ export const SportTypeFilter = ({ selectedSport, onSportSelect }: SportTypeFilte
                 }
                 ${isSelected ? 'scale-105' : 'scale-100'}
               `}
-              onClick={() => onSportSelect(selectedSport === sport.id ? undefined : sport.id)}
+              onClick={() => onSportSelect(selectedSport === sport ? undefined : sport)}
             >
-              <span className="relative z-10">{sport.label}</span>
+              <span className="relative z-10">{sport}</span>
               {isSelected && (
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
               )}
