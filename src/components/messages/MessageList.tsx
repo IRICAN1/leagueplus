@@ -55,7 +55,7 @@ export const MessageList = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data: userConversations, error } = await supabase
+      const { data, error } = await supabase
         .from("conversation_participants")
         .select(`
           conversation:conversations (
@@ -69,7 +69,7 @@ export const MessageList = ({
                 avatar_url
               )
             ),
-            messages:messages (
+            messages (
               content,
               created_at,
               sender:profiles (
@@ -91,7 +91,7 @@ export const MessageList = ({
         return [];
       }
 
-      return userConversations
+      return (data || [])
         .map((uc) => uc.conversation)
         .filter((c): c is Conversation => c !== null);
     },
@@ -182,8 +182,8 @@ export const MessageList = ({
                   {lastMessage && (
                     <p className="mt-1 text-sm text-gray-600 truncate">
                       <span className="font-medium">
-                        {lastMessage.sender.username === otherParticipant?.username ? "" : "You"}:
-                      </span>{" "}
+                        {lastMessage.sender.username === otherParticipant?.username ? "" : "You: "}
+                      </span>
                       {lastMessage.content}
                     </p>
                   )}

@@ -26,20 +26,21 @@ export const ChatArea = ({ conversationId, onShowList }: ChatAreaProps) => {
 
       const { data, error } = await supabase
         .from("messages")
-        .select(
-          `
+        .select(`
           *,
           profiles (
             username,
             avatar_url,
             full_name
           )
-        `
-        )
+        `)
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching messages:", error);
+        throw error;
+      }
 
       // Update last_read_at
       await supabase
@@ -53,7 +54,6 @@ export const ChatArea = ({ conversationId, onShowList }: ChatAreaProps) => {
     enabled: !!conversationId,
   });
 
-  // Query to get other participant's info
   const { data: otherParticipant } = useQuery({
     queryKey: ["other-participant", conversationId],
     queryFn: async () => {
@@ -92,7 +92,7 @@ export const ChatArea = ({ conversationId, onShowList }: ChatAreaProps) => {
     if (!conversationId) return;
 
     const channel = supabase
-      .channel("messages")
+      .channel(`messages-${conversationId}`)
       .on(
         "postgres_changes",
         {
@@ -108,7 +108,7 @@ export const ChatArea = ({ conversationId, onShowList }: ChatAreaProps) => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [conversationId, refetch]);
 
