@@ -4,6 +4,7 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
+import { Trophy } from "lucide-react";
 
 interface MatchScoresTableProps {
   winnerName: string;
@@ -19,36 +20,35 @@ export const MatchScoresTable = ({
   loserSets,
 }: MatchScoresTableProps) => {
   return (
-    <div className="mt-2">
-      <Table className="w-full bg-gradient-to-r from-gray-50/80 via-white/90 to-gray-50/80 rounded-lg overflow-hidden border border-gray-100">
+    <div className="mt-3">
+      <Table className="w-full bg-gradient-to-r from-gray-50/80 via-white/90 to-gray-50/80 rounded-lg overflow-hidden border border-gray-100 shadow-sm">
         <TableBody>
           <TableRow className="hover:bg-blue-50/30 transition-colors">
-            <TableCell className="py-0.5 text-xs">
+            <TableCell className="py-1.5 text-xs">
               <div className="flex items-center gap-1.5">
-                <div className="w-1 h-1 rounded-full bg-green-500"></div>
+                <Trophy className="h-3 w-3 text-yellow-500" />
                 <span className="font-medium text-green-700 truncate">{winnerName}</span>
               </div>
             </TableCell>
             {winnerSets.map((score, index) => (
               <TableCell 
                 key={index} 
-                className="text-center py-0.5 text-xs font-medium text-green-600 px-2"
+                className="text-center py-1.5 text-sm font-semibold text-green-600 px-3 bg-green-50/30"
               >
                 {score}
               </TableCell>
             ))}
           </TableRow>
           <TableRow className="hover:bg-blue-50/30 transition-colors">
-            <TableCell className="py-0.5 text-xs">
-              <div className="flex items-center gap-1.5">
-                <div className="w-1 h-1 rounded-full bg-red-500"></div>
+            <TableCell className="py-1.5 text-xs">
+              <div className="flex items-center gap-1.5 pl-6">
                 <span className="font-medium text-red-700 truncate">{loserName}</span>
               </div>
             </TableCell>
             {loserSets.map((score, index) => (
               <TableCell 
                 key={index} 
-                className="text-center py-0.5 text-xs font-medium text-red-600 px-2"
+                className="text-center py-1.5 text-sm font-semibold text-red-600 px-3 bg-red-50/30"
               >
                 {score}
               </TableCell>

@@ -30,11 +30,11 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     if (challenge.status !== 'completed' || !challenge.winner_score) return null;
     const isWinner = challenge.winner_id === currentUserId;
     const winnerName = isWinner 
-      ? challenge.challenger.username
-      : challenge.challenged.username;
+      ? (challenge.challenger.full_name || challenge.challenger.username)
+      : (challenge.challenged.full_name || challenge.challenged.username);
     const loserName = !isWinner 
-      ? challenge.challenger.username
-      : challenge.challenged.username;
+      ? (challenge.challenger.full_name || challenge.challenger.username)
+      : (challenge.challenged.full_name || challenge.challenged.username);
     const winnerSets = parseScore(challenge.winner_score);
     const loserSets = parseScore(challenge.loser_score);
 
@@ -121,7 +121,6 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
             </div>
           </div>
 
-          <ChallengeDetails challenge={challenge} />
           {renderScores()}
           
           {challenge.status === 'pending' && type === 'received' && onResponse && (
