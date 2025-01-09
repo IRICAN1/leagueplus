@@ -49,7 +49,7 @@ const DuoSearch = () => {
   }, [duos, duosLoading]);
 
   const { data: players, isLoading: playersLoading } = useQuery({
-    queryKey: ['duo-search', filters],
+    queryKey: ['duo-search', filters, searchQuery],
     queryFn: async () => {
       let query = supabase
         .from('profiles')
@@ -62,6 +62,11 @@ const DuoSearch = () => {
             points
           )
         `);
+
+      // Apply text search on full_name or username
+      if (searchQuery) {
+        query = query.or(`full_name.ilike.%${searchQuery}%,username.ilike.%${searchQuery}%`);
+      }
 
       if (filters.gender) {
         query = query.eq('gender', filters.gender);
@@ -110,6 +115,7 @@ const DuoSearch = () => {
 
   const handleFilterReset = () => {
     setFilters({});
+    setSearchQuery("");
   };
 
   return (
@@ -123,7 +129,7 @@ const DuoSearch = () => {
 
           {activeTab === 'search' && (
             <div className="space-y-6 animate-fade-in">
-              <div className="sticky top-20 z-10 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-4 border border-blue-100">
+              <div className="sticky top-20 z-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-4 border border-blue-100">
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <DuoSearchHeader 
                     searchQuery={searchQuery}
@@ -168,7 +174,7 @@ const DuoSearch = () => {
           )}
 
           {activeTab === 'myDuos' && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="animate-fade-in">
               {!duosLoading && (!duos || duos.length === 0) ? (
                 <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm text-center">
                   <h2 className="text-xl font-semibold mb-2">No Active Partnerships</h2>
@@ -195,7 +201,7 @@ const DuoSearch = () => {
               )}
 
               {pendingInvites && pendingInvites.length > 0 && (
-                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
+                <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
                   <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Pending Invites
                   </h2>

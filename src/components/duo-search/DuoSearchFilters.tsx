@@ -10,15 +10,15 @@ interface DuoSearchFiltersProps {
 
 export const DuoSearchFilters = ({ filters, onFilterChange }: DuoSearchFiltersProps) => {
   return (
-    <Card className="p-4 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+    <Card className="p-4 bg-gradient-to-br from-white/80 to-blue-50/80 backdrop-blur-sm border-blue-100 hover:shadow-md transition-all duration-300">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label>Skill Level</Label>
+          <Label className="text-blue-800">Skill Level</Label>
           <Select
             value={filters.skillLevel}
             onValueChange={(value) => onFilterChange({ skillLevel: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/90 border-blue-100 hover:border-blue-200 focus:border-blue-300 transition-colors">
               <SelectValue placeholder="Select skill level" />
             </SelectTrigger>
             <SelectContent>
@@ -30,12 +30,12 @@ export const DuoSearchFilters = ({ filters, onFilterChange }: DuoSearchFiltersPr
         </div>
 
         <div className="space-y-2">
-          <Label>Gender</Label>
+          <Label className="text-blue-800">Gender</Label>
           <Select
             value={filters.gender}
             onValueChange={(value) => onFilterChange({ gender: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/90 border-blue-100 hover:border-blue-200 focus:border-blue-300 transition-colors">
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
             <SelectContent>
@@ -47,12 +47,12 @@ export const DuoSearchFilters = ({ filters, onFilterChange }: DuoSearchFiltersPr
         </div>
 
         <div className="space-y-2">
-          <Label>Age Category</Label>
+          <Label className="text-blue-800">Age Category</Label>
           <Select
             value={filters.ageCategory}
             onValueChange={(value) => onFilterChange({ ageCategory: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/90 border-blue-100 hover:border-blue-200 focus:border-blue-300 transition-colors">
               <SelectValue placeholder="Select age category" />
             </SelectTrigger>
             <SelectContent>
