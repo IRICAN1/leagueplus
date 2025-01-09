@@ -9,6 +9,7 @@ import { DuoSearchHeader } from "@/components/duo-search/DuoSearchHeader";
 import { DuoSearchTabs } from "@/components/duo-search/DuoSearchTabs";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 export type DuoSearchFilters = {
   skillLevel?: string;
@@ -18,10 +19,14 @@ export type DuoSearchFilters = {
   ageCategory?: string;
 };
 
+const PLAYERS_PER_PAGE = 5;
+
 const DuoSearch = () => {
   const [filters, setFilters] = useState<DuoSearchFilters>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<'myDuos' | 'search'>('myDuos');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data: duos, isLoading: duosLoading } = useQuery({
     queryKey: ['active-duos'],
@@ -41,7 +46,6 @@ const DuoSearch = () => {
     },
   });
 
-  // Auto-switch to search tab if no duos exist
   useEffect(() => {
     if (!duosLoading && (!duos || duos.length === 0)) {
       setActiveTab('search');
@@ -63,7 +67,6 @@ const DuoSearch = () => {
           )
         `);
 
-      // Apply text search on full_name or username
       if (searchQuery) {
         query = query.or(`full_name.ilike.%${searchQuery}%,username.ilike.%${searchQuery}%`);
       }
@@ -111,16 +114,34 @@ const DuoSearch = () => {
 
   const handleFilterChange = (newFilters: DuoSearchFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleFilterReset = () => {
     setFilters({});
     setSearchQuery("");
+    setCurrentPage(1);
   };
 
+  // Pagination calculations
+  const totalPlayers = players?.length || 0;
+  const totalPages = Math.ceil(totalPlayers / PLAYERS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PLAYERS_PER_PAGE;
+  const endIndex = startIndex + PLAYERS_PER_PAGE;
+  const currentPlayers = players?.slice(startIndex, endIndex) || [];
+
+  // Show filters only when there are results or active filters
+  useEffect(() => {
+    setShowFilters(
+      Boolean(searchQuery) || 
+      Object.values(filters).some(value => value !== undefined) ||
+      (players && players.length > 0)
+    );
+  }, [searchQuery, filters, players]);
+
   return (
-    <div className="min-h-screen pt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen pt-4 md:pt-8 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="container max-w-4xl mx-auto px-4">
         <div className="space-y-6">
           <DuoSearchTabs 
             activeTab={activeTab}
@@ -145,10 +166,12 @@ const DuoSearch = () => {
                     <RotateCcw className="h-4 w-4" />
                   </Button>
                 </div>
-                <DuoSearchFilters
-                  filters={filters}
-                  onFilterChange={handleFilterChange}
-                />
+                {showFilters && (
+                  <DuoSearchFilters
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                  />
+                )}
               </div>
 
               <div className="space-y-3">
@@ -156,14 +179,45 @@ const DuoSearch = () => {
                   <div className="text-center py-8 text-gray-600">
                     Loading players...
                   </div>
-                ) : players && players.length > 0 ? (
-                  players.map((player) => (
-                    <PlayerResultCard
-                      key={player.id}
-                      player={player}
-                      className="animate-slide-in"
-                    />
-                  ))
+                ) : currentPlayers.length > 0 ? (
+                  <>
+                    {currentPlayers.map((player) => (
+                      <PlayerResultCard
+                        key={player.id}
+                        player={player}
+                        className="animate-slide-in"
+                      />
+                    ))}
+                    {totalPages > 1 && (
+                      <Pagination className="mt-6">
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                              className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                onClick={() => setCurrentPage(page)}
+                                isActive={currentPage === page}
+                                className="hover:bg-blue-50"
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          <PaginationItem>
+                            <PaginationNext 
+                              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-8 text-gray-600 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
                     No players found matching your criteria.
