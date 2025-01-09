@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Trophy, Dumbbell, Volleyball } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 interface SportTypeFilterProps {
@@ -9,31 +8,34 @@ interface SportTypeFilterProps {
 
 export const SportTypeFilter = ({ selectedSport, onSportSelect }: SportTypeFilterProps) => {
   const sportTypes = [
-    { id: 'Tennis', label: 'Tennis', icon: Trophy },
-    { id: 'Padel', label: 'Padel', icon: Volleyball },
-    { id: 'Badminton', label: 'Badminton', icon: Dumbbell },
+    { id: 'Tennis', label: 'Tennis' },
+    { id: 'Padel', label: 'Padel' },
+    { id: 'Badminton', label: 'Badminton' },
   ];
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
-      <Label className="text-sm font-medium text-gray-700">Sport:</Label>
       <div className="flex flex-wrap gap-2">
         {sportTypes.map((sport) => {
-          const Icon = sport.icon;
           const isSelected = selectedSport === sport.id;
           return (
             <Button
               key={sport.id}
               variant={isSelected ? "default" : "outline"}
-              className={`flex items-center gap-2 h-9 px-3 ${
-                isSelected
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-white hover:bg-blue-50 border-blue-200'
-              }`}
+              className={`
+                relative overflow-hidden transition-all duration-300
+                ${isSelected 
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg'
+                  : 'bg-white hover:bg-blue-50 border-blue-200 hover:border-blue-300'
+                }
+                ${isSelected ? 'scale-105' : 'scale-100'}
+              `}
               onClick={() => onSportSelect(selectedSport === sport.id ? undefined : sport.id)}
             >
-              <Icon className="h-4 w-4" />
-              {sport.label}
+              <span className="relative z-10">{sport.label}</span>
+              {isSelected && (
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
+              )}
             </Button>
           );
         })}

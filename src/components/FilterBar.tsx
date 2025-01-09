@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Filter, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
+import { RotateCcw, SlidersHorizontal } from "lucide-react";
 import { LeagueFilters } from "@/pages/Index";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -37,24 +37,10 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
 
   const toggleExpanded = () => setIsExpanded(!isExpanded);
 
-  const filterContent = (
-    <div className="space-y-4">
-      <SportTypeFilter
-        selectedSport={filters.sportType}
-        onSportSelect={(sport) => onFilterChange({ sportType: sport })}
-      />
-      
-      <FilterControls
-        filters={filters}
-        onFilterChange={onFilterChange}
-      />
-    </div>
-  );
-
   return (
     <div className="w-full animate-fade-in">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex-1 flex items-center gap-2">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex-1 flex items-center gap-3">
           <SportTypeFilter
             selectedSport={filters.sportType}
             onSportSelect={(sport) => onFilterChange({ sportType: sport })}
@@ -64,19 +50,24 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
         {isMobile ? (
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="bg-white">
-                <SlidersHorizontal className="h-4 w-4 mr-2" />
+              <Button 
+                variant="outline" 
+                className="bg-white hover:bg-blue-50 border-blue-200 hover:border-blue-300 transition-colors"
+              >
+                <SlidersHorizontal className="h-4 w-4 mr-2 text-blue-600" />
                 More Filters
               </Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
+                <SheetTitle className="text-gradient bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  Filters
+                </SheetTitle>
                 <SheetDescription>
                   Refine your search with additional filters
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-4">
+              <div className="mt-6">
                 <FilterControls
                   filters={filters}
                   onFilterChange={onFilterChange}
@@ -88,9 +79,9 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
           <Button
             variant="outline"
             onClick={toggleExpanded}
-            className="bg-white"
+            className="bg-white hover:bg-blue-50 border-blue-200 hover:border-blue-300 transition-colors"
           >
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            <SlidersHorizontal className="h-4 w-4 mr-2 text-blue-600" />
             {isExpanded ? 'Less Filters' : 'More Filters'}
           </Button>
         )}
@@ -98,7 +89,7 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className="hover:bg-blue-50 text-blue-600"
+          className="hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-colors"
           title="Reset filters"
           onClick={handleReset}
         >
@@ -107,7 +98,7 @@ export const FilterBar = ({ onFilterChange, filters }: FilterBarProps) => {
       </div>
 
       {!isMobile && isExpanded && (
-        <div className="p-4 bg-gray-50/90 backdrop-blur-sm rounded-lg animate-slide-in shadow-md hover:shadow-lg transition-all duration-300 border border-blue-200">
+        <div className="p-6 bg-gradient-to-br from-white to-blue-50/50 backdrop-blur-sm rounded-lg animate-slide-up shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
           <FilterControls
             filters={filters}
             onFilterChange={onFilterChange}
