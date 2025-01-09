@@ -6,32 +6,23 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
- 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
- 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
- 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
- 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
- 
     --radius: 0.75rem;
   }
 }
@@ -41,10 +32,53 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 min-h-screen;
   }
 }
 
+/* Common page container styles */
+.page-container {
+  @apply container max-w-4xl mx-auto py-4 md:py-8 space-y-6 px-4;
+}
+
+/* Common page header styles */
+.page-header {
+  @apply text-center space-y-4 mb-8 animate-fade-in;
+}
+
+.page-title {
+  @apply text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-transparent bg-clip-text;
+}
+
+.page-description {
+  @apply text-lg text-gray-600 max-w-2xl mx-auto;
+}
+
+/* Common card styles */
+.content-card {
+  @apply bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-blue-100 animate-fade-in;
+}
+
+/* Common section styles */
+.section-container {
+  @apply sticky top-20 z-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-4 border border-blue-100;
+}
+
+/* Common form styles */
+.form-container {
+  @apply space-y-4 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-blue-100;
+}
+
+/* Common button styles */
+.primary-button {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-md hover:from-blue-700 hover:to-blue-800 transition-colors;
+}
+
+.secondary-button {
+  @apply bg-white text-blue-600 border border-blue-200 px-4 py-2 rounded-md hover:bg-blue-50 transition-colors;
+}
+
+/* Animation classes */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
@@ -88,4 +122,58 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Common list styles */
+.list-container {
+  @apply space-y-4 animate-slide-up;
+}
+
+/* Common search and filter styles */
+.search-container {
+  @apply flex items-center gap-4 p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-blue-100;
+}
+
+.filter-button {
+  @apply flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors;
+}
+
+.filter-button[data-active="true"] {
+  @apply bg-blue-100 text-blue-700;
+}
+
+/* Common status indicator styles */
+.status-indicator {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-warning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-error {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Common loading state styles */
+.loading-container {
+  @apply flex items-center justify-center p-8;
+}
+
+.loading-spinner {
+  @apply animate-spin h-8 w-8 text-blue-600;
+}
+
+/* Common empty state styles */
+.empty-state {
+  @apply text-center py-8 text-gray-600;
+}
+
+/* Common error state styles */
+.error-state {
+  @apply text-center py-8 text-red-600;
 }
