@@ -32,11 +32,11 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     if (challenge.status !== 'completed' || !challenge.winner_score) return null;
     const isWinner = challenge.winner_id === currentUserId;
     const winnerName = isWinner 
-      ? challenge.challenger.full_name || challenge.challenger.username 
-      : challenge.challenged.full_name || challenge.challenged.username;
+      ? challenge.challenger.username
+      : challenge.challenged.username;
     const loserName = !isWinner 
-      ? challenge.challenger.full_name || challenge.challenger.username 
-      : challenge.challenged.full_name || challenge.challenged.username;
+      ? challenge.challenger.username
+      : challenge.challenged.username;
     const winnerSets = parseScore(challenge.winner_score);
     const loserSets = parseScore(challenge.loser_score);
 
@@ -56,13 +56,13 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
   };
 
   return (
-    <Card className="p-6 hover:shadow-lg transition-shadow bg-white/80 backdrop-blur-sm">
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex flex-col gap-4 flex-grow">
+    <Card className="p-3 hover:shadow-md transition-all bg-white/90 backdrop-blur-sm border-l-4 border-l-blue-500 hover:scale-[1.01]">
+      <div className="flex items-start gap-2">
+        <div className="flex-grow space-y-2">
           <ChallengeHeader challenge={challenge} type={type} />
           <ChallengeDetails challenge={challenge} />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <ChallengeStatus 
             challenge={challenge} 
             type={type} 

@@ -8,19 +8,19 @@ interface ChallengeDetailsProps {
 
 export const ChallengeDetails = ({ challenge }: ChallengeDetailsProps) => {
   return (
-    <div className="space-y-1">
-      <p className="text-sm text-gray-600 flex items-center gap-2">
-        <Award className="h-4 w-4 text-purple-500" />
+    <div className="flex gap-3 text-xs text-gray-600">
+      <span className="flex items-center gap-1">
+        <Award className="h-3 w-3 text-purple-500" />
         {challenge.league.name}
-      </p>
-      <p className="text-sm text-gray-600 flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-blue-500" />
+      </span>
+      <span className="flex items-center gap-1">
+        <Calendar className="h-3 w-3 text-blue-500" />
         {format(new Date(challenge.proposed_time), 'PPp')}
-      </p>
-      <p className="text-sm text-gray-600 flex items-center gap-2">
-        <MapPin className="h-4 w-4 text-red-500" />
+      </span>
+      <span className="flex items-center gap-1">
+        <MapPin className="h-3 w-3 text-red-500" />
         {challenge.location}
-      </p>
+      </span>
     </div>
   );
 };
