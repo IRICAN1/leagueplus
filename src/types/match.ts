@@ -4,10 +4,12 @@ export type Challenge = Tables<"match_challenges"> & {
   challenger: {
     username: string | null;
     avatar_url: string | null;
+    full_name: string | null;
   };
   challenged: {
     username: string | null;
     avatar_url: string | null;
+    full_name: string | null;
   };
   league: {
     name: string;
