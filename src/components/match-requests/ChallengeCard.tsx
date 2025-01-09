@@ -9,6 +9,7 @@ import { Challenge, ChallengeType } from "@/types/match";
 import { MessageButton } from "./MessageButton";
 import { MatchScoresTable } from "./MatchScoresTable";
 import { MatchActions } from "./MatchActions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChallengeCardProps {
   challenge: Challenge & { challengeType?: ChallengeType };
@@ -19,12 +20,6 @@ interface ChallengeCardProps {
 export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProps) => {
   const currentUserId = type === 'sent' ? challenge.challenger_id : challenge.challenged_id;
   const otherUserId = type === 'sent' ? challenge.challenged_id : challenge.challenger_id;
-
-  const isMatchTime = () => {
-    const now = new Date();
-    const matchTime = new Date(challenge.proposed_time);
-    return now >= matchTime;
-  };
 
   const parseScore = (score: string | null) => {
     if (!score) return [];
@@ -62,8 +57,25 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80">
       <CardContent className="p-2 sm:p-3 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
         <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center justify-between gap-1">
-            <div className="flex flex-wrap gap-1">
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8 border-2 border-blue-100">
+                <AvatarImage src={challenge.challenger.avatar_url || undefined} />
+                <AvatarFallback className="bg-blue-50 text-blue-600">
+                  {challenge.challenger.username[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium">{challenge.challenger.username}</span>
+              <span className="text-xs text-gray-500">vs</span>
+              <Avatar className="h-8 w-8 border-2 border-purple-100">
+                <AvatarImage src={challenge.challenged.avatar_url || undefined} />
+                <AvatarFallback className="bg-purple-50 text-purple-600">
+                  {challenge.challenged.username[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium">{challenge.challenged.username}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
               <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${
                 challenge.status === 'completed' 
                   ? 'bg-green-50 text-green-600 border-green-200' 
@@ -72,11 +84,10 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
                   : 'bg-blue-50 text-blue-600 border-blue-200'
               }`}>
                 {challenge.status === 'completed' ? (
-                  <Check className="h-3 w-3 mr-1" />
+                  <Check className="h-3 w-3" />
                 ) : (
-                  <CircleDot className="h-3 w-3 mr-1" />
+                  <CircleDot className="h-3 w-3" />
                 )}
-                <span className="text-[10px] uppercase font-medium">{challenge.status}</span>
               </Badge>
               <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${
                 type === 'sent' 
@@ -85,8 +96,6 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
               }`}>
                 {type}
               </Badge>
-            </div>
-            <div className="flex items-center gap-1">
               <MessageButton
                 currentUserId={currentUserId}
                 otherUserId={otherUserId}
@@ -96,24 +105,18 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-medium text-gray-800 truncate">
-                {challenge.challenger.username} vs {challenge.challenged.username}
-              </h3>
-              <ChallengeDetails challenge={challenge} />
-            </div>
-          </div>
-
+          <ChallengeDetails challenge={challenge} />
           {renderScores()}
           
-          <div className="flex justify-end">
-            <ChallengeStatus 
-              challenge={challenge} 
-              type={type} 
-              onResponse={onResponse}
-            />
-          </div>
+          {challenge.status === 'pending' && type === 'received' && onResponse && (
+            <div className="flex justify-end gap-2 mt-2">
+              <ChallengeStatus 
+                challenge={challenge} 
+                type={type} 
+                onResponse={onResponse}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
