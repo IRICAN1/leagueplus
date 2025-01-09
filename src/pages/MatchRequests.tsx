@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { ChallengeCard } from "@/components/match-requests/ChallengeCard";
 import { Challenge } from "@/types/match";
-import { format } from "date-fns";
 
 const MatchRequests = () => {
   const { toast } = useToast();
@@ -16,15 +15,15 @@ const MatchRequests = () => {
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
 
-      if (!userId) return { sent: [], received: [] };
+      if (!userId) return [];
 
       const [sentResponse, receivedResponse] = await Promise.all([
         supabase
           .from('match_challenges')
           .select(`
             *,
-            challenged:profiles!match_challenges_challenged_id_fkey(username, avatar_url),
-            challenger:profiles!match_challenges_challenger_id_fkey(username, avatar_url),
+            challenged:profiles!match_challenges_challenged_id_fkey(username, full_name, avatar_url),
+            challenger:profiles!match_challenges_challenger_id_fkey(username, full_name, avatar_url),
             league:leagues(name)
           `)
           .eq('challenger_id', userId)
@@ -34,8 +33,8 @@ const MatchRequests = () => {
           .from('match_challenges')
           .select(`
             *,
-            challenged:profiles!match_challenges_challenged_id_fkey(username, avatar_url),
-            challenger:profiles!match_challenges_challenger_id_fkey(username, avatar_url),
+            challenged:profiles!match_challenges_challenged_id_fkey(username, full_name, avatar_url),
+            challenger:profiles!match_challenges_challenger_id_fkey(username, full_name, avatar_url),
             league:leagues(name)
           `)
           .eq('challenged_id', userId)
@@ -45,36 +44,15 @@ const MatchRequests = () => {
       if (sentResponse.error) throw sentResponse.error;
       if (receivedResponse.error) throw receivedResponse.error;
 
-      return {
-        sent: sentResponse.data as Challenge[],
-        received: receivedResponse.data as Challenge[]
-      };
-    }
-  });
+      // Combine and sort all challenges by date
+      const allChallenges = [
+        ...sentResponse.data.map(c => ({ ...c, challengeType: 'sent' as const })),
+        ...receivedResponse.data.map(c => ({ ...c, challengeType: 'received' as const }))
+      ].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
 
-  const { data: matchHistory, isLoading: historyLoading } = useQuery({
-    queryKey: ['match-history'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-
-      if (!userId) return [];
-
-      const { data, error } = await supabase
-        .from('match_challenges')
-        .select(`
-          *,
-          challenged:profiles!match_challenges_challenged_id_fkey(username, avatar_url),
-          challenger:profiles!match_challenges_challenger_id_fkey(username, avatar_url),
-          league:leagues(name)
-        `)
-        .or(`challenger_id.eq.${userId},challenged_id.eq.${userId}`)
-        .eq('status', 'completed')
-        .eq('result_status', 'approved')
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
+      return allChallenges;
     }
   });
 
@@ -104,7 +82,7 @@ const MatchRequests = () => {
     }
   };
 
-  if (challengesLoading || historyLoading) {
+  if (challengesLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -113,56 +91,47 @@ const MatchRequests = () => {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4">
+    <div className="container max-w-5xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">My Matches</h1>
       
-      <Tabs defaultValue="received" className="space-y-6">
+      <Tabs defaultValue="all" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="received">Received Challenges</TabsTrigger>
-          <TabsTrigger value="sent">Sent Challenges</TabsTrigger>
+          <TabsTrigger value="all">All Challenges</TabsTrigger>
           <TabsTrigger value="history">Match History</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="received" className="space-y-4">
-          {challenges?.received.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No received challenges</p>
+        <TabsContent value="all" className="space-y-4">
+          {!challenges?.length ? (
+            <p className="text-gray-500 text-center py-8">No challenges found</p>
           ) : (
-            challenges?.received.map(challenge => (
-              <ChallengeCard
-                key={challenge.id}
-                challenge={challenge}
-                type="received"
-                onResponse={handleResponse}
-              />
-            ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="sent" className="space-y-4">
-          {challenges?.sent.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No sent challenges</p>
-          ) : (
-            challenges?.sent.map(challenge => (
-              <ChallengeCard
-                key={challenge.id}
-                challenge={challenge}
-                type="sent"
-              />
-            ))
+            <div className="grid gap-4">
+              {challenges.map(challenge => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  type={challenge.challengeType}
+                  onResponse={handleResponse}
+                />
+              ))}
+            </div>
           )}
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
-          {!matchHistory?.length ? (
+          {challenges?.filter(c => c.status === 'completed')?.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No completed matches yet</p>
           ) : (
-            matchHistory.map(match => (
-              <ChallengeCard
-                key={match.id}
-                challenge={match}
-                type={match.challenger_id === match.winner_id ? "sent" : "received"}
-              />
-            ))
+            <div className="grid gap-4">
+              {challenges
+                ?.filter(c => c.status === 'completed')
+                .map(challenge => (
+                  <ChallengeCard
+                    key={challenge.id}
+                    challenge={challenge}
+                    type={challenge.challengeType}
+                  />
+                ))}
+            </div>
           )}
         </TabsContent>
       </Tabs>

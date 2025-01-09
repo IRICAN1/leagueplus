@@ -21,8 +21,8 @@ export const MatchScoresTable = ({
   loserSets,
 }: MatchScoresTableProps) => {
   return (
-    <div className="mt-6 px-4">
-      <Table className="w-full bg-gradient-to-r from-gray-50 via-white to-gray-50 rounded-xl overflow-hidden shadow-lg border border-gray-200">
+    <div className="mt-6">
+      <Table className="w-full bg-gradient-to-r from-gray-50/80 via-white/90 to-gray-50/80 rounded-xl overflow-hidden shadow-lg border border-gray-200">
         <TableHeader>
           <TableRow className="bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-blue-50/50">
             <TableHead className="w-[200px] font-semibold text-gray-700">Player</TableHead>

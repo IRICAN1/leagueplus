@@ -8,7 +8,7 @@ import { MatchScoresTable } from "./MatchScoresTable";
 import { MatchActions } from "./MatchActions";
 
 interface ChallengeCardProps {
-  challenge: Challenge;
+  challenge: Challenge & { challengeType?: ChallengeType };
   type: ChallengeType;
   onResponse?: (challengeId: string, accept: boolean) => void;
 }
@@ -31,12 +31,15 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
   const renderScores = () => {
     if (challenge.status !== 'completed' || !challenge.winner_score) return null;
     const isWinner = challenge.winner_id === currentUserId;
-    const winnerName = isWinner ? challenge.challenger.username : challenge.challenged.username;
-    const loserName = !isWinner ? challenge.challenger.username : challenge.challenged.username;
+    const winnerName = isWinner 
+      ? challenge.challenger.full_name || challenge.challenger.username 
+      : challenge.challenged.full_name || challenge.challenged.username;
+    const loserName = !isWinner 
+      ? challenge.challenger.full_name || challenge.challenger.username 
+      : challenge.challenged.full_name || challenge.challenged.username;
     const winnerSets = parseScore(challenge.winner_score);
     const loserSets = parseScore(challenge.loser_score);
 
-    // Add third set scores if they exist
     if (challenge.winner_score_set3) {
       winnerSets.push(challenge.winner_score_set3);
       loserSets.push(challenge.loser_score_set3);
@@ -53,9 +56,9 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
   };
 
   return (
-    <Card className="p-6 mb-4 hover:shadow-lg transition-shadow bg-white/80 backdrop-blur-sm">
+    <Card className="p-6 hover:shadow-lg transition-shadow bg-white/80 backdrop-blur-sm">
       <div className="flex justify-between items-start gap-4">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 flex-grow">
           <ChallengeHeader challenge={challenge} type={type} />
           <ChallengeDetails challenge={challenge} />
         </div>
