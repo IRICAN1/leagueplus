@@ -137,77 +137,80 @@ const DuoSearch = () => {
 
   return (
     <div className="min-h-screen pt-4 md:pt-8 bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container max-w-4xl mx-auto px-4">
-        <div className="space-y-6">
-          <DuoSearchTabs 
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+      <div className="container max-w-4xl mx-auto px-4 space-y-6">
+        <DuoSearchTabs 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          className="sticky top-0 z-50 bg-white/80 backdrop-blur-md rounded-lg shadow-sm mb-4"
+        />
 
-          {activeTab === 'search' ? (
-            <div className="space-y-6 animate-fade-in">
-              <SearchSection
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                filters={filters}
-                handleFilterChange={handleFilterChange}
-                handleFilterReset={handleFilterReset}
-                showFilters={showFilters}
-              />
-              <ResultsSection
-                players={currentPlayers}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
-                playersLoading={playersLoading}
-              />
-            </div>
-          ) : (
-            <div className="animate-fade-in">
-              {!duosLoading && (!duos || duos.length === 0) ? (
-                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm text-center">
-                  <h2 className="text-xl font-semibold mb-2">No Active Partnerships</h2>
-                  <p className="text-gray-600 mb-4">
-                    Start searching for duo partners to create new partnerships!
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('search')}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-md hover:from-blue-700 hover:to-blue-800 transition-colors"
-                  >
-                    Find Partners
-                  </button>
+        {activeTab === 'search' ? (
+          <div className="space-y-4 md:space-y-6 animate-fade-in">
+            <SearchSection
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              filters={filters}
+              handleFilterChange={handleFilterChange}
+              handleFilterReset={handleFilterReset}
+              showFilters={showFilters}
+              className="rounded-xl overflow-hidden"
+            />
+            <ResultsSection
+              players={currentPlayers}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+              playersLoading={playersLoading}
+              className="rounded-xl overflow-hidden"
+            />
+          </div>
+        ) : (
+          <div className="animate-fade-in space-y-4 md:space-y-6">
+            {!duosLoading && (!duos || duos.length === 0) ? (
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm text-center">
+                <h2 className="text-xl font-semibold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  No Active Partnerships
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Start searching for duo partners to create new partnerships!
+                </p>
+                <button
+                  onClick={() => setActiveTab('search')}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  Find Partners
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden">
+                  <ActiveDuosList
+                    duos={duos || []}
+                    isLoading={duosLoading}
+                    onDuoUpdated={() => {
+                      // Refetch queries
+                    }}
+                  />
                 </div>
-              ) : (
-                <>
-                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
-                    <ActiveDuosList
-                      duos={duos || []}
-                      isLoading={duosLoading}
-                      onDuoUpdated={() => {
+
+                {pendingInvites && pendingInvites.length > 0 && (
+                  <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
+                    <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      Pending Invites
+                    </h2>
+                    <PendingInvites
+                      invites={pendingInvites}
+                      isLoading={invitesLoading}
+                      onInviteUpdated={() => {
                         // Refetch queries
                       }}
                     />
                   </div>
-
-                  {pendingInvites && pendingInvites.length > 0 && (
-                    <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-sm">
-                      <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Pending Invites
-                      </h2>
-                      <PendingInvites
-                        invites={pendingInvites}
-                        isLoading={invitesLoading}
-                        onInviteUpdated={() => {
-                          // Refetch queries
-                        }}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

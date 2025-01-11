@@ -165,7 +165,7 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
       <div className="space-y-4">
         {[1, 2].map((i) => (
           <Card key={i} className="bg-white/80 backdrop-blur-sm border-blue-100 hover:border-blue-200 transition-all duration-300">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <Skeleton className="h-24 w-full" />
             </CardContent>
           </Card>
@@ -177,8 +177,8 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
   if (duos.length === 0) {
     return (
       <Card className="bg-white/80 backdrop-blur-sm border-blue-100">
-        <CardContent className="p-8 text-center">
-          <Users className="h-12 w-12 mx-auto mb-4 text-blue-400 opacity-50" />
+        <CardContent className="p-6 md:p-8 text-center">
+          <Users className="h-12 w-12 mx-auto mb-4 text-blue-400 opacity-50 animate-pulse" />
           <p className="text-gray-500">You don't have any active duo partnerships yet.</p>
         </CardContent>
       </Card>
@@ -193,9 +193,9 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
 
         return (
           <Card key={duo.id} className="bg-white/80 backdrop-blur-sm border-blue-100 hover:border-blue-200 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between p-6">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
+            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-6 space-y-4 md:space-y-0">
+              <div className="flex items-center space-x-4 w-full md:w-auto">
+                <div className="relative flex-shrink-0">
                   <img
                     src={partner.avatar_url || "/placeholder.svg"}
                     alt={partner.username}
@@ -203,23 +203,25 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
                   />
                   <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-400 border-2 border-white" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-800">{partner.full_name || partner.username}</h3>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-lg text-gray-800 truncate">
+                    {partner.full_name || partner.username}
+                  </h3>
                   <p className="text-sm text-blue-600 font-medium">@{partner.username}</p>
                   <p className="text-sm text-gray-500 mt-1">
                     Partners since {format(new Date(duo.created_at), 'MMM d, yyyy')}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" className="bg-white hover:bg-blue-50">
+              <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
+                <Button variant="outline" size="sm" className="bg-white hover:bg-blue-50 flex-1 md:flex-none">
                   <MessageSquare className="h-4 w-4 mr-2 text-blue-500" />
                   Message
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="bg-white hover:bg-blue-50"
+                  className="bg-white hover:bg-blue-50 flex-1 md:flex-none"
                   onClick={() => {
                     loadDuoAvailability(duo.id);
                     setShowSettings(true);
@@ -230,12 +232,12 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="bg-white hover:bg-red-50">
+                    <Button variant="outline" size="sm" className="bg-white hover:bg-red-50 flex-1 md:flex-none">
                       <XCircle className="h-4 w-4 mr-2 text-red-500" />
                       Dissolve
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="sm:max-w-[425px]">
                     <AlertDialogHeader>
                       <AlertDialogTitle>Dissolve Duo Partnership</AlertDialogTitle>
                       <AlertDialogDescription>
@@ -252,22 +254,22 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
                 </AlertDialog>
               </div>
             </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 text-center">
+            <CardContent className="px-4 pb-4 md:px-6 md:pb-6">
+              <div className="grid grid-cols-3 gap-2 md:gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 md:p-4 text-center transform hover:scale-105 transition-transform duration-300">
                   <Trophy className="h-5 w-5 text-blue-500 mx-auto mb-2" />
-                  <div className="text-xl font-bold text-blue-600">{stats?.wins || 0}</div>
-                  <div className="text-sm text-gray-600">Wins</div>
+                  <div className="text-lg md:text-xl font-bold text-blue-600">{stats?.wins || 0}</div>
+                  <div className="text-xs md:text-sm text-gray-600">Wins</div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 text-center">
-                  <div className="text-xl font-bold text-red-500">{stats?.losses || 0}</div>
-                  <div className="text-sm text-gray-600">Losses</div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 md:p-4 text-center transform hover:scale-105 transition-transform duration-300">
+                  <div className="text-lg md:text-xl font-bold text-red-500">{stats?.losses || 0}</div>
+                  <div className="text-xs md:text-sm text-gray-600">Losses</div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-4 text-center">
-                  <div className="text-xl font-bold text-purple-600">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 md:p-4 text-center transform hover:scale-105 transition-transform duration-300">
+                  <div className="text-lg md:text-xl font-bold text-purple-600">
                     {stats ? ((stats.wins / (stats.wins + stats.losses)) * 100).toFixed(1) : 0}%
                   </div>
-                  <div className="text-sm text-gray-600">Win Rate</div>
+                  <div className="text-xs md:text-sm text-gray-600">Win Rate</div>
                 </div>
               </div>
             </CardContent>
