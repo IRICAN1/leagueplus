@@ -1,5 +1,6 @@
 import { PlayerResultCard } from "./PlayerResultCard";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { cn } from "@/lib/utils";
 
 interface ResultsSectionProps {
   players: any[];
@@ -7,6 +8,7 @@ interface ResultsSectionProps {
   setCurrentPage: (page: number) => void;
   totalPages: number;
   playersLoading: boolean;
+  className?: string; // Added className prop
 }
 
 export const ResultsSection = ({
@@ -15,10 +17,11 @@ export const ResultsSection = ({
   setCurrentPage,
   totalPages,
   playersLoading,
+  className,
 }: ResultsSectionProps) => {
   if (playersLoading) {
     return (
-      <div className="text-center py-8 text-gray-600">
+      <div className={cn("text-center py-8 text-gray-600", className)}>
         Loading players...
       </div>
     );
@@ -26,14 +29,14 @@ export const ResultsSection = ({
 
   if (players.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-600 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
+      <div className={cn("text-center py-8 text-gray-600 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm", className)}>
         No players found matching your criteria.
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3", className)}>
       {players.map((player) => (
         <PlayerResultCard
           key={player.id}

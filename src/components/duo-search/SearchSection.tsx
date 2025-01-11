@@ -10,6 +10,7 @@ interface SearchSectionProps {
   handleFilterChange: (newFilters: FilterType) => void;
   handleFilterReset: () => void;
   showFilters: boolean;
+  className?: string; // Added className prop
 }
 
 export const SearchSection = ({
@@ -19,9 +20,10 @@ export const SearchSection = ({
   handleFilterChange,
   handleFilterReset,
   showFilters,
+  className,
 }: SearchSectionProps) => {
   return (
-    <div className="sticky top-20 z-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-4 border border-blue-100 animate-fade-in">
+    <div className={className}>
       <div className="flex items-center justify-between gap-4 mb-4">
         <DuoSearchHeader
           searchQuery={searchQuery}

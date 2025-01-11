@@ -9,6 +9,7 @@ import { isAvailabilitySchedule } from "@/types/availability";
 interface DuoSearchTabsProps {
   activeTab: 'search' | 'myDuos';
   onTabChange: (tab: 'search' | 'myDuos') => void;
+  className?: string; // Added className prop
 }
 
 export const DuoSearchTabs = ({ activeTab, onTabChange }: DuoSearchTabsProps) => {
