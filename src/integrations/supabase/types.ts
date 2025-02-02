@@ -9,72 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      conversation_participants: {
-        Row: {
-          conversation_id: string
-          created_at: string
-          id: string
-          is_admin: boolean | null
-          last_read_at: string
-          profile_id: string
-        }
-        Insert: {
-          conversation_id: string
-          created_at?: string
-          id?: string
-          is_admin?: boolean | null
-          last_read_at?: string
-          profile_id: string
-        }
-        Update: {
-          conversation_id?: string
-          created_at?: string
-          id?: string
-          is_admin?: boolean | null
-          last_read_at?: string
-          profile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversation_participants_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversation_participants_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      conversations: {
-        Row: {
-          created_at: string
-          id: string
-          last_message_at: string
-          title: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          last_message_at?: string
-          title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          last_message_at?: string
-          title?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       duo_invites: {
         Row: {
           created_at: string
@@ -473,54 +407,6 @@ export type Database = {
           {
             foreignKeyName: "match_history_player_id_fkey"
             columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      messages: {
-        Row: {
-          content: string
-          conversation_id: string
-          created_at: string
-          id: string
-          is_edited: boolean | null
-          sender_id: string
-          status: string | null
-          updated_at: string
-        }
-        Insert: {
-          content: string
-          conversation_id: string
-          created_at?: string
-          id?: string
-          is_edited?: boolean | null
-          sender_id: string
-          status?: string | null
-          updated_at?: string
-        }
-        Update: {
-          content?: string
-          conversation_id?: string
-          created_at?: string
-          id?: string
-          is_edited?: boolean | null
-          sender_id?: string
-          status?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

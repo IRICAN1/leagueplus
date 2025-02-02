@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Challenge, ChallengeType } from "@/types/match";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChallengeStatusProps {
@@ -19,63 +18,8 @@ export const ChallengeStatus = ({ challenge, type, onResponse }: ChallengeStatus
     completed: "bg-gray-100 text-gray-800"
   };
 
-  const createConversationAndSendMessage = async () => {
-    try {
-      // Create a new conversation
-      const { data: conversation, error: conversationError } = await supabase
-        .from('conversations')
-        .insert({})
-        .select()
-        .single();
-
-      if (conversationError) throw conversationError;
-
-      // Add both participants to the conversation
-      const participantsPromises = [
-        supabase
-          .from('conversation_participants')
-          .insert({
-            conversation_id: conversation.id,
-            profile_id: challenge.challenger_id,
-            is_admin: false
-          }),
-        supabase
-          .from('conversation_participants')
-          .insert({
-            conversation_id: conversation.id,
-            profile_id: challenge.challenged_id,
-            is_admin: false
-          })
-      ];
-
-      await Promise.all(participantsPromises);
-
-      // Send initial message
-      const initialMessage = `Match challenge accepted! 🎾\nProposed time: ${new Date(challenge.proposed_time).toLocaleString()}\nLocation: ${challenge.location}`;
-      
-      await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversation.id,
-          sender_id: challenge.challenged_id,
-          content: initialMessage
-        });
-
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create conversation. Please try messaging manually.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleResponse = async (accept: boolean) => {
     if (onResponse) {
-      if (accept) {
-        await createConversationAndSendMessage();
-      }
       onResponse(challenge.id, accept);
     }
   };

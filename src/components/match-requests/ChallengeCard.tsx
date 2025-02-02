@@ -1,12 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Users, CircleDot, MessageSquare, Check, Calendar } from "lucide-react";
+import { Trophy, Star, Users, CircleDot, Check, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChallengeHeader } from "./ChallengeHeader";
 import { ChallengeDetails } from "./ChallengeDetails";
 import { ChallengeStatus } from "./ChallengeStatus";
 import { Challenge, ChallengeType } from "@/types/match";
-import { MessageButton } from "./MessageButton";
 import { MatchScoresTable } from "./MatchScoresTable";
 import { MatchActions } from "./MatchActions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -113,12 +112,6 @@ export const ChallengeCard = ({ challenge, type, onResponse }: ChallengeCardProp
               }`}>
                 {type}
               </Badge>
-              <MessageButton
-                currentUserId={currentUserId}
-                otherUserId={otherUserId}
-                challengeId={challenge.id}
-                compact={true}
-              />
             </div>
           </div>
 
