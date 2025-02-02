@@ -41,7 +41,7 @@ const TournamentRegistration = () => {
     },
   });
 
-  // Fetch duos
+  // Fetch duos without any conditions
   useEffect(() => {
     const fetchDuos = async () => {
       try {
@@ -76,7 +76,6 @@ const TournamentRegistration = () => {
     }
   }, [leagueData]);
 
-  // Query for user profile and availability
   const { data: profile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
@@ -107,12 +106,6 @@ const TournamentRegistration = () => {
       setHasExistingSchedule(false);
     }
   }, [profile]);
-
-  useEffect(() => {
-    if (leagueData) {
-      setLeague(leagueData);
-    }
-  }, [leagueData]);
 
   const handleDuoSelect = (duoId: string) => {
     setSelectedDuo(duoId);
@@ -154,7 +147,6 @@ const TournamentRegistration = () => {
         return;
       }
 
-      // For individual leagues, proceed with direct registration
       const { error: joinError } = await supabase
         .from('league_participants')
         .insert({
@@ -231,7 +223,7 @@ const TournamentRegistration = () => {
                 rules={league.rules}
               />
 
-              {league.is_doubles && (
+              {league?.is_doubles && (
                 <>
                   <Separator className="my-4" />
                   <div className="space-y-4">
@@ -244,7 +236,7 @@ const TournamentRegistration = () => {
                       <Alert>
                         <Users className="h-4 w-4" />
                         <AlertDescription>
-                          You need an active duo partnership to join this league.
+                          You need a duo partnership to join this league.
                           You can find a duo partner in the Duo Search section.
                         </AlertDescription>
                       </Alert>
