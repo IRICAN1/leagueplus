@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { TournamentHeader } from "@/components/tournament-registration/TournamentHeader";
 import { TournamentInfo } from "@/components/tournament-registration/TournamentInfo";
-import { PositionSelector } from "@/components/tournament-registration/PositionSelector";
 import { RegistrationButton } from "@/components/tournament-registration/RegistrationButton";
 import { RegistrationHandler } from "@/components/tournament-registration/RegistrationHandler";
 import { AvailabilitySection } from "@/components/tournament-registration/AvailabilitySection";
@@ -14,18 +13,14 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Loader2 } from "lucide-react";
 import { isAvailabilitySchedule } from "@/types/availability";
-import type { AvailabilitySchedule } from "@/types/availability";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
-  const [primaryPosition, setPrimaryPosition] = useState<string>("");
-  const [secondaryPosition, setSecondaryPosition] = useState<string>("");
   const [hasExistingSchedule, setHasExistingSchedule] = useState<boolean | null>(null);
   const [league, setLeague] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showRegistrationHandler, setShowRegistrationHandler] = useState(false);
 
   // Query for league data
@@ -106,15 +101,6 @@ const TournamentRegistration = () => {
         return;
       }
 
-      if (!primaryPosition) {
-        toast({
-          title: "Position required",
-          description: "Please select your preferred position.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Update profile if needed
       if (!hasExistingSchedule) {
         const { error: profileError } = await supabase
@@ -151,10 +137,8 @@ const TournamentRegistration = () => {
         .insert({
           league_id: id,
           player_id: user.id,
-          preferred_position: primaryPosition,
           availability_schedule: {
             timeSlots: selectedTimeSlots,
-            secondaryPosition,
           },
         });
 
@@ -215,13 +199,6 @@ const TournamentRegistration = () => {
               />
 
               <Separator className="my-4" />
-
-              <PositionSelector
-                primaryPosition={primaryPosition}
-                setPrimaryPosition={setPrimaryPosition}
-                secondaryPosition={secondaryPosition}
-                setSecondaryPosition={setSecondaryPosition}
-              />
 
               {!hasExistingSchedule && (
                 <>
