@@ -165,30 +165,31 @@ export const BasicInformation = ({ form }: BasicInformationProps) => {
         )}
       />
 
-      {field.value && (
-        <FormField
-          control={form.control}
-          name="requires_duo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Duo Registration</FormLabel>
-              <Select onValueChange={(value) => field.onChange(value === "true")} defaultValue={field.value ? "true" : "false"}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select duo registration type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="false">Individual Registration</SelectItem>
-                  <SelectItem value="true">Register as Duo</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>Choose whether players must register as established duos</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      <FormField
+        control={form.control}
+        name="requires_duo"
+        render={({ field: duoField }) => (
+          <FormItem>
+            <FormLabel>Duo Registration</FormLabel>
+            <Select 
+              onValueChange={(value) => duoField.onChange(value === "true")} 
+              defaultValue={duoField.value ? "true" : "false"}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select duo registration type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="false">Individual Registration</SelectItem>
+                <SelectItem value="true">Register as Duo</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>Choose whether players must register as established duos</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 };
