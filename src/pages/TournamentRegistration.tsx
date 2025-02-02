@@ -308,7 +308,7 @@ const TournamentRegistration = () => {
             isDoubles={league.is_doubles}
             requirements={{
               skillLevel: `${league.skill_level_min}-${league.skill_level_max}`,
-              ageCategory: league.age_category,
+              ageRange: league.age_min && league.age_max ? `${league.age_min}-${league.age_max}` : undefined,
               genderCategory: league.gender_category,
             }}
           />
