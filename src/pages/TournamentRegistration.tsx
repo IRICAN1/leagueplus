@@ -20,14 +20,13 @@ const TournamentRegistration = () => {
   const { toast } = useToast();
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [hasExistingSchedule, setHasExistingSchedule] = useState<boolean | null>(null);
-  const [league, setLeague] = useState<any>(null);
   const [showRegistrationHandler, setShowRegistrationHandler] = useState(false);
   const [selectedDuo, setSelectedDuo] = useState<string | null>(null);
   const [duos, setDuos] = useState<any[]>([]);
   const [isLoadingDuos, setIsLoadingDuos] = useState(true);
 
   // Query for league data
-  const { data: leagueData, isLoading: isLeagueLoading } = useQuery({
+  const { data: league, isLoading: isLeagueLoading } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -71,10 +70,10 @@ const TournamentRegistration = () => {
       }
     };
 
-    if (leagueData?.is_doubles) {
+    if (league?.is_doubles) {
       fetchDuos();
     }
-  }, [leagueData]);
+  }, [league]);
 
   const { data: profile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['profile'],
