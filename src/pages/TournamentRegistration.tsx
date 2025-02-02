@@ -12,6 +12,7 @@ import { AvailabilitySection } from "@/components/tournament-registration/Availa
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Loader2, Users } from "lucide-react";
+import { isAvailabilitySchedule } from "@/types/availability";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -96,8 +97,9 @@ const TournamentRegistration = () => {
 
   useEffect(() => {
     if (profile?.availability_schedule) {
-      if (isAvailabilitySchedule(profile.availability_schedule)) {
-        setSelectedTimeSlots(profile.availability_schedule.selectedSlots);
+      const schedule = profile.availability_schedule;
+      if (isAvailabilitySchedule(schedule)) {
+        setSelectedTimeSlots(schedule.selectedSlots);
         setHasExistingSchedule(true);
       } else {
         setHasExistingSchedule(false);
