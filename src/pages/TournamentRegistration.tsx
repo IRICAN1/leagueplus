@@ -56,7 +56,7 @@ const TournamentRegistration = () => {
             duo_statistics(*)
           `)
           .eq('player1_id', user.id)
-          .eq('active', true);
+          .eq('active', true); // Make sure to only fetch active partnerships
 
         if (error) throw error;
         setDuos(partnerships || []);
@@ -259,7 +259,7 @@ const TournamentRegistration = () => {
                                 ? 'ring-2 ring-blue-500 bg-blue-50' 
                                 : 'hover:bg-gray-50'
                             }`}
-                            onClick={() => handleDuoSelect(duo.id)}
+                            onClick={() => setSelectedDuo(duo.id)}
                           >
                             <div className="flex items-center space-x-4">
                               <div className="flex-shrink-0">
