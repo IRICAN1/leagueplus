@@ -30,32 +30,6 @@ export const ChatInput = ({ conversationId, onMessageSent }: ChatInputProps) => 
         return;
       }
 
-      const { data: participant, error: participantError } = await supabase
-        .from("conversation_participants")
-        .select("*")
-        .eq("conversation_id", conversationId)
-        .eq("profile_id", user.id)
-        .maybeSingle();
-
-      if (participantError) {
-        console.error("Error checking participant:", participantError);
-        toast({
-          title: "Error",
-          description: "Failed to verify conversation participation.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!participant) {
-        toast({
-          title: "Error",
-          description: "You are not a participant in this conversation.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const { error: messageError } = await supabase
         .from("messages")
         .insert({

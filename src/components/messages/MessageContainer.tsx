@@ -56,7 +56,7 @@ export const MessageContainer = ({ children }: MessageContainerProps) => {
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        void supabase.removeChannel(channel);
       };
     };
 
