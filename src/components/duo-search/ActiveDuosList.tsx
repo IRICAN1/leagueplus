@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
+import { Badge } from "@/components/ui/badge";
 
 interface ActiveDuosListProps {
   duos: any[];
@@ -179,7 +180,7 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
       <Card className="bg-white/80 backdrop-blur-sm border-blue-100">
         <CardContent className="p-6 md:p-8 text-center">
           <Users className="h-12 w-12 mx-auto mb-4 text-blue-400 opacity-50 animate-pulse" />
-          <p className="text-gray-500">You don't have any active duo partnerships yet.</p>
+          <p className="text-gray-500">You don't have any duo partnerships yet.</p>
         </CardContent>
       </Card>
     );
@@ -208,9 +209,16 @@ export const ActiveDuosList = ({ duos, isLoading, onDuoUpdated }: ActiveDuosList
                     {partner.full_name || partner.username}
                   </h3>
                   <p className="text-sm text-blue-600 font-medium">@{partner.username}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Partners since {format(new Date(duo.created_at), 'MMM d, yyyy')}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm text-gray-500">
+                      Partners since {format(new Date(duo.created_at), 'MMM d, yyyy')}
+                    </p>
+                    {!duo.active && (
+                      <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                        Inactive
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
