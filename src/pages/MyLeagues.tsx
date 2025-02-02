@@ -3,23 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResultCard } from "@/components/ResultCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Loader2, PlusCircle } from "lucide-react";
+import { CalendarIcon, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
 
 const MyLeagues = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sportFilter, setSportFilter] = useState<string>("all");
 
-  const { data: createdLeagues, isLoading: isLoadingCreated, error: createdError } = useQuery({
+  const { data: createdLeagues, isLoading: isLoadingCreated } = useQuery({
     queryKey: ['created-leagues'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -36,7 +31,7 @@ const MyLeagues = () => {
     },
   });
 
-  const { data: joinedLeagues, isLoading: isLoadingJoined, error: joinedError } = useQuery({
+  const { data: joinedLeagues, isLoading: isLoadingJoined } = useQuery({
     queryKey: ['joined-leagues'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -66,55 +61,13 @@ const MyLeagues = () => {
     return 'Active';
   };
 
-  // Show error toast if either query fails
-  if (createdError || joinedError) {
-    toast({
-      title: "Error loading leagues",
-      description: "There was a problem loading your leagues. Please try again.",
-      variant: "destructive",
-    });
-  }
-
-  const filterLeagues = (leagues: any[] = []) => {
-    return leagues.filter(league => {
-      const status = getLeagueStatus(league.start_date, league.end_date);
-      const statusMatch = statusFilter === "all" || status.toLowerCase() === statusFilter.toLowerCase();
-      const sportMatch = sportFilter === "all" || league.sport_type.toLowerCase() === sportFilter.toLowerCase();
-      return statusMatch && sportMatch;
-    });
-  };
-
-  const filteredCreatedLeagues = filterLeagues(createdLeagues);
-  const filteredJoinedLeagues = filterLeagues(joinedLeagues);
-
-  const LoadingState = () => (
-    <div className="flex items-center justify-center py-8">
-      <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-    </div>
-  );
-
-  const EmptyState = ({ type, onCreateClick }: { type: string; onCreateClick: () => void }) => (
-    <div className="text-center py-8">
-      <h3 className="text-lg font-semibold mb-2">No {type} leagues found</h3>
-      <p className="text-gray-600 mb-4">
-        {type === 'created' 
-          ? "You haven't created any leagues yet. Start organizing your first league!"
-          : "You haven't joined any leagues yet. Find a league to participate in!"}
-      </p>
-      <Button onClick={onCreateClick}>
-        <PlusCircle className="mr-2 h-4 w-4" />
-        {type === 'created' ? 'Create League' : 'Find Leagues'}
-      </Button>
-    </div>
-  );
-
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">My Leagues</h1>
         <Button 
           onClick={() => navigate('/create-league')}
-          className="bg-purple-600 hover:bg-purple-700 text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <PlusCircle className="mr-2 h-4 w-4" />
           Create League
@@ -122,26 +75,26 @@ const MyLeagues = () => {
       </div>
       
       <Tabs defaultValue="created" className="space-y-6">
-        <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="created" className="flex-1 sm:flex-none">Leagues I Created</TabsTrigger>
-          <TabsTrigger value="joined" className="flex-1 sm:flex-none">Leagues I Joined</TabsTrigger>
+        <TabsList>
+          <TabsTrigger value="created">Leagues I Created</TabsTrigger>
+          <TabsTrigger value="joined">Leagues I Joined</TabsTrigger>
         </TabsList>
 
-        <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+        <div className="flex flex-wrap gap-4 items-center">
+          <Select>
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="upcoming">Upcoming</SelectItem>
               <SelectItem value="ended">Ended</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select value={sportFilter} onValueChange={setSportFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+          <Select>
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by sport" />
             </SelectTrigger>
             <SelectContent>
@@ -151,7 +104,6 @@ const MyLeagues = () => {
               <SelectItem value="football">Football</SelectItem>
               <SelectItem value="volleyball">Volleyball</SelectItem>
               <SelectItem value="badminton">Badminton</SelectItem>
-              <SelectItem value="padel">Padel</SelectItem>
             </SelectContent>
           </Select>
 
@@ -160,7 +112,7 @@ const MyLeagues = () => {
               <Button
                 variant="outline"
                 className={cn(
-                  "w-full sm:w-[240px] justify-start text-left font-normal",
+                  "w-[240px] justify-start text-left font-normal",
                   !Date && "text-muted-foreground"
                 )}
               >
@@ -178,55 +130,51 @@ const MyLeagues = () => {
           </Popover>
         </div>
 
-        <TabsContent value="created" className="space-y-4 min-h-[200px]">
+        <TabsContent value="created" className="space-y-4">
           {isLoadingCreated ? (
-            <LoadingState />
-          ) : filteredCreatedLeagues?.length === 0 ? (
-            <EmptyState type="created" onCreateClick={() => navigate('/create-league')} />
+            <div>Loading...</div>
+          ) : createdLeagues?.length === 0 ? (
+            <div>You haven't created any leagues yet.</div>
           ) : (
-            <div className="grid gap-4">
-              {filteredCreatedLeagues?.map((league) => (
-                <ResultCard
-                  key={league.id}
-                  id={league.id}
-                  title={league.name}
-                  location={league.location}
-                  distance={0}
-                  date={`${format(new Date(league.start_date), 'PP')} - ${format(new Date(league.end_date), 'PP')}`}
-                  type={getLeagueStatus(league.start_date, league.end_date)}
-                  sportType={league.sport_type}
-                  skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
-                  genderCategory={league.gender_category}
-                  participants={league.max_participants}
-                />
-              ))}
-            </div>
+            createdLeagues?.map((league) => (
+              <ResultCard
+                key={league.id}
+                id={league.id}
+                title={league.name}
+                location={league.location}
+                distance={0}
+                date={`${format(new Date(league.start_date), 'PP')} - ${format(new Date(league.end_date), 'PP')}`}
+                type={getLeagueStatus(league.start_date, league.end_date)}
+                sportType={league.sport_type}
+                skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
+                genderCategory={league.gender_category}
+                participants={league.max_participants}
+              />
+            ))
           )}
         </TabsContent>
 
-        <TabsContent value="joined" className="space-y-4 min-h-[200px]">
+        <TabsContent value="joined" className="space-y-4">
           {isLoadingJoined ? (
-            <LoadingState />
-          ) : filteredJoinedLeagues?.length === 0 ? (
-            <EmptyState type="joined" onCreateClick={() => navigate('/')} />
+            <div>Loading...</div>
+          ) : joinedLeagues?.length === 0 ? (
+            <div>You haven't joined any leagues yet.</div>
           ) : (
-            <div className="grid gap-4">
-              {filteredJoinedLeagues?.map((league) => (
-                <ResultCard
-                  key={league.id}
-                  id={league.id}
-                  title={league.name}
-                  location={league.location}
-                  distance={0}
-                  date={`${format(new Date(league.start_date), 'PP')} - ${format(new Date(league.end_date), 'PP')}`}
-                  type={getLeagueStatus(league.start_date, league.end_date)}
-                  sportType={league.sport_type}
-                  skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
-                  genderCategory={league.gender_category}
-                  participants={league.max_participants}
-                />
-              ))}
-            </div>
+            joinedLeagues?.map((league) => (
+              <ResultCard
+                key={league.id}
+                id={league.id}
+                title={league.name}
+                location={league.location}
+                distance={0}
+                date={`${format(new Date(league.start_date), 'PP')} - ${format(new Date(league.end_date), 'PP')}`}
+                type={getLeagueStatus(league.start_date, league.end_date)}
+                sportType={league.sport_type}
+                skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
+                genderCategory={league.gender_category}
+                participants={league.max_participants}
+              />
+            ))
           )}
         </TabsContent>
       </Tabs>

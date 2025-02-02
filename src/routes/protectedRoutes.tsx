@@ -1,55 +1,67 @@
-import { lazy } from "react";
-import { RouteObject } from "react-router-dom";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import DuoSearch from "@/pages/DuoSearch";
-import MyDuos from "@/pages/MyDuos";
 import Profile from "@/pages/Profile";
 import TournamentRegistration from "@/pages/TournamentRegistration";
+import PlayerChallenge from "@/pages/PlayerChallenge";
+import CreateLeague from "@/pages/CreateLeague";
 import MyLeagues from "@/pages/MyLeagues";
+import MatchRequests from "@/pages/MatchRequests";
+import MyDuos from "@/pages/MyDuos";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
-const CreateLeagueType = lazy(() => import("@/pages/CreateLeagueType"));
-const CreateLeague = lazy(() => import("@/pages/CreateLeague"));
-
-export const protectedRoutes: RouteObject[] = [
+export const protectedRoutes = [
   {
-    element: <ProtectedRoute>
-      <div>
-        {/* Outlet will render child routes */}
-      </div>
-    </ProtectedRoute>,
-    children: [
-      {
-        path: "/create-league",
-        element: <CreateLeagueType />,
-      },
-      {
-        path: "/create-league/single",
-        element: <CreateLeague />,
-      },
-      {
-        path: "/create-league/duo",
-        element: <CreateLeague type="duo" />,
-      },
-      {
-        path: "/duo-search",
-        element: <DuoSearch />,
-      },
-      {
-        path: "/my-duos",
-        element: <MyDuos />,
-      },
-      {
-        path: "/my-leagues",
-        element: <MyLeagues />,
-      },
-      {
-        path: "/tournament/:id/register",
-        element: <TournamentRegistration />,
-      },
-      {
-        path: "/profile",
-        element: <Profile />,
-      },
-    ],
+    path: "/profile",
+    element: (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    )
   },
+  {
+    path: "/my-leagues",
+    element: (
+      <ProtectedRoute>
+        <MyLeagues />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/my-matches",
+    element: (
+      <ProtectedRoute>
+        <MatchRequests />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/create-league",
+    element: (
+      <ProtectedRoute>
+        <CreateLeague />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/tournament/:id/register",
+    element: (
+      <ProtectedRoute>
+        <TournamentRegistration />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/player-challenge/:playerId",
+    element: (
+      <ProtectedRoute>
+        <PlayerChallenge />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/my-duos",
+    element: (
+      <ProtectedRoute>
+        <MyDuos />
+      </ProtectedRoute>
+    )
+  }
 ];

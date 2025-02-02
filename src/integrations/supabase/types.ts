@@ -54,131 +54,6 @@ export type Database = {
           },
         ]
       }
-      duo_league_participants: {
-        Row: {
-          duo_partnership_id: string
-          id: string
-          joined_at: string | null
-          league_id: string
-        }
-        Insert: {
-          duo_partnership_id: string
-          id?: string
-          joined_at?: string | null
-          league_id: string
-        }
-        Update: {
-          duo_partnership_id?: string
-          id?: string
-          joined_at?: string | null
-          league_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "duo_league_participants_duo_partnership_id_fkey"
-            columns: ["duo_partnership_id"]
-            isOneToOne: false
-            referencedRelation: "duo_partnerships"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "duo_league_participants_league_id_fkey"
-            columns: ["league_id"]
-            isOneToOne: false
-            referencedRelation: "duo_leagues"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      duo_leagues: {
-        Row: {
-          age_max: number | null
-          age_min: number | null
-          created_at: string
-          creator_id: string
-          description: string | null
-          end_date: string
-          equipment_requirements: string | null
-          format: Database["public"]["Enums"]["league_format"]
-          gender_category: Database["public"]["Enums"]["league_gender_category"]
-          id: string
-          location: string
-          match_format: Database["public"]["Enums"]["league_match_format"]
-          max_duo_pairs: number
-          name: string
-          registration_deadline: string
-          rules: string | null
-          schedule_preferences: string | null
-          skill_level_max: number
-          skill_level_min: number
-          sport_type: Database["public"]["Enums"]["league_sport_type"]
-          start_date: string
-          tournament_structure: string | null
-          updated_at: string
-          venue_details: string | null
-        }
-        Insert: {
-          age_max?: number | null
-          age_min?: number | null
-          created_at?: string
-          creator_id: string
-          description?: string | null
-          end_date: string
-          equipment_requirements?: string | null
-          format?: Database["public"]["Enums"]["league_format"]
-          gender_category: Database["public"]["Enums"]["league_gender_category"]
-          id?: string
-          location: string
-          match_format: Database["public"]["Enums"]["league_match_format"]
-          max_duo_pairs: number
-          name: string
-          registration_deadline: string
-          rules?: string | null
-          schedule_preferences?: string | null
-          skill_level_max: number
-          skill_level_min: number
-          sport_type: Database["public"]["Enums"]["league_sport_type"]
-          start_date: string
-          tournament_structure?: string | null
-          updated_at?: string
-          venue_details?: string | null
-        }
-        Update: {
-          age_max?: number | null
-          age_min?: number | null
-          created_at?: string
-          creator_id?: string
-          description?: string | null
-          end_date?: string
-          equipment_requirements?: string | null
-          format?: Database["public"]["Enums"]["league_format"]
-          gender_category?: Database["public"]["Enums"]["league_gender_category"]
-          id?: string
-          location?: string
-          match_format?: Database["public"]["Enums"]["league_match_format"]
-          max_duo_pairs?: number
-          name?: string
-          registration_deadline?: string
-          rules?: string | null
-          schedule_preferences?: string | null
-          skill_level_max?: number
-          skill_level_min?: number
-          sport_type?: Database["public"]["Enums"]["league_sport_type"]
-          start_date?: string
-          tournament_structure?: string | null
-          updated_at?: string
-          venue_details?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "duo_leagues_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       duo_partnerships: {
         Row: {
           active: boolean | null
@@ -721,7 +596,6 @@ export type Database = {
         | "Volleyball"
         | "Badminton"
         | "Padel"
-      league_type: "single" | "duo"
       match_result: "win" | "loss" | "draw"
       result_approval_status: "pending" | "approved" | "disputed"
     }
