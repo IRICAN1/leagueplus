@@ -5,17 +5,19 @@ import { DuoSelectionDialog } from "./DuoSelectionDialog";
 import { toast } from "sonner";
 
 interface RegistrationHandlerProps {
-  tournamentId: string;
-  skillLevel?: string;
-  ageCategory?: string;
-  genderCategory?: string;
+  leagueId: string;
+  isDoubles?: boolean;
+  requirements?: {
+    skillLevel?: string;
+    ageCategory?: string;
+    genderCategory?: "Men" | "Women" | "Mixed";
+  };
 }
 
 export const RegistrationHandler = ({
-  tournamentId,
-  skillLevel,
-  ageCategory,
-  genderCategory,
+  leagueId,
+  isDoubles,
+  requirements,
 }: RegistrationHandlerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -32,7 +34,7 @@ export const RegistrationHandler = ({
         const { data: existingRegistrations } = await supabase
           .from('duo_league_participants')
           .select('duo_partnership_id')
-          .eq('league_id', tournamentId);
+          .eq('league_id', leagueId);
 
         const registeredDuoIds = existingRegistrations?.map(reg => reg.duo_partnership_id) || [];
 
@@ -41,8 +43,8 @@ export const RegistrationHandler = ({
           .from('duo_partnerships')
           .select(`
             *,
-            player1:player1_id(id, username, avatar_url),
-            player2:player2_id(id, username, avatar_url),
+            player1:profiles!duo_partnerships_player1_id_fkey(*),
+            player2:profiles!duo_partnerships_player2_id_fkey(*),
             duo_statistics(*)
           `)
           .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
@@ -65,7 +67,7 @@ export const RegistrationHandler = ({
     };
 
     fetchDuos();
-  }, [tournamentId]);
+  }, [leagueId]);
 
   const handleRegistration = async (duoId: string) => {
     try {
@@ -81,7 +83,7 @@ export const RegistrationHandler = ({
       const { data: tournament } = await supabase
         .from('duo_leagues')
         .select('*')
-        .eq('id', tournamentId)
+        .eq('id', leagueId)
         .single();
 
       if (!tournament) {
@@ -99,7 +101,7 @@ export const RegistrationHandler = ({
       const { count } = await supabase
         .from('duo_league_participants')
         .select('*', { count: 'exact' })
-        .eq('league_id', tournamentId);
+        .eq('league_id', leagueId);
 
       if (count && tournament.max_duo_pairs && count >= tournament.max_duo_pairs) {
         toast.error("Tournament is full");
@@ -110,14 +112,14 @@ export const RegistrationHandler = ({
       const { error: registrationError } = await supabase
         .from('duo_league_participants')
         .insert({
-          league_id: tournamentId,
+          league_id: leagueId,
           duo_partnership_id: duoId,
         });
 
       if (registrationError) throw registrationError;
 
       toast.success("Successfully registered for the tournament");
-      navigate(`/tournament/${tournamentId}`);
+      navigate(`/tournament/${leagueId}`);
     } catch (error) {
       console.error('Error during registration:', error);
       toast.error("Failed to register for the tournament");
@@ -135,9 +137,9 @@ export const RegistrationHandler = ({
         duos={duos}
         onSelect={handleRegistration}
         leagueRequirements={{
-          skillLevel,
-          ageCategory,
-          genderCategory,
+          skillLevel: requirements?.skillLevel,
+          ageCategory: requirements?.ageCategory,
+          genderCategory: requirements?.genderCategory,
         }}
       />
     </>
