@@ -4,60 +4,14 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { NavbarLinks } from "./navbar/NavbarLinks";
 import { NavbarAuth } from "./navbar/NavbarAuth";
-import { NavbarNotifications } from "./navbar/NavbarNotifications";
 
 export const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [unreadMessages, setUnreadMessages] = useState<number>(0);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
-
-      if (session) {
-        // Fetch unread messages count
-        const { data: participants } = await supabase
-          .from('conversation_participants')
-          .select('conversation_id, last_read_at')
-          .eq('profile_id', session.user.id);
-
-        if (participants) {
-          let unreadCount = 0;
-          for (const participant of participants) {
-            const { count } = await supabase
-              .from('messages')
-              .select('*', { count: 'exact', head: true })
-              .eq('conversation_id', participant.conversation_id)
-              .gt('created_at', participant.last_read_at || '1970-01-01');
-            
-            unreadCount += count || 0;
-          }
-          setUnreadMessages(unreadCount);
-        }
-
-        // Subscribe to new messages
-        const messageChannel = supabase
-          .channel('message-changes')
-          .on(
-            'postgres_changes',
-            {
-              event: 'INSERT',
-              schema: 'public',
-              table: 'messages'
-            },
-            async (payload) => {
-              if (payload.new.sender_id !== session.user.id) {
-                setUnreadMessages(prev => prev + 1);
-              }
-            }
-          )
-          .subscribe();
-
-        return () => {
-          supabase.removeChannel(messageChannel);
-        };
-      }
     };
     checkAuth();
 
@@ -85,9 +39,6 @@ export const Navbar = () => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {isAuthenticated && (
-              <NavbarNotifications unreadMessages={unreadMessages} />
-            )}
             <NavbarAuth isAuthenticated={isAuthenticated} />
           </div>
         </div>
