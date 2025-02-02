@@ -108,7 +108,7 @@ export const DuoSelectionDialog = ({
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium">{duo.player2.username}</h3>
+                      <h3 className="font-medium">{duo.partner.username}</h3>
                       <Badge variant="secondary">
                         Win Rate: {
                           duo.duo_statistics[0]

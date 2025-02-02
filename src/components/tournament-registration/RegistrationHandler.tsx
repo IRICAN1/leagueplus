@@ -78,15 +78,16 @@ export const RegistrationHandler = ({
       // Create an array of registered partnership IDs
       const registeredDuoIds = existingRegistrations?.map(reg => reg.duo_partnership_id) || [];
 
-      // Then fetch partnerships that aren't in the registered IDs
+      // Fetch partnerships where the user is either player1 or player2
       const query = supabase
         .from('duo_partnerships')
         .select(`
           *,
+          player1:profiles!duo_partnerships_player1_id_fkey(*),
           player2:profiles!duo_partnerships_player2_id_fkey(*),
           duo_statistics(*)
         `)
-        .eq('player1_id', user.id)
+        .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
         .eq('active', true);
 
       // Only add the not-in filter if there are registered partnerships
@@ -99,7 +100,12 @@ export const RegistrationHandler = ({
       if (error) throw error;
 
       if (partnerships) {
-        setDuos(partnerships);
+        // Transform the data to always show the partner's info
+        const transformedPartnerships = partnerships.map(partnership => ({
+          ...partnership,
+          partner: user.id === partnership.player1_id ? partnership.player2 : partnership.player1
+        }));
+        setDuos(transformedPartnerships);
       }
     } catch (error: any) {
       toast.error("Failed to fetch duo partnerships");
