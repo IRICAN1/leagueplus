@@ -38,8 +38,8 @@ export const RegistrationHandler = ({
 
         const registeredDuoIds = existingRegistrations?.map(reg => reg.duo_partnership_id) || [];
 
-        // Fetch partnerships where the user is either player1 or player2
-        const { data: partnerships, error } = await supabase
+        // Base query for partnerships
+        let query = supabase
           .from('duo_partnerships')
           .select(`
             *,
@@ -48,8 +48,14 @@ export const RegistrationHandler = ({
             duo_statistics(*)
           `)
           .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
-          .eq('active', true)
-          .not('id', 'in', registeredDuoIds.length > 0 ? `(${registeredDuoIds.join(',')})` : '(null)');
+          .eq('active', true);
+
+        // Only add the not.in filter if there are registered duos
+        if (registeredDuoIds.length > 0) {
+          query = query.not('id', 'in', `(${registeredDuoIds.join(',')})`);
+        }
+
+        const { data: partnerships, error } = await query;
 
         if (error) throw error;
 
