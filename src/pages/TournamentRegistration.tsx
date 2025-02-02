@@ -11,8 +11,7 @@ import { RegistrationHandler } from "@/components/tournament-registration/Regist
 import { AvailabilitySection } from "@/components/tournament-registration/AvailabilitySection";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, Loader2 } from "lucide-react";
-import { isAvailabilitySchedule } from "@/types/availability";
+import { InfoIcon, Loader2, Users } from "lucide-react";
 
 const TournamentRegistration = () => {
   const { id } = useParams();
@@ -23,6 +22,8 @@ const TournamentRegistration = () => {
   const [league, setLeague] = useState<any>(null);
   const [showRegistrationHandler, setShowRegistrationHandler] = useState(false);
   const [selectedDuo, setSelectedDuo] = useState<string | null>(null);
+  const [duos, setDuos] = useState<any[]>([]);
+  const [isLoadingDuos, setIsLoadingDuos] = useState(true);
 
   // Query for league data
   const { data: leagueData, isLoading: isLeagueLoading } = useQuery({
@@ -38,6 +39,42 @@ const TournamentRegistration = () => {
       return data;
     },
   });
+
+  // Fetch duos
+  useEffect(() => {
+    const fetchDuos = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: partnerships, error } = await supabase
+          .from('duo_partnerships')
+          .select(`
+            *,
+            player2:profiles!duo_partnerships_player2_id_fkey(*),
+            duo_statistics(*)
+          `)
+          .eq('player1_id', user.id)
+          .eq('active', true);
+
+        if (error) throw error;
+        setDuos(partnerships || []);
+      } catch (error) {
+        console.error('Error fetching duos:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch duo partnerships",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingDuos(false);
+      }
+    };
+
+    if (leagueData?.is_doubles) {
+      fetchDuos();
+    }
+  }, [leagueData]);
 
   // Query for user profile and availability
   const { data: profile, isLoading: isProfileLoading } = useQuery({
@@ -76,8 +113,8 @@ const TournamentRegistration = () => {
     }
   }, [leagueData]);
 
-  const handleTimeSlotSelect = (slots: string[]) => {
-    setSelectedTimeSlots(slots);
+  const handleDuoSelect = (duoId: string) => {
+    setSelectedDuo(duoId);
   };
 
   const handleSubmit = async () => {
@@ -102,22 +139,16 @@ const TournamentRegistration = () => {
         return;
       }
 
-      // Update profile if needed
-      if (!hasExistingSchedule) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            availability_schedule: {
-              selectedSlots: selectedTimeSlots,
-            },
-          })
-          .eq('id', user.id);
-
-        if (profileError) throw profileError;
-      }
-
       // For doubles leagues, show the registration handler
       if (league?.is_doubles) {
+        if (!selectedDuo) {
+          toast({
+            title: "Duo selection required",
+            description: "Please select a duo partner before registering.",
+            variant: "destructive",
+          });
+          return;
+        }
         setShowRegistrationHandler(true);
         return;
       }
@@ -199,7 +230,58 @@ const TournamentRegistration = () => {
                 rules={league.rules}
               />
 
-              <Separator className="my-4" />
+              {league.is_doubles && (
+                <>
+                  <Separator className="my-4" />
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Select Duo Partner</h3>
+                    {isLoadingDuos ? (
+                      <div className="flex items-center justify-center p-4">
+                        <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                      </div>
+                    ) : duos.length === 0 ? (
+                      <Alert>
+                        <Users className="h-4 w-4" />
+                        <AlertDescription>
+                          You need an active duo partnership to join this league.
+                          You can find a duo partner in the Duo Search section.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <div className="grid gap-4">
+                        {duos.map((duo) => (
+                          <Card
+                            key={duo.id}
+                            className={`p-4 cursor-pointer transition-all ${
+                              selectedDuo === duo.id 
+                                ? 'ring-2 ring-blue-500 bg-blue-50' 
+                                : 'hover:bg-gray-50'
+                            }`}
+                            onClick={() => handleDuoSelect(duo.id)}
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={duo.player2.avatar_url || "/placeholder.svg"}
+                                  alt={duo.player2.username}
+                                  className="h-10 w-10 rounded-full"
+                                />
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{duo.player2.username}</h4>
+                                <p className="text-sm text-gray-500">
+                                  Wins: {duo.duo_statistics[0]?.wins || 0} - 
+                                  Losses: {duo.duo_statistics[0]?.losses || 0}
+                                </p>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
 
               {!hasExistingSchedule && (
                 <>
@@ -213,7 +295,7 @@ const TournamentRegistration = () => {
                       </span>
                     </div>
                     
-                    <AvailabilitySection onTimeSlotSelect={handleTimeSlotSelect} />
+                    <AvailabilitySection onTimeSlotSelect={setSelectedTimeSlots} />
                   </div>
                 </>
               )}
