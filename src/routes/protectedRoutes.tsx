@@ -5,6 +5,7 @@ import DuoSearch from "@/pages/DuoSearch";
 import MyDuos from "@/pages/MyDuos";
 import Profile from "@/pages/Profile";
 import TournamentRegistration from "@/pages/TournamentRegistration";
+import MyLeagues from "@/pages/MyLeagues";
 
 const CreateLeagueType = lazy(() => import("@/pages/CreateLeagueType"));
 const CreateLeague = lazy(() => import("@/pages/CreateLeague"));
@@ -36,6 +37,10 @@ export const protectedRoutes: RouteObject[] = [
       {
         path: "/my-duos",
         element: <MyDuos />,
+      },
+      {
+        path: "/my-leagues",
+        element: <MyLeagues />,
       },
       {
         path: "/tournament/:id/register",
