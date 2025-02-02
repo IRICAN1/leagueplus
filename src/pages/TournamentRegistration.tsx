@@ -22,6 +22,7 @@ const TournamentRegistration = () => {
   const [hasExistingSchedule, setHasExistingSchedule] = useState<boolean | null>(null);
   const [league, setLeague] = useState<any>(null);
   const [showRegistrationHandler, setShowRegistrationHandler] = useState(false);
+  const [selectedDuo, setSelectedDuo] = useState<string | null>(null);
 
   // Query for league data
   const { data: leagueData, isLoading: isLeagueLoading } = useQuery({
@@ -219,7 +220,10 @@ const TournamentRegistration = () => {
 
               <Separator className="my-4" />
 
-              <RegistrationButton onClick={handleSubmit} />
+              <RegistrationButton 
+                onClick={handleSubmit} 
+                disabled={league?.is_doubles && !selectedDuo}
+              />
             </CardContent>
           </Card>
         </div>
