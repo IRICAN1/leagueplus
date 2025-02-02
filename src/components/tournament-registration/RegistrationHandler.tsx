@@ -40,17 +40,27 @@ export const RegistrationHandler = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Check if user is already registered through any duo partnership
-      const { data: registrations } = await supabase
+      // Check existing registrations through duo partnerships
+      const { data: registrations, error } = await supabase
         .from('league_participants')
         .select(`
           *,
-          duo_partnership:duo_partnerships!inner(*)
+          duo_partnership:duo_partnerships(
+            player1_id,
+            player2_id
+          )
         `)
-        .eq('league_id', leagueId)
-        .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`);
+        .eq('league_id', leagueId);
 
-      setExistingRegistration(registrations && registrations.length > 0);
+      if (error) throw error;
+
+      // Check if user is part of any registered duo
+      const isRegistered = registrations?.some(reg => {
+        const duo = reg.duo_partnership;
+        return duo && (duo.player1_id === user.id || duo.player2_id === user.id);
+      });
+
+      setExistingRegistration(!!isRegistered);
     } catch (error) {
       console.error('Error checking registration:', error);
     }
@@ -60,6 +70,14 @@ export const RegistrationHandler = ({
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Get existing registrations for this league
+      const { data: existingRegistrations } = await supabase
+        .from('league_participants')
+        .select('duo_partnership_id')
+        .eq('league_id', leagueId);
+
+      const registeredDuoIds = existingRegistrations?.map(reg => reg.duo_partnership_id) || [];
 
       // Fetch active duo partnerships that aren't already registered
       const { data: partnerships, error } = await supabase
@@ -71,12 +89,7 @@ export const RegistrationHandler = ({
         `)
         .eq('player1_id', user.id)
         .eq('active', true)
-        .not('id', 'in', (
-          supabase
-            .from('league_participants')
-            .select('duo_partnership_id')
-            .eq('league_id', leagueId)
-        ));
+        .not('id', 'in', registeredDuoIds);
 
       if (error) throw error;
 
@@ -93,20 +106,6 @@ export const RegistrationHandler = ({
 
   const handleDuoSelect = async (duoId: string) => {
     try {
-      // Check if either player is already registered
-      const { data: existingRegistration, error: checkError } = await supabase
-        .from('league_participants')
-        .select('*')
-        .eq('league_id', leagueId)
-        .eq('duo_partnership_id', duoId);
-
-      if (checkError) throw checkError;
-
-      if (existingRegistration && existingRegistration.length > 0) {
-        toast.error("This duo partnership is already registered in this league");
-        return;
-      }
-
       const { error: registrationError } = await supabase
         .from('league_participants')
         .insert({
