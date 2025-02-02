@@ -55,8 +55,7 @@ const TournamentRegistration = () => {
             player2:profiles!duo_partnerships_player2_id_fkey(*),
             duo_statistics(*)
           `)
-          .eq('player1_id', user.id)
-          .eq('active', true); // Make sure to only fetch active partnerships
+          .eq('player1_id', user.id);
 
         if (error) throw error;
         setDuos(partnerships || []);
