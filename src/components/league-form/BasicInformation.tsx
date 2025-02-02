@@ -28,6 +28,29 @@ export const BasicInformation = ({ form }: BasicInformationProps) => {
 
       <FormField
         control={form.control}
+        name="format"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>League Format</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select league format" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Individual">Individual</SelectItem>
+                <SelectItem value="Team">Team</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>Choose between individual or team-based competition</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
         name="sport_type"
         render={({ field }) => (
           <FormItem>
@@ -118,6 +141,54 @@ export const BasicInformation = ({ form }: BasicInformationProps) => {
           </FormItem>
         )}
       />
+
+      <FormField
+        control={form.control}
+        name="is_doubles"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>League Type</FormLabel>
+            <Select onValueChange={(value) => field.onChange(value === "true")} defaultValue={field.value ? "true" : "false"}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select league type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="false">Singles</SelectItem>
+                <SelectItem value="true">Doubles</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>Choose between singles or doubles play</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {field.value && (
+        <FormField
+          control={form.control}
+          name="requires_duo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duo Registration</FormLabel>
+              <Select onValueChange={(value) => field.onChange(value === "true")} defaultValue={field.value ? "true" : "false"}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duo registration type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="false">Individual Registration</SelectItem>
+                  <SelectItem value="true">Register as Duo</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>Choose whether players must register as established duos</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </div>
   );
 };

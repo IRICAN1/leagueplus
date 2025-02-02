@@ -2,7 +2,7 @@ import * as z from "zod";
 
 export const leagueFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  sport_type: z.enum(["Tennis", "Basketball", "Football", "Volleyball", "Badminton"]),
+  sport_type: z.enum(["Tennis", "Basketball", "Football", "Volleyball", "Badminton", "Padel"]),
   skill_level_min: z.number().min(1).max(10),
   skill_level_max: z.number().min(1).max(10),
   gender_category: z.enum(["Men", "Women", "Mixed"]),
@@ -21,6 +21,8 @@ export const leagueFormSchema = z.object({
   schedule_preferences: z.string().optional(),
   equipment_requirements: z.string().optional(),
   venue_details: z.string().optional(),
+  is_doubles: z.boolean().default(false),
+  requires_duo: z.boolean().default(false),
 }).refine((data) => {
   return data.start_date < data.end_date;
 }, {

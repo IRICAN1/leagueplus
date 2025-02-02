@@ -31,6 +31,8 @@ const CreateLeague = () => {
       match_format: "Single Matches",
       sport_type: "Tennis",
       max_participants: 2,
+      is_doubles: false,
+      requires_duo: false,
     },
   });
 
@@ -63,6 +65,8 @@ const CreateLeague = () => {
         schedule_preferences: data.schedule_preferences,
         equipment_requirements: data.equipment_requirements,
         venue_details: data.venue_details,
+        is_doubles: data.is_doubles,
+        requires_duo: data.requires_duo,
       };
 
       const { error } = await supabase
