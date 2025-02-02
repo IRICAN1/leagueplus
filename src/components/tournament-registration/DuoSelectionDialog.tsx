@@ -1,8 +1,12 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Check, Users } from "lucide-react";
 
 interface DuoSelectionDialogProps {
   isOpen: boolean;
@@ -84,24 +88,48 @@ export const DuoSelectionDialog = ({
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Select Duo Partner & Availability</DialogTitle>
+          <DialogDescription>
+            Choose a duo partner and set your availability schedule for league matches
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
           <div className="space-y-4">
             {duos.map((duo) => (
-              <div
+              <Card
                 key={duo.id}
-                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedDuo === duo.id ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'
+                className={`p-4 cursor-pointer transition-all ${
+                  selectedDuo === duo.id 
+                    ? 'ring-2 ring-blue-500 bg-blue-50' 
+                    : 'hover:bg-gray-50'
                 }`}
                 onClick={() => setSelectedDuo(duo.id)}
               >
-                <p className="font-medium">{duo.player2.username}</p>
-                <p className="text-sm text-gray-600">
-                  Wins: {duo.duo_statistics[0]?.wins || 0} - 
-                  Losses: {duo.duo_statistics[0]?.losses || 0}
-                </p>
-              </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{duo.player2.username}</h3>
+                      <Badge variant="secondary">
+                        Win Rate: {
+                          duo.duo_statistics[0]
+                            ? Math.round(
+                                (duo.duo_statistics[0].wins /
+                                  (duo.duo_statistics[0].wins + duo.duo_statistics[0].losses)) *
+                                  100
+                              )
+                            : 0
+                        }%
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Matches: {duo.duo_statistics[0]?.wins || 0} W - {duo.duo_statistics[0]?.losses || 0} L
+                    </p>
+                  </div>
+                  {selectedDuo === duo.id && (
+                    <Check className="h-5 w-5 text-blue-500" />
+                  )}
+                </div>
+              </Card>
             ))}
           </div>
 
@@ -115,12 +143,14 @@ export const DuoSelectionDialog = ({
                 isDuo={true}
               />
 
-              <button
-                className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              <Button
+                className="w-full"
                 onClick={() => handleDuoSelect(selectedDuo)}
+                disabled={selectedTimeSlots.length === 0}
               >
-                Select Duo & Continue
-              </button>
+                <Users className="mr-2 h-4 w-4" />
+                Complete Registration
+              </Button>
             </div>
           )}
         </div>
