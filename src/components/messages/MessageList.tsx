@@ -55,31 +55,50 @@ export const MessageList = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data, error } = await supabase
+      // First, get the conversation IDs the user is part of
+      const { data: participations, error: participationsError } = await supabase
         .from("conversation_participants")
+        .select("conversation_id")
+        .eq("profile_id", user.id);
+
+      if (participationsError) {
+        console.error("Error fetching participations:", participationsError);
+        toast({
+          title: "Error",
+          description: "Failed to load conversations",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      const conversationIds = participations.map(p => p.conversation_id);
+      
+      if (conversationIds.length === 0) return [];
+
+      // Then, get the full conversation details
+      const { data, error } = await supabase
+        .from("conversations")
         .select(`
-          conversation:conversations (
-            id,
-            title,
-            last_message_at,
-            participants:conversation_participants (
-              profile_id,
-              profiles (
-                username,
-                avatar_url
-              )
-            ),
-            messages (
-              content,
-              created_at,
-              sender:profiles (
-                username
-              )
+          id,
+          title,
+          last_message_at,
+          participants:conversation_participants (
+            profile_id,
+            profiles (
+              username,
+              avatar_url
+            )
+          ),
+          messages (
+            content,
+            created_at,
+            sender:profiles (
+              username
             )
           )
         `)
-        .eq("profile_id", user.id)
-        .order("conversation(last_message_at)", { ascending: false });
+        .in("id", conversationIds)
+        .order("last_message_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching conversations:", error);
@@ -91,9 +110,7 @@ export const MessageList = ({
         return [];
       }
 
-      return (data || [])
-        .map((uc) => uc.conversation)
-        .filter((c): c is Conversation => c !== null);
+      return (data || []) as Conversation[];
     },
     enabled: !!currentUserId,
   });
