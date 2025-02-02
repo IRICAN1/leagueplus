@@ -40,7 +40,6 @@ export const RegistrationHandler = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Check existing registrations through duo partnerships
       const { data: registrations, error } = await supabase
         .from('league_participants')
         .select(`
@@ -54,7 +53,6 @@ export const RegistrationHandler = ({
 
       if (error) throw error;
 
-      // Check if user is part of any registered duo
       const isRegistered = registrations?.some(reg => {
         const duo = reg.duo_partnership;
         return duo && (duo.player1_id === user.id || duo.player2_id === user.id);
@@ -71,16 +69,17 @@ export const RegistrationHandler = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get existing registrations for this league
+      // First, get the IDs of partnerships that are already registered
       const { data: existingRegistrations } = await supabase
         .from('league_participants')
         .select('duo_partnership_id')
         .eq('league_id', leagueId);
 
+      // Create an array of registered partnership IDs
       const registeredDuoIds = existingRegistrations?.map(reg => reg.duo_partnership_id) || [];
 
-      // Fetch active duo partnerships that aren't already registered
-      const { data: partnerships, error } = await supabase
+      // Then fetch partnerships that aren't in the registered IDs
+      const query = supabase
         .from('duo_partnerships')
         .select(`
           *,
@@ -88,8 +87,14 @@ export const RegistrationHandler = ({
           duo_statistics(*)
         `)
         .eq('player1_id', user.id)
-        .eq('active', true)
-        .not('id', 'in', registeredDuoIds);
+        .eq('active', true);
+
+      // Only add the not-in filter if there are registered partnerships
+      if (registeredDuoIds.length > 0) {
+        query.not('id', 'in', `(${registeredDuoIds.join(',')})`);
+      }
+
+      const { data: partnerships, error } = await query;
 
       if (error) throw error;
 
