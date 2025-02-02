@@ -16,7 +16,11 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Trophy, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const CreateLeague = () => {
+interface CreateLeagueProps {
+  type?: 'single' | 'duo';
+}
+
+const CreateLeague = ({ type = 'single' }: CreateLeagueProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showOptional, setShowOptional] = useState(false);
@@ -24,13 +28,13 @@ const CreateLeague = () => {
   const form = useForm<z.infer<typeof leagueFormSchema>>({
     resolver: zodResolver(leagueFormSchema),
     defaultValues: {
-      format: "Individual",
+      format: type === 'duo' ? "Team" : "Individual",
       skill_level_min: 1,
       skill_level_max: 10,
       gender_category: "Mixed",
       match_format: "Single Matches",
       sport_type: "Tennis",
-      max_participants: 2,
+      max_participants: type === 'duo' ? 4 : 2,
     },
   });
 
@@ -51,7 +55,7 @@ const CreateLeague = () => {
         start_date: data.start_date.toISOString(),
         end_date: data.end_date.toISOString(),
         location: data.location,
-        max_participants: data.max_participants,
+        max_participants: type === 'duo' ? data.max_participants / 2 : data.max_participants,
         description: data.description,
         rules: data.rules,
         match_format: data.match_format,
@@ -66,7 +70,7 @@ const CreateLeague = () => {
       };
 
       const { error } = await supabase
-        .from('leagues')
+        .from(type === 'duo' ? 'duo_leagues' : 'leagues')
         .insert(formattedData);
 
       if (error) throw error;
@@ -93,13 +97,12 @@ const CreateLeague = () => {
         <div className="flex items-center gap-3 mb-8">
           <Trophy className="h-8 w-8 text-blue-600 animate-pulse-soft" />
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
-            Create a New League
+            Create a New {type === 'duo' ? 'Duo' : 'Single'} League
           </h1>
         </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Required Fields Section */}
             <div className="space-y-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-blue-100 animate-fade-in">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-semibold text-blue-800">Required Information</h2>
@@ -107,10 +110,9 @@ const CreateLeague = () => {
               </div>
               <BasicInformation form={form} />
               <DateFields form={form} />
-              <LocationParticipants form={form} />
+              <LocationParticipants form={form} type={type} />
             </div>
 
-            {/* Optional Fields Toggle */}
             <Button
               type="button"
               variant="outline"
@@ -133,7 +135,6 @@ const CreateLeague = () => {
               )}
             </Button>
 
-            {/* Optional Fields Section */}
             {showOptional && (
               <div className="space-y-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-blue-100 animate-fade-in">
                 <div className="flex items-center gap-2">

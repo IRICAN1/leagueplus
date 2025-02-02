@@ -1,30 +1,16 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { MapPin, Users } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LocationParticipantsProps {
   form: UseFormReturn<any>;
+  type?: 'single' | 'duo';
 }
 
-export const LocationParticipants = ({ form }: LocationParticipantsProps) => {
+export const LocationParticipants = ({ form, type = 'single' }: LocationParticipantsProps) => {
   return (
     <div className="space-y-4">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <h2 className="text-xl font-semibold flex items-center gap-2 cursor-help">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              Location and Participants
-            </h2>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Specify where the league will take place and how many can join</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
       <FormField
         control={form.control}
         name="location"
@@ -49,16 +35,22 @@ export const LocationParticipants = ({ form }: LocationParticipantsProps) => {
           <FormItem>
             <FormLabel className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              Maximum Participants
+              Maximum {type === 'duo' ? 'Players' : 'Participants'}
             </FormLabel>
             <FormControl>
               <Input 
                 type="number" 
-                min={2} 
+                min={type === 'duo' ? 4 : 2}
+                step={type === 'duo' ? 2 : 1}
                 {...field} 
                 onChange={e => field.onChange(+e.target.value)}
               />
             </FormControl>
+            <FormDescription>
+              {type === 'duo' 
+                ? 'Enter the total number of players (must be even for duo pairs)' 
+                : 'Enter the maximum number of participants'}
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
