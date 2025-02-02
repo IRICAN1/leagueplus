@@ -1,19 +1,21 @@
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { DuoSearch } from "@/pages/DuoSearch";
-import { DuoPartnerships } from "@/pages/DuoPartnerships";
-import { DuoInvites } from "@/pages/DuoInvites";
-import { Tournament } from "@/pages/Tournament";
-import { TournamentRegistration } from "@/pages/TournamentRegistration";
-import { Profile } from "@/pages/Profile";
+import DuoSearch from "@/pages/DuoSearch";
+import MyDuos from "@/pages/MyDuos";
+import Profile from "@/pages/Profile";
+import TournamentRegistration from "@/pages/TournamentRegistration";
 
 const CreateLeagueType = lazy(() => import("@/pages/CreateLeagueType"));
 const CreateLeague = lazy(() => import("@/pages/CreateLeague"));
 
 export const protectedRoutes: RouteObject[] = [
   {
-    element: <ProtectedRoute />,
+    element: <ProtectedRoute>
+      <div>
+        {/* Outlet will render child routes */}
+      </div>
+    </ProtectedRoute>,
     children: [
       {
         path: "/create-league",
@@ -32,16 +34,8 @@ export const protectedRoutes: RouteObject[] = [
         element: <DuoSearch />,
       },
       {
-        path: "/duo-partnerships",
-        element: <DuoPartnerships />,
-      },
-      {
-        path: "/duo-invites",
-        element: <DuoInvites />,
-      },
-      {
-        path: "/tournament/:id",
-        element: <Tournament />,
+        path: "/my-duos",
+        element: <MyDuos />,
       },
       {
         path: "/tournament/:id/register",
