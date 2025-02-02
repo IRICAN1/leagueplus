@@ -120,6 +120,11 @@ export const DuoSelectionDialog = ({
                             : 0
                         }%
                       </Badge>
+                      {!duo.active && (
+                        <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                          Inactive
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600">
                       Matches: {duo.duo_statistics[0]?.wins || 0} W - {duo.duo_statistics[0]?.losses || 0} L
