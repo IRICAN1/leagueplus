@@ -40,10 +40,14 @@ export const MessageButton = ({ currentUserId, otherUserId, challengeId, compact
         }
       }
 
-      // If no conversation exists, create a new one
+      // If no conversation exists, create a new one with a title
       const { data: newConversation, error: conversationError } = await supabase
         .from('conversations')
-        .insert({})
+        .insert({
+          title: `Challenge #${challengeId}`, // Add a title for the conversation
+          updated_at: new Date().toISOString(),
+          last_message_at: new Date().toISOString()
+        })
         .select()
         .single();
 
@@ -51,33 +55,33 @@ export const MessageButton = ({ currentUserId, otherUserId, challengeId, compact
 
       if (newConversation) {
         // Add both users as participants
-        const participantsPromises = [
-          supabase
-            .from('conversation_participants')
-            .insert({
+        const { error: participantsError } = await supabase
+          .from('conversation_participants')
+          .insert([
+            {
               conversation_id: newConversation.id,
               profile_id: currentUserId,
               is_admin: true
-            }),
-          supabase
-            .from('conversation_participants')
-            .insert({
+            },
+            {
               conversation_id: newConversation.id,
               profile_id: otherUserId,
               is_admin: false
-            })
-        ];
+            }
+          ]);
 
-        await Promise.all(participantsPromises);
+        if (participantsError) throw participantsError;
 
         // Send initial message about the challenge
-        await supabase
+        const { error: messageError } = await supabase
           .from('messages')
           .insert({
             conversation_id: newConversation.id,
             sender_id: currentUserId,
             content: `Challenge #${challengeId} has been created. Let's discuss the details!`
           });
+
+        if (messageError) throw messageError;
 
         toast({
           title: "Conversation Created",
