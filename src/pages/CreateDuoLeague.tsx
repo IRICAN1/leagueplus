@@ -25,8 +25,6 @@ const duoLeagueFormSchema = z.object({
   description: z.string().optional(),
   rules: z.string().optional(),
   format: z.literal("Team"),
-  is_doubles: z.literal(true),
-  requires_duo: z.literal(true),
   skill_level_min: z.number().default(1),
   skill_level_max: z.number().default(10),
   match_format: z.enum(["Single Matches", "Round Robin", "Knockout"]).default("Single Matches"),
@@ -47,8 +45,6 @@ const CreateDuoLeague = () => {
     resolver: zodResolver(duoLeagueFormSchema),
     defaultValues: {
       format: "Team",
-      is_doubles: true,
-      requires_duo: true,
       skill_level_min: 1,
       skill_level_max: 10,
       match_format: "Single Matches",
@@ -70,6 +66,9 @@ const CreateDuoLeague = () => {
       const { error } = await supabase.from("duo_leagues").insert({
         ...values,
         creator_id: session.session.user.id,
+        start_date: values.start_date.toISOString(),
+        end_date: values.end_date.toISOString(),
+        registration_deadline: values.registration_deadline.toISOString(),
       });
 
       if (error) throw error;
