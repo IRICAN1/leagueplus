@@ -60,29 +60,16 @@ const DuoTournamentDetails = () => {
       if (error) throw error;
       if (!data) throw new Error('League not found');
 
-      // Transform duo league data to match the expected league interface
       return {
         ...data,
+        format: 'Team' as const,
         is_doubles: true,
         max_participants: data.max_duo_pairs * 2,
-        requires_duo: true,
-        format: 'Team' as const
+        requires_duo: true
       };
     },
     retry: 1,
     enabled: !!id && UUID_REGEX.test(id)
-  });
-
-  const { data: registeredPlayers } = useQuery({
-    queryKey: ['registeredDuoPlayers', id],
-    queryFn: async () => {
-      const { count } = await supabase
-        .from('duo_league_participants')
-        .select('*', { count: 'exact', head: true })
-        .eq('league_id', id);
-      return count || 0;
-    },
-    enabled: !!id
   });
 
   const { data: isUserRegistered } = useQuery({
