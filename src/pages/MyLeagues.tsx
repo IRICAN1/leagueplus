@@ -149,7 +149,7 @@ const MyLeagues = () => {
               <ResultCard
                 key={league.id}
                 id={league.id}
-                title={league.name}
+                name={league.name}
                 location={league.location}
                 distance={0}
                 date={`${format(new Date(league.start_date), 'PP')} - ${format(new Date(league.end_date), 'PP')}`}
@@ -158,6 +158,8 @@ const MyLeagues = () => {
                 skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
                 genderCategory={league.gender_category}
                 participants={league.max_participants}
+                isDuoLeague={false}
+                registrationOpen={new Date(league.registration_deadline) > new Date()}
               />
             ))
           )}
@@ -173,7 +175,7 @@ const MyLeagues = () => {
               <ResultCard
                 key={league.id}
                 id={league.id}
-                title={league.name}
+                name={league.name}
                 location={league.location}
                 distance={0}
                 date={`${format(new Date(league.start_date), 'PP')} - ${format(new Date(league.end_date), 'PP')}`}
@@ -182,6 +184,8 @@ const MyLeagues = () => {
                 skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
                 genderCategory={league.gender_category}
                 participants={league.max_participants}
+                isDuoLeague={false}
+                registrationOpen={new Date(league.registration_deadline) > new Date()}
               />
             ))
           )}

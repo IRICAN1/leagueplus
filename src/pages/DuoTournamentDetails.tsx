@@ -59,7 +59,14 @@ const DuoTournamentDetails = () => {
 
       if (error) throw error;
       if (!data) throw new Error('League not found');
-      return data;
+      
+      // Add the missing properties required by the type
+      return {
+        ...data,
+        is_doubles: true,
+        max_participants: data.max_duo_pairs * 2, // Convert duo pairs to total participants
+        requires_duo: true
+      };
     },
     retry: 1,
     enabled: !!id && UUID_REGEX.test(id)
