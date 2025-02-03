@@ -38,7 +38,7 @@ export const RegistrationHandler = ({
 
         const registeredDuoIds = existingRegistrations?.map(reg => reg.duo_partnership_id) || [];
 
-        // Base query for partnerships
+        // Base query for partnerships where user is either player1 or player2
         let query = supabase
           .from('duo_partnerships')
           .select(`
@@ -52,7 +52,7 @@ export const RegistrationHandler = ({
 
         // Only add the not.in filter if there are registered duos
         if (registeredDuoIds.length > 0) {
-          query = query.not('id', 'in', `(${registeredDuoIds.join(',')})`);
+          query = query.not('id', 'in', registeredDuoIds);
         }
 
         const { data: partnerships, error } = await query;
@@ -62,6 +62,7 @@ export const RegistrationHandler = ({
         // Transform the data to show the partner's information
         const transformedPartnerships = partnerships?.map(partnership => ({
           ...partnership,
+          // Set partner based on which player the current user is
           partner: user.id === partnership.player1_id ? partnership.player2 : partnership.player1
         })) || [];
 
