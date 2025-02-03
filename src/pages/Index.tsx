@@ -162,7 +162,7 @@ const Index = () => {
                 <ResultCard
                   key={league.id}
                   id={league.id}
-                  name={league.name}
+                  title={league.name}
                   location={league.location}
                   distance={0}
                   date={format(new Date(league.start_date), 'MMMM d, yyyy')}
@@ -171,8 +171,6 @@ const Index = () => {
                   skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
                   genderCategory={league.gender_category}
                   participants={league.max_participants}
-                  isDuoLeague={leagueType === 'duo'}
-                  registrationOpen={new Date(league.registration_deadline) > new Date()}
                 />
               ))}
               {!selectedLeagueId && (
