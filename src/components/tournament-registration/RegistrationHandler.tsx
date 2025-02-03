@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { DuoSelectionDialog } from "./DuoSelectionDialog";
 import { toast } from "sonner";
+import { RegistrationButton } from "./RegistrationButton";
 
 interface RegistrationHandlerProps {
   leagueId: string;
@@ -22,7 +23,74 @@ export const RegistrationHandler = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [duos, setDuos] = useState<any[]>([]);
+  const [canRegister, setCanRegister] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  const verifyRegistrationEligibility = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please log in to register");
+        return false;
+      }
+
+      // Check if the tournament exists and get its details
+      const { data: tournament } = await supabase
+        .from('duo_leagues')
+        .select('*')
+        .eq('id', leagueId)
+        .single();
+
+      if (!tournament) {
+        toast.error("Tournament not found");
+        return false;
+      }
+
+      // Check if registration is still open
+      if (new Date(tournament.registration_deadline) < new Date()) {
+        toast.error("Registration deadline has passed");
+        return false;
+      }
+
+      // Check if the tournament is full
+      const { count } = await supabase
+        .from('duo_league_participants')
+        .select('*', { count: 'exact' })
+        .eq('league_id', leagueId);
+
+      if (count && tournament.max_duo_pairs && count >= tournament.max_duo_pairs) {
+        toast.error("Tournament is full");
+        return false;
+      }
+
+      // Check if user is already registered
+      const { data: existingRegistration } = await supabase
+        .from('duo_league_participants')
+        .select('id')
+        .eq('league_id', leagueId)
+        .single();
+
+      if (existingRegistration) {
+        toast.error("You are already registered for this tournament");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error checking registration eligibility:', error);
+      toast.error("Failed to verify registration eligibility");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const checkEligibility = async () => {
+      const isEligible = await verifyRegistrationEligibility();
+      setCanRegister(isEligible);
+    };
+    
+    checkEligibility();
+  }, [leagueId]);
 
   useEffect(() => {
     const fetchDuos = async () => {
@@ -80,38 +148,8 @@ export const RegistrationHandler = ({
     try {
       setIsLoading(true);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please log in to register");
-        return;
-      }
-
-      // Check if the tournament exists and get its details
-      const { data: tournament } = await supabase
-        .from('duo_leagues')
-        .select('*')
-        .eq('id', leagueId)
-        .single();
-
-      if (!tournament) {
-        toast.error("Tournament not found");
-        return;
-      }
-
-      // Check if registration is still open
-      if (new Date(tournament.registration_deadline) < new Date()) {
-        toast.error("Registration deadline has passed");
-        return;
-      }
-
-      // Check if the tournament is full
-      const { count } = await supabase
-        .from('duo_league_participants')
-        .select('*', { count: 'exact' })
-        .eq('league_id', leagueId);
-
-      if (count && tournament.max_duo_pairs && count >= tournament.max_duo_pairs) {
-        toast.error("Tournament is full");
+      const isEligible = await verifyRegistrationEligibility();
+      if (!isEligible) {
         return;
       }
 
@@ -138,6 +176,10 @@ export const RegistrationHandler = ({
 
   return (
     <>
+      <RegistrationButton 
+        onClick={() => setIsDialogOpen(true)} 
+        disabled={!canRegister || isLoading}
+      />
       <DuoSelectionDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
