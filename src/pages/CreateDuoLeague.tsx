@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateFields } from "@/components/league-form/DateFields";
 import { Textarea } from "@/components/ui/textarea";
-import { Database } from "@/integrations/supabase/types";
 import * as z from "zod";
 
 const duoLeagueFormSchema = z.object({
@@ -25,6 +24,9 @@ const duoLeagueFormSchema = z.object({
   max_duo_pairs: z.number().min(2),
   description: z.string().optional(),
   rules: z.string().optional(),
+  format: z.literal("Team"),
+  is_doubles: z.literal(true),
+  requires_duo: z.literal(true),
 }).refine((data) => {
   return data.start_date < data.end_date;
 }, {
@@ -32,11 +34,13 @@ const duoLeagueFormSchema = z.object({
   path: ["start_date"],
 });
 
+type DuoLeagueFormValues = z.infer<typeof duoLeagueFormSchema>;
+
 const CreateDuoLeague = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const form = useForm({
+  const form = useForm<DuoLeagueFormValues>({
     resolver: zodResolver(duoLeagueFormSchema),
     defaultValues: {
       format: "Team",
@@ -45,7 +49,7 @@ const CreateDuoLeague = () => {
     },
   });
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: DuoLeagueFormValues) => {
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) {
@@ -170,8 +174,8 @@ const CreateDuoLeague = () => {
                     <Input 
                       type="number" 
                       min={2} 
-                      {...field} 
-                      onChange={e => field.onChange(+e.target.value)}
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
