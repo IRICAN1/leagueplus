@@ -2,6 +2,7 @@ import Profile from "@/pages/Profile";
 import TournamentRegistration from "@/pages/TournamentRegistration";
 import PlayerChallenge from "@/pages/PlayerChallenge";
 import CreateLeague from "@/pages/CreateLeague";
+import CreateDuoLeague from "@/pages/CreateDuoLeague";
 import MyLeagues from "@/pages/MyLeagues";
 import MatchRequests from "@/pages/MatchRequests";
 import MyDuos from "@/pages/MyDuos";
@@ -37,6 +38,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <CreateLeague />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/create-duo-league",
+    element: (
+      <ProtectedRoute>
+        <CreateDuoLeague />
       </ProtectedRoute>
     )
   },

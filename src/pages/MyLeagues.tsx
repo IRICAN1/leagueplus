@@ -65,13 +65,22 @@ const MyLeagues = () => {
     <div className="container max-w-4xl mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">My Leagues</h1>
-        <Button 
-          onClick={() => navigate('/create-league')}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create League
-        </Button>
+        <div className="flex gap-4">
+          <Button 
+            onClick={() => navigate('/create-league')}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create League
+          </Button>
+          <Button 
+            onClick={() => navigate('/create-duo-league')}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Duo League
+          </Button>
+        </div>
       </div>
       
       <Tabs defaultValue="created" className="space-y-6">
