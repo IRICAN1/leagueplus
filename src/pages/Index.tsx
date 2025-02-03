@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Users, User } from "lucide-react";
 
 const LEAGUES_PER_PAGE = 10;
 
@@ -22,24 +23,26 @@ export type LeagueFilters = {
   hasSpots?: boolean;
 };
 
+type LeagueType = 'individual' | 'duo';
+
 const Index = () => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<LeagueFilters>({});
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
+  const [leagueType, setLeagueType] = useState<LeagueType>('individual');
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['leagues', page, filters, selectedLeagueId],
+    queryKey: ['leagues', page, filters, selectedLeagueId, leagueType],
     queryFn: async () => {
+      const tableName = leagueType === 'individual' ? 'leagues' : 'duo_leagues';
       let query = supabase
-        .from('leagues')
+        .from(tableName)
         .select('*, league_participants(count)')
         .order('created_at', { ascending: false });
 
-      // If a specific league is selected through search
       if (selectedLeagueId) {
         query = query.eq('id', selectedLeagueId);
       } else {
-        // Apply pagination only when not searching for a specific league
         query = query.range((page - 1) * LEAGUES_PER_PAGE, page * LEAGUES_PER_PAGE - 1);
       }
 
@@ -96,13 +99,13 @@ const Index = () => {
 
   const handleSearch = (leagueId: string) => {
     setSelectedLeagueId(leagueId);
-    setPage(1); // Reset to first page when searching
+    setPage(1);
   };
 
   const handleFilterChange = (newFilters: Partial<LeagueFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setSelectedLeagueId(null); // Clear selected league when filters change
-    setPage(1); // Reset to first page when filters change
+    setSelectedLeagueId(null);
+    setPage(1);
   };
 
   return (
@@ -115,6 +118,31 @@ const Index = () => {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Discover sports competitions near you and join the excitement
           </p>
+        </div>
+
+        <div className="flex justify-center gap-2 mb-6">
+          <Button
+            variant={leagueType === 'individual' ? 'default' : 'outline'}
+            onClick={() => setLeagueType('individual')}
+            className="relative overflow-hidden transition-all duration-300"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Individual Leagues
+            {leagueType === 'individual' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
+            )}
+          </Button>
+          <Button
+            variant={leagueType === 'duo' ? 'default' : 'outline'}
+            onClick={() => setLeagueType('duo')}
+            className="relative overflow-hidden transition-all duration-300"
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Duo Leagues
+            {leagueType === 'duo' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
+            )}
+          </Button>
         </div>
 
         <SearchHeader onSearch={handleSearch} />
