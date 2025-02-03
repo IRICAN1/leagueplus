@@ -63,13 +63,24 @@ const CreateDuoLeague = () => {
         return;
       }
 
-      const { error } = await supabase.from("duo_leagues").insert({
+      const formattedValues = {
         ...values,
         creator_id: session.session.user.id,
         start_date: values.start_date.toISOString(),
         end_date: values.end_date.toISOString(),
         registration_deadline: values.registration_deadline.toISOString(),
-      });
+        sport_type: values.sport_type,
+        gender_category: values.gender_category,
+        location: values.location,
+        max_duo_pairs: values.max_duo_pairs,
+        name: values.name,
+        format: values.format,
+        skill_level_min: values.skill_level_min,
+        skill_level_max: values.skill_level_max,
+        match_format: values.match_format,
+      };
+
+      const { error } = await supabase.from("duo_leagues").insert(formattedValues);
 
       if (error) throw error;
 
@@ -86,6 +97,8 @@ const CreateDuoLeague = () => {
       });
     }
   };
+
+  // ... keep existing code (form JSX)
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
