@@ -27,6 +27,9 @@ const duoLeagueFormSchema = z.object({
   format: z.literal("Team"),
   is_doubles: z.literal(true),
   requires_duo: z.literal(true),
+  skill_level_min: z.number().default(1),
+  skill_level_max: z.number().default(10),
+  match_format: z.enum(["Single Matches", "Round Robin", "Knockout"]).default("Single Matches"),
 }).refine((data) => {
   return data.start_date < data.end_date;
 }, {
@@ -46,6 +49,9 @@ const CreateDuoLeague = () => {
       format: "Team",
       is_doubles: true,
       requires_duo: true,
+      skill_level_min: 1,
+      skill_level_max: 10,
+      match_format: "Single Matches",
     },
   });
 
