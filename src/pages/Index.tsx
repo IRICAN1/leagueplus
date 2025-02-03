@@ -35,9 +35,11 @@ const Index = () => {
     queryKey: ['leagues', page, filters, selectedLeagueId, leagueType],
     queryFn: async () => {
       const tableName = leagueType === 'individual' ? 'leagues' : 'duo_leagues';
+      const participantsTable = leagueType === 'individual' ? 'league_participants' : 'duo_league_participants';
+      
       let query = supabase
         .from(tableName)
-        .select('*, league_participants(count)')
+        .select(`*, ${participantsTable}(count)`)
         .order('created_at', { ascending: false });
 
       if (selectedLeagueId) {
@@ -80,7 +82,7 @@ const Index = () => {
         }
       }
       if (filters.hasSpots === true) {
-        query = query.neq('league_participants.count', 'max_participants');
+        query = query.neq(`${participantsTable}.count`, leagueType === 'individual' ? 'max_participants' : 'max_duo_pairs');
       }
 
       const { data, error } = await query;
