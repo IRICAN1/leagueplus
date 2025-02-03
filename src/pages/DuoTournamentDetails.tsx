@@ -60,12 +60,13 @@ const DuoTournamentDetails = () => {
       if (error) throw error;
       if (!data) throw new Error('League not found');
 
-      // Add the missing properties required by the type
+      // Transform duo league data to match the expected league interface
       return {
         ...data,
-        is_doubles: true, // Since this is a duo league, it's always doubles
-        max_participants: data.max_duo_pairs * 2, // Convert duo pairs to total participants
-        requires_duo: true // Since this is a duo league, it always requires duo
+        is_doubles: true,
+        max_participants: data.max_duo_pairs * 2,
+        requires_duo: true,
+        format: 'Team' as const
       };
     },
     retry: 1,
@@ -165,7 +166,7 @@ const DuoTournamentDetails = () => {
         league={league} 
         isAuthenticated={isAuthenticated}
         isUserRegistered={isUserRegistered}
-        registeredPlayers={registeredPlayers}
+        registeredPlayers={league.max_duo_pairs * 2}
       />
 
       <Tabs defaultValue="rankings" className="space-y-6">
