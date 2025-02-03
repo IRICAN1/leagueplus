@@ -6,9 +6,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface LocationParticipantsProps {
   form: UseFormReturn<any>;
+  maxParticipantsLabel?: string;
 }
 
-export const LocationParticipants = ({ form }: LocationParticipantsProps) => {
+export const LocationParticipants = ({ form, maxParticipantsLabel = "Maximum Participants" }: LocationParticipantsProps) => {
   return (
     <div className="space-y-4">
       <TooltipProvider>
@@ -49,7 +50,7 @@ export const LocationParticipants = ({ form }: LocationParticipantsProps) => {
           <FormItem>
             <FormLabel className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              Maximum Participants
+              {maxParticipantsLabel}
             </FormLabel>
             <FormControl>
               <Input 
