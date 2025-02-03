@@ -26,6 +26,39 @@ export const RegistrationHandler = ({
   const [canRegister, setCanRegister] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  const checkPlayerDuos = async (playerId: string) => {
+    try {
+      const { data: partnerships, error } = await supabase
+        .from('duo_partnerships')
+        .select('*')
+        .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
+        .eq('active', true);
+
+      if (error) {
+        console.error('Error checking duo partnerships:', error);
+        return false;
+      }
+
+      // For testing purposes, log the results
+      console.log('Found partnerships:', partnerships);
+      
+      return partnerships && partnerships.length > 0;
+    } catch (error) {
+      console.error('Error in checkPlayerDuos:', error);
+      return false;
+    }
+  };
+
+  // Test the function with the specific player ID
+  useEffect(() => {
+    const testPlayerDuos = async () => {
+      const hasDuos = await checkPlayerDuos('5ceca20e-30ad-4043-a02e-f17e539f2ad0');
+      console.log('Does player have active duos?', hasDuos);
+    };
+    
+    testPlayerDuos();
+  }, []);
+
   const verifyRegistrationEligibility = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
