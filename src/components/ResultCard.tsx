@@ -14,6 +14,7 @@ interface ResultCardProps {
   skillLevel?: string;
   genderCategory?: string;
   participants?: number;
+  format?: 'Individual' | 'Team';
 }
 
 export const ResultCard = ({
@@ -27,12 +28,18 @@ export const ResultCard = ({
   skillLevel,
   genderCategory,
   participants,
+  format = 'Individual',
 }: ResultCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
     if (id) {
-      navigate(`/tournament/${id}`);
+      // Redirect to duo-tournament for Team format leagues
+      if (format === 'Team') {
+        navigate(`/duo-tournament/${id}`);
+      } else {
+        navigate(`/tournament/${id}`);
+      }
     }
   };
 
