@@ -34,7 +34,7 @@ export const ResultCard = ({
 
   const handleClick = () => {
     if (id) {
-      // Redirect to duo-tournament for Team format leagues
+      // Redirect to the appropriate tournament details page based on format
       if (format === 'Team') {
         navigate(`/duo-tournament/${id}`);
       } else {
