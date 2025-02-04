@@ -11,12 +11,14 @@ import { useEffect, useState } from "react";
 import { LogIn, Trophy, Calendar, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const TournamentDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -38,7 +40,35 @@ const TournamentDetails = () => {
     };
   }, []);
 
-  const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
+  // First, check if this is a duo league
+  const { data: duoLeague, isLoading: isLoadingDuo } = useQuery({
+    queryKey: ['duo-league', id],
+    queryFn: async () => {
+      if (!id || !UUID_REGEX.test(id)) {
+        throw new Error('Invalid league ID format');
+      }
+
+      const { data, error } = await supabase
+        .from('duo_leagues')
+        .select(`
+          *,
+          creator:creator_id (
+            username,
+            full_name
+          )
+        `)
+        .eq('id', id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    retry: 1,
+    enabled: !!id && UUID_REGEX.test(id)
+  });
+
+  // If not a duo league, try regular league
+  const { data: league, isLoading: isLoadingLeague } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
       if (!id || !UUID_REGEX.test(id)) {
@@ -58,11 +88,10 @@ const TournamentDetails = () => {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) throw new Error('League not found');
       return data;
     },
     retry: 1,
-    enabled: !!id && UUID_REGEX.test(id)
+    enabled: !!id && UUID_REGEX.test(id) && !duoLeague
   });
 
   const { data: registeredPlayers } = useQuery({
@@ -107,7 +136,7 @@ const TournamentDetails = () => {
     );
   }
 
-  if (isLoadingLeague) {
+  if (isLoadingDuo || isLoadingLeague) {
     return (
       <div className="container mx-auto p-4 flex items-center justify-center min-h-[200px]">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -115,16 +144,14 @@ const TournamentDetails = () => {
     );
   }
 
-  if (leagueError) {
-    return (
-      <div className="container mx-auto p-4">
-        <Alert variant="destructive">
-          <AlertDescription>
-            Error loading league details. Please try again later.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  // If this is a duo league, redirect to the correct page
+  if (duoLeague) {
+    toast({
+      title: "Redirecting...",
+      description: "This is a duo tournament. Redirecting to the correct page.",
+    });
+    navigate(`/duo-tournament/${id}`, { replace: true });
+    return null;
   }
 
   if (!league) {
