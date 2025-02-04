@@ -19,6 +19,7 @@ const DuoTournamentDetails = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [isCheckingLeagueType, setIsCheckingLeagueType] = useState(true);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   // Check authentication status
   useEffect(() => {
@@ -52,8 +53,7 @@ const DuoTournamentDetails = () => {
           .maybeSingle();
 
         if (data) {
-          toast.info("Redirecting to regular tournament page");
-          navigate(`/tournament/${id}`, { replace: true });
+          setShouldRedirect(true);
         }
       } catch (error) {
         console.error('Error checking league type:', error);
@@ -63,7 +63,15 @@ const DuoTournamentDetails = () => {
     };
 
     checkLeagueType();
-  }, [id, navigate]);
+  }, [id]);
+
+  // Handle redirect effect separately
+  useEffect(() => {
+    if (shouldRedirect) {
+      toast.info("Redirecting to regular tournament page");
+      navigate(`/tournament/${id}`, { replace: true });
+    }
+  }, [shouldRedirect, id, navigate]);
 
   // Query for duo league data
   const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
