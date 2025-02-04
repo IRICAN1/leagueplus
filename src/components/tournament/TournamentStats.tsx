@@ -24,11 +24,17 @@ interface DuoLeagueParticipant {
   duo_partnership: DuoPartnership;
 }
 
-export const TournamentStats = () => {
-  const { id: leagueId } = useParams();
+interface TournamentStatsProps {
+  leagueId?: string;
+  isDuo?: boolean;
+}
+
+export const TournamentStats: React.FC<TournamentStatsProps> = ({ leagueId, isDuo }) => {
+  const { id: routeLeagueId } = useParams();
+  const finalLeagueId = leagueId || routeLeagueId;
 
   const { data: participants } = useQuery({
-    queryKey: ['duoLeagueParticipants', leagueId],
+    queryKey: ['duoLeagueParticipants', finalLeagueId],
     queryFn: async () => {
       const { data: participants, error } = await supabase
         .from('duo_league_participants')
@@ -50,13 +56,14 @@ export const TournamentStats = () => {
             )
           )
         `)
-        .eq('league_id', leagueId)
+        .eq('league_id', finalLeagueId)
         .order('joined_at', { ascending: true });
 
       if (error) throw error;
 
       return participants as DuoLeagueParticipant[];
     },
+    enabled: !!finalLeagueId
   });
 
   const totalParticipants = participants?.length || 0;
