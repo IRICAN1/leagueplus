@@ -35,8 +35,11 @@ export const ResultCard = ({
   const handleClick = () => {
     if (id) {
       // Ensure proper redirection based on format type
-      const path = format === 'Team' ? 'duo-tournament' : 'tournament';
-      navigate(`/${path}/${id}`);
+      if (format === 'Team') {
+        navigate(`/duo-tournament/${id}`);
+      } else {
+        navigate(`/tournament/${id}`);
+      }
     }
   };
 
