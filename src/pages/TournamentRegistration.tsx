@@ -25,7 +25,22 @@ const TournamentRegistration = () => {
   const [duos, setDuos] = useState<any[]>([]);
   const [isLoadingDuos, setIsLoadingDuos] = useState(true);
 
-  // Query for league data
+  // First check if this is a duo league
+  const { data: duoLeague, isLoading: isDuoLeagueLoading } = useQuery({
+    queryKey: ['duo-league', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('duo_leagues')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Query for league data only if it's not a duo league
   const { data: league, isLoading: isLeagueLoading } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
@@ -33,12 +48,24 @@ const TournamentRegistration = () => {
         .from('leagues')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
     },
+    enabled: !duoLeague, // Only run this query if it's not a duo league
   });
+
+  // If this is a duo league, redirect to the correct registration page
+  useEffect(() => {
+    if (duoLeague) {
+      toast({
+        title: "Redirecting...",
+        description: "This is a duo tournament. Redirecting to the correct registration page.",
+      });
+      navigate(`/duo-tournament/${id}/register`, { replace: true });
+    }
+  }, [duoLeague, id, navigate, toast]);
 
   // Fetch duos without any conditions
   useEffect(() => {
@@ -184,7 +211,7 @@ const TournamentRegistration = () => {
     }
   };
 
-  if (isLeagueLoading || isProfileLoading || hasExistingSchedule === null) {
+  if (isDuoLeagueLoading || isLeagueLoading || isProfileLoading || hasExistingSchedule === null) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
         <div className="container max-w-6xl mx-auto px-4 flex items-center justify-center">
@@ -195,13 +222,25 @@ const TournamentRegistration = () => {
     );
   }
 
-  if (!league) {
+  if (!league && !duoLeague) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
         <div className="container max-w-6xl mx-auto px-4">
           <Alert variant="destructive">
-            <AlertDescription>Tournament not found</AlertDescription>
+            <AlertDescription>Tournament not found. Please check the URL and try again.</AlertDescription>
           </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  // If we're being redirected to duo tournament, show loading
+  if (duoLeague) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 py-8">
+        <div className="container max-w-6xl mx-auto px-4 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+          <span className="ml-2">Redirecting to duo tournament registration...</span>
         </div>
       </div>
     );
