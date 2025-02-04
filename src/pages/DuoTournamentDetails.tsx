@@ -11,8 +11,7 @@ import { useEffect, useState } from "react";
 import { LogIn, Trophy, Calendar, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+import { toast } from "sonner";
 
 const DuoTournamentDetails = () => {
   const { id } = useParams();
@@ -20,6 +19,7 @@ const DuoTournamentDetails = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
 
+  // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -38,11 +38,12 @@ const DuoTournamentDetails = () => {
     };
   }, []);
 
+  // Query for duo league data
   const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
     queryKey: ['duo-league', id],
     queryFn: async () => {
-      if (!id || !UUID_REGEX.test(id)) {
-        throw new Error('Invalid league ID format');
+      if (!id) {
+        throw new Error('Invalid league ID');
       }
 
       const { data, error } = await supabase
@@ -69,9 +70,10 @@ const DuoTournamentDetails = () => {
       };
     },
     retry: 1,
-    enabled: !!id && UUID_REGEX.test(id)
+    enabled: !!id
   });
 
+  // Check if user is registered
   const { data: isUserRegistered } = useQuery({
     queryKey: ['isUserRegisteredDuo', id, userId],
     queryFn: async () => {
@@ -89,7 +91,27 @@ const DuoTournamentDetails = () => {
     enabled: !!userId && !!id
   });
 
-  if (!id || !UUID_REGEX.test(id)) {
+  // Handle regular league redirect
+  useEffect(() => {
+    const checkLeagueType = async () => {
+      if (!id) return;
+
+      const { data } = await supabase
+        .from('leagues')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (data) {
+        toast.info("Redirecting to regular tournament page");
+        navigate(`/tournament/${id}`, { replace: true });
+      }
+    };
+
+    checkLeagueType();
+  }, [id, navigate]);
+
+  if (!id) {
     return (
       <div className="container mx-auto p-4">
         <Alert variant="destructive">
