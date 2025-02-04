@@ -18,6 +18,7 @@ const DuoTournamentDetails = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isCheckingLeagueType, setIsCheckingLeagueType] = useState(true);
 
   // Check authentication status
   useEffect(() => {
@@ -37,6 +38,32 @@ const DuoTournamentDetails = () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Handle regular league redirect
+  useEffect(() => {
+    const checkLeagueType = async () => {
+      if (!id) return;
+
+      try {
+        const { data } = await supabase
+          .from('leagues')
+          .select('id')
+          .eq('id', id)
+          .maybeSingle();
+
+        if (data) {
+          toast.info("Redirecting to regular tournament page");
+          navigate(`/tournament/${id}`, { replace: true });
+        }
+      } catch (error) {
+        console.error('Error checking league type:', error);
+      } finally {
+        setIsCheckingLeagueType(false);
+      }
+    };
+
+    checkLeagueType();
+  }, [id, navigate]);
 
   // Query for duo league data
   const { data: league, isLoading: isLoadingLeague, error: leagueError } = useQuery({
@@ -70,7 +97,7 @@ const DuoTournamentDetails = () => {
       };
     },
     retry: 1,
-    enabled: !!id
+    enabled: !!id && !isCheckingLeagueType
   });
 
   // Check if user is registered
@@ -91,26 +118,6 @@ const DuoTournamentDetails = () => {
     enabled: !!userId && !!id
   });
 
-  // Handle regular league redirect
-  useEffect(() => {
-    const checkLeagueType = async () => {
-      if (!id) return;
-
-      const { data } = await supabase
-        .from('leagues')
-        .select('id')
-        .eq('id', id)
-        .maybeSingle();
-
-      if (data) {
-        toast.info("Redirecting to regular tournament page");
-        navigate(`/tournament/${id}`, { replace: true });
-      }
-    };
-
-    checkLeagueType();
-  }, [id, navigate]);
-
   if (!id) {
     return (
       <div className="container mx-auto p-4">
@@ -123,7 +130,7 @@ const DuoTournamentDetails = () => {
     );
   }
 
-  if (isLoadingLeague) {
+  if (isLoadingLeague || isCheckingLeagueType) {
     return (
       <div className="container mx-auto p-4 flex items-center justify-center min-h-[200px]">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
