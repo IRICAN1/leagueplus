@@ -39,9 +39,6 @@ export const RegistrationHandler = ({
         return false;
       }
 
-      // For testing purposes, log the results
-      console.log('Found partnerships:', partnerships);
-      
       return partnerships && partnerships.length > 0;
     } catch (error) {
       console.error('Error in checkPlayerDuos:', error);
@@ -49,21 +46,18 @@ export const RegistrationHandler = ({
     }
   };
 
-  // Test the function with the specific player ID
-  useEffect(() => {
-    const testPlayerDuos = async () => {
-      const hasDuos = await checkPlayerDuos('5ceca20e-30ad-4043-a02e-f17e539f2ad0');
-      console.log('Does player have active duos?', hasDuos);
-    };
-    
-    testPlayerDuos();
-  }, []);
-
   const verifyRegistrationEligibility = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("Please log in to register");
+        return false;
+      }
+
+      // Check if the user has any active duo partnerships
+      const hasDuos = await checkPlayerDuos(user.id);
+      if (!hasDuos) {
+        toast.error("You need to have an active duo partnership to register for this tournament");
         return false;
       }
 
@@ -160,11 +154,11 @@ export const RegistrationHandler = ({
 
         if (error) throw error;
 
-        // Transform the data to show the partner's information
+        // Transform the data to show both players' information
         const transformedPartnerships = partnerships?.map(partnership => ({
           ...partnership,
-          // Set partner based on which player the current user is
-          partner: user.id === partnership.player1_id ? partnership.player2 : partnership.player1
+          player1: partnership.player1,
+          player2: partnership.player2
         })) || [];
 
         setDuos(transformedPartnerships);
