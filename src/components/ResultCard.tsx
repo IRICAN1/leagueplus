@@ -34,12 +34,9 @@ export const ResultCard = ({
 
   const handleClick = () => {
     if (id) {
-      // Redirect to the appropriate tournament details page based on format
-      if (format === 'Team') {
-        navigate(`/duo-tournament/${id}`);
-      } else {
-        navigate(`/tournament/${id}`);
-      }
+      // Ensure proper redirection based on format type
+      const path = format === 'Team' ? 'duo-tournament' : 'tournament';
+      navigate(`/${path}/${id}`);
     }
   };
 
