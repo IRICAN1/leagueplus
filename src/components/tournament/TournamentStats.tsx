@@ -31,8 +31,7 @@ export const TournamentStats = ({ leagueId, isDuo }: TournamentStatsProps) => {
               )
             )
           `)
-          .eq('league_id', leagueId)
-          .order('created_at', { ascending: true });
+          .eq('league_id', leagueId);
 
         if (error) throw error;
 
