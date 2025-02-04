@@ -213,7 +213,7 @@ const DuoTournamentDetails = () => {
         </TabsList>
         
         <TabsContent value="rankings">
-          <TournamentStats leagueId={id} />
+          <TournamentStats leagueId={id} isDuo={true} />
         </TabsContent>
         
         <TabsContent value="matches">

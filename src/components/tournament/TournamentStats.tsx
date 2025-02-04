@@ -7,29 +7,58 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type PlayerStatWithProfile = Tables<"player_statistics", never> & {
-  profiles: Pick<Tables<"profiles", never>, "username">;
-};
-
 interface TournamentStatsProps {
   leagueId: string;
+  isDuo?: boolean;
 }
 
-export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
+export const TournamentStats = ({ leagueId, isDuo }: TournamentStatsProps) => {
   const { data: playerStats, isLoading } = useQuery({
-    queryKey: ['player-statistics', leagueId],
+    queryKey: ['player-statistics', leagueId, isDuo],
     queryFn: async () => {
+      if (isDuo) {
+        const { data, error } = await supabase
+          .from('duo_league_participants')
+          .select(`
+            *,
+            duo_partnership:duo_partnerships (
+              id,
+              player1:profiles!duo_partnerships_player1_id_fkey (username, avatar_url),
+              player2:profiles!duo_partnerships_player2_id_fkey (username, avatar_url),
+              duo_statistics (
+                wins,
+                losses
+              )
+            )
+          `)
+          .eq('league_id', leagueId)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        // Transform the data to match the expected format
+        return data.map((participant) => ({
+          duo_partnership_id: participant.duo_partnership.id,
+          player1: participant.duo_partnership.player1,
+          player2: participant.duo_partnership.player2,
+          wins: participant.duo_partnership.duo_statistics?.[0]?.wins || 0,
+          losses: participant.duo_partnership.duo_statistics?.[0]?.losses || 0,
+          rank: 0, // Will be calculated based on wins/losses
+          points: (participant.duo_partnership.duo_statistics?.[0]?.wins || 0) * 10
+        }));
+      }
+
       const { data, error } = await supabase
         .from('player_statistics')
         .select(`
           *,
-          profiles (username)
+          profiles (username, avatar_url)
         `)
         .eq('league_id', leagueId)
         .order('rank', { ascending: true });
 
       if (error) throw error;
-      return data as PlayerStatWithProfile[];
+      return data;
     },
     refetchInterval: 5000,
   });
@@ -111,6 +140,7 @@ export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
                 leagueId={leagueId} 
                 sortBy="points"
                 playerStats={playerStats}
+                isDuo={isDuo}
               />
             </div>
           </TabsContent>
@@ -121,7 +151,8 @@ export const TournamentStats = ({ leagueId }: TournamentStatsProps) => {
               <PlayerRankingsTable 
                 leagueId={leagueId}
                 sortBy="matches"
-                playerStats={playerStats?.sort((a, b) => b.matches_played - a.matches_played)}
+                playerStats={playerStats}
+                isDuo={isDuo}
               />
             </div>
           </TabsContent>

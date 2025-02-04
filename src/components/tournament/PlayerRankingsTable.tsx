@@ -15,9 +15,10 @@ interface PlayerRankingsTableProps {
   leagueId: string;
   sortBy: "points" | "matches";
   playerStats?: any[];
+  isDuo?: boolean;
 }
 
-export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats }: PlayerRankingsTableProps) => {
+export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: PlayerRankingsTableProps) => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const isMobile = useIsMobile();
@@ -33,25 +34,27 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats }: PlayerRan
   }, []);
 
   const { data: players } = useQuery({
-    queryKey: ['player-rankings', leagueId, sortBy, playerStats],
+    queryKey: ['player-rankings', leagueId, sortBy, playerStats, isDuo],
     queryFn: async () => {
-      if (playerStats) {
+      if (!playerStats) {
+        return [];
+      }
+
+      if (isDuo) {
         const mappedStats = playerStats.map((stat, index) => ({
-          id: stat.player_id,
-          name: stat.profiles?.username || 'Unknown Player',
-          avatar_url: stat.profiles?.avatar_url,
+          id: stat.duo_partnership_id,
+          name: `${stat.player1?.username || 'Unknown'} & ${stat.player2?.username || 'Unknown'}`,
+          avatar_url: stat.player1?.avatar_url,
           rank: sortBy === 'points' ? stat.rank : index + 1,
           wins: stat.wins || 0,
           losses: stat.losses || 0,
           points: stat.points || 0,
-          matches_played: (stat.wins || 0) + (stat.losses || 0), // Correctly calculate total matches
+          matches_played: (stat.wins || 0) + (stat.losses || 0),
           achievements: getPlayerAchievements(stat)
         }));
 
-        // Sort by matches played if that's the selected criteria
         if (sortBy === 'matches') {
           mappedStats.sort((a, b) => b.matches_played - a.matches_played);
-          // Update ranks after sorting
           mappedStats.forEach((player, index) => {
             player.rank = index + 1;
           });
@@ -59,7 +62,28 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats }: PlayerRan
 
         return mappedStats;
       }
-      return [];
+
+      // Regular player stats mapping
+      const mappedStats = playerStats.map((stat, index) => ({
+        id: stat.player_id,
+        name: stat.profiles?.username || 'Unknown Player',
+        avatar_url: stat.profiles?.avatar_url,
+        rank: sortBy === 'points' ? stat.rank : index + 1,
+        wins: stat.wins || 0,
+        losses: stat.losses || 0,
+        points: stat.points || 0,
+        matches_played: (stat.wins || 0) + (stat.losses || 0),
+        achievements: getPlayerAchievements(stat)
+      }));
+
+      if (sortBy === 'matches') {
+        mappedStats.sort((a, b) => b.matches_played - a.matches_played);
+        mappedStats.forEach((player, index) => {
+          player.rank = index + 1;
+        });
+      }
+
+      return mappedStats;
     },
     enabled: !!playerStats,
   });
