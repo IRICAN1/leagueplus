@@ -36,6 +36,8 @@ export const TournamentStats: React.FC<TournamentStatsProps> = ({ leagueId, isDu
   const { data: participants } = useQuery({
     queryKey: ['duoLeagueParticipants', finalLeagueId],
     queryFn: async () => {
+      if (!isDuo) return null;
+      
       const { data: participants, error } = await supabase
         .from('duo_league_participants')
         .select(`
@@ -60,10 +62,9 @@ export const TournamentStats: React.FC<TournamentStatsProps> = ({ leagueId, isDu
         .order('joined_at', { ascending: true });
 
       if (error) throw error;
-
       return participants as DuoLeagueParticipant[];
     },
-    enabled: !!finalLeagueId
+    enabled: isDuo && !!finalLeagueId
   });
 
   const totalParticipants = participants?.length || 0;
@@ -83,7 +84,7 @@ export const TournamentStats: React.FC<TournamentStatsProps> = ({ leagueId, isDu
 
   const stats = [
     {
-      label: 'Total Duos',
+      label: isDuo ? 'Total Duos' : 'Total Players',
       value: totalParticipants,
     },
     {
@@ -95,7 +96,7 @@ export const TournamentStats: React.FC<TournamentStatsProps> = ({ leagueId, isDu
       value: totalWins,
     },
     {
-      label: 'Avg Matches per Duo',
+      label: isDuo ? 'Avg Matches per Duo' : 'Avg Matches per Player',
       value: averageMatchesPerDuo,
     },
   ];
