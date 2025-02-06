@@ -31,7 +31,7 @@ export const DuoTournamentStatus = ({ id, isLoading, error }: DuoTournamentStatu
     return (
       <div className="container mx-auto p-4">
         <Alert variant="destructive">
-          <AlertDescription>Error loading league details.</AlertDescription>
+          <AlertDescription>Error loading league details</AlertDescription>
         </Alert>
       </div>
     );
@@ -39,3 +39,4 @@ export const DuoTournamentStatus = ({ id, isLoading, error }: DuoTournamentStatu
 
   return null;
 };
+
