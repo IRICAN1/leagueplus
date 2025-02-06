@@ -1,3 +1,4 @@
+
 import { LucideIcon } from "lucide-react";
 
 export interface Achievement {
@@ -15,4 +16,5 @@ export interface Player {
   matches_played: number;
   achievements?: Achievement[];
   avatar_url?: string;
+  avatar_url2?: string;
 }

@@ -7,9 +7,8 @@ interface PlayerProfileProps {
 }
 
 export const PlayerProfile = ({ player }: PlayerProfileProps) => {
-  // Split the name if it contains & to handle duo partnerships
-  const names = player.name.split(' & ');
-  const isDuo = names.length === 2;
+  const [player1Name, player2Name] = player.name.split(' & ');
+  const isDuo = !!player2Name;
 
   return (
     <div className="flex items-center space-x-3">
@@ -20,17 +19,17 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
             className="object-cover"
           />
           <AvatarFallback className="bg-gradient-to-br from-blue-100 to-purple-100 text-blue-700 font-medium">
-            {names[0]?.[0]?.toUpperCase() || "?"}
+            {player1Name?.[0]?.toUpperCase() || "?"}
           </AvatarFallback>
         </Avatar>
         {isDuo && (
           <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-purple-100 group-hover:ring-purple-200 transition-all duration-300">
             <AvatarImage 
-              src={player.avatar_url} 
+              src={player.avatar_url2} 
               className="object-cover"
             />
             <AvatarFallback className="bg-gradient-to-br from-purple-100 to-blue-100 text-purple-700 font-medium">
-              {names[1]?.[0]?.toUpperCase() || "?"}
+              {player2Name?.[0]?.toUpperCase() || "?"}
             </AvatarFallback>
           </Avatar>
         )}
@@ -39,9 +38,9 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
         <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
           {isDuo ? (
             <span className="flex flex-col">
-              <span>{names[0]}</span>
+              <span>{player1Name}</span>
               <span className="text-sm text-gray-500">&</span>
-              <span>{names[1]}</span>
+              <span>{player2Name}</span>
             </span>
           ) : (
             player.name
