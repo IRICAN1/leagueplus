@@ -67,7 +67,7 @@ const DuoTournamentDetails = () => {
     retry: 1
   });
 
-  // Query for duo rankings
+  // Query for duo rankings with extended profile information
   const { data: duoRankings } = useQuery({
     queryKey: ['duo-rankings', id],
     queryFn: async () => {
@@ -81,12 +81,20 @@ const DuoTournamentDetails = () => {
             player1:profiles!duo_partnerships_player1_id_fkey (
               id,
               username,
-              avatar_url
+              full_name,
+              avatar_url,
+              primary_location,
+              skill_level,
+              gender
             ),
             player2:profiles!duo_partnerships_player2_id_fkey (
               id,
               username,
-              avatar_url
+              full_name,
+              avatar_url,
+              primary_location,
+              skill_level,
+              gender
             ),
             duo_statistics (
               wins,
@@ -169,7 +177,7 @@ const DuoTournamentDetails = () => {
   // Convert duo rankings data to the format expected by PlayerRankingsTable
   const processedRankings = duoRankings?.map((participant, index) => ({
     id: participant.duo_partnership.id,
-    name: `${participant.duo_partnership.player1?.username || 'Unknown'} & ${participant.duo_partnership.player2?.username || 'Unknown'}`,
+    name: `${participant.duo_partnership.player1?.full_name || participant.duo_partnership.player1?.username || 'Unknown'} & ${participant.duo_partnership.player2?.full_name || participant.duo_partnership.player2?.username || 'Unknown'}`,
     avatar_url: participant.duo_partnership.player1?.avatar_url,
     avatar_url2: participant.duo_partnership.player2?.avatar_url,
     rank: index + 1,
@@ -204,4 +212,3 @@ const DuoTournamentDetails = () => {
 };
 
 export default DuoTournamentDetails;
-
