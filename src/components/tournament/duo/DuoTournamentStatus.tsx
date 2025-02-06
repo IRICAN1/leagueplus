@@ -2,7 +2,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 interface DuoTournamentStatusProps {
   id?: string;
@@ -12,16 +12,20 @@ interface DuoTournamentStatusProps {
 
 export const DuoTournamentStatus = ({ id, isLoading, error }: DuoTournamentStatusProps) => {
   const { toast } = useToast();
+  
+  const showErrorToast = useCallback(() => {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to load league details"
+    });
+  }, [toast]);
 
   useEffect(() => {
     if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load league details"
-      });
+      showErrorToast();
     }
-  }, [error, toast]);
+  }, [error, showErrorToast]);
 
   if (!id) {
     return (
@@ -53,3 +57,4 @@ export const DuoTournamentStatus = ({ id, isLoading, error }: DuoTournamentStatu
 
   return null;
 };
+
