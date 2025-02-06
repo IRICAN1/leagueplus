@@ -2,11 +2,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export const useDuoLeague = (id: string | undefined) => {
   const { toast } = useToast();
-
-  return useQuery({
+  
+  const query = useQuery({
     queryKey: ['duo-league', id],
     queryFn: async () => {
       if (!id) throw new Error('Invalid league ID');
@@ -34,16 +35,18 @@ export const useDuoLeague = (id: string | undefined) => {
         requires_duo: true
       };
     },
-    retry: 1,
-    meta: {
-      onError: (error: Error) => {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load league details"
-        });
-      }
-    }
+    retry: 1
   });
-};
 
+  useEffect(() => {
+    if (query.error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load league details"
+      });
+    }
+  }, [query.error, toast]);
+
+  return query;
+};
