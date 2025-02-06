@@ -20,13 +20,17 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
             className="object-cover"
           />
           <AvatarFallback className="bg-gradient-to-br from-blue-100 to-purple-100 text-blue-700 font-medium">
-            {names[0][0]?.toUpperCase()}
+            {names[0]?.[0]?.toUpperCase() || "?"}
           </AvatarFallback>
         </Avatar>
         {isDuo && (
           <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-purple-100 group-hover:ring-purple-200 transition-all duration-300">
+            <AvatarImage 
+              src={player.avatar_url} 
+              className="object-cover"
+            />
             <AvatarFallback className="bg-gradient-to-br from-purple-100 to-blue-100 text-purple-700 font-medium">
-              {names[1][0]?.toUpperCase()}
+              {names[1]?.[0]?.toUpperCase() || "?"}
             </AvatarFallback>
           </Avatar>
         )}
@@ -42,9 +46,6 @@ export const PlayerProfile = ({ player }: PlayerProfileProps) => {
           ) : (
             player.name
           )}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {player.points} total points
         </span>
       </div>
     </div>
