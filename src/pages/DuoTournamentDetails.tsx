@@ -1,16 +1,14 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TournamentStats } from "@/components/tournament/TournamentStats";
-import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
-import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
-import { LogIn, Trophy, Calendar, History } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { PlayerRankingsTable } from "@/components/tournament/PlayerRankingsTable";
+import { DuoTournamentAlert } from "@/components/tournament/duo/DuoTournamentAlert";
+import { DuoTournamentHeader } from "@/components/tournament/duo/DuoTournamentHeader";
+import { DuoTournamentTabs } from "@/components/tournament/duo/DuoTournamentTabs";
 
 const DuoTournamentDetails = () => {
   const { id } = useParams();
@@ -177,88 +175,31 @@ const DuoTournamentDetails = () => {
     points: (participant.duo_partnership.duo_statistics[0]?.wins || 0) * 10,
     matches_played: (participant.duo_partnership.duo_statistics[0]?.wins || 0) + 
                    (participant.duo_partnership.duo_statistics[0]?.losses || 0)
-  }));
+  })) || [];
 
   return (
     <div className="container mx-auto p-4 space-y-6 sm:mt-0 mt-20">
-      {!isAuthenticated && (
-        <Alert>
-          <AlertDescription className="flex items-center justify-between">
-            <span>Sign in to register for this league and access all features.</span>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/login', { state: { returnTo: `/duo-tournament/${id}` } })}
-              className="ml-4"
-            >
-              <LogIn className="mr-2 h-4 w-4" />
-              Sign In
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
+      {!isAuthenticated && <DuoTournamentAlert tournamentId={id} />}
       
       <div className="flex flex-col gap-4">
-        <div className="w-full">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">
-            {league.name}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Created by {league.creator?.full_name || league.creator?.username || 'Unknown'}
-          </p>
-        </div>
+        <DuoTournamentHeader
+          name={league.name}
+          creatorName={league.creator?.full_name || league.creator?.username}
+          isAuthenticated={isAuthenticated}
+          isUserRegistered={isUserRegistered}
+          onRegisterClick={handleRegisterClick}
+        />
         
         <TournamentStats leagueId={id} isDuo={true} />
 
-        <div className="w-full flex flex-wrap gap-2">
-          {isAuthenticated && !isUserRegistered && (
-            <Button 
-              className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
-              onClick={handleRegisterClick}
-            >
-              Register Now
-            </Button>
-          )}
-        </div>
-
-        <Tabs defaultValue="rankings" className="space-y-6">
-          <TabsList className="w-full justify-start bg-background border rounded-lg p-1">
-            <TabsTrigger value="rankings" className="flex-1 sm:flex-none">
-              <Trophy className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Rankings</span>
-              <span className="sm:hidden">Rank</span>
-            </TabsTrigger>
-            <TabsTrigger value="matches" className="flex-1 sm:flex-none">
-              <Calendar className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Upcoming Matches</span>
-              <span className="sm:hidden">Matches</span>
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex-1 sm:flex-none">
-              <History className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Match History</span>
-              <span className="sm:hidden">History</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="rankings">
-            <PlayerRankingsTable
-              leagueId={id}
-              sortBy="points"
-              playerStats={processedRankings}
-              isDuo={true}
-            />
-          </TabsContent>
-
-          <TabsContent value="matches">
-            <UpcomingMatches leagueId={id} />
-          </TabsContent>
-
-          <TabsContent value="history">
-            <MatchHistoryList leagueId={id} />
-          </TabsContent>
-        </Tabs>
+        <DuoTournamentTabs 
+          leagueId={id}
+          processedRankings={processedRankings}
+        />
       </div>
     </div>
   );
 };
 
 export default DuoTournamentDetails;
+
