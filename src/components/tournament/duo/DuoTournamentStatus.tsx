@@ -1,6 +1,8 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 interface DuoTournamentStatusProps {
   id?: string;
@@ -9,6 +11,18 @@ interface DuoTournamentStatusProps {
 }
 
 export const DuoTournamentStatus = ({ id, isLoading, error }: DuoTournamentStatusProps) => {
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load league details"
+      });
+    }
+  }, [error, toast]);
+
   if (!id) {
     return (
       <div className="container mx-auto p-4">
@@ -39,4 +53,3 @@ export const DuoTournamentStatus = ({ id, isLoading, error }: DuoTournamentStatu
 
   return null;
 };
-
