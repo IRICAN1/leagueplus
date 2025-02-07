@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,9 +25,21 @@ const DuoSearch = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data: duos, isLoading: duosLoading } = useQuery({
-    queryKey: ['active-duos'],
+  // Get the current user's ID first
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
     queryFn: async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return user;
+    },
+  });
+
+  const { data: duos, isLoading: duosLoading } = useQuery({
+    queryKey: ['active-duos', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return [];
+
       const { data, error } = await supabase
         .from('duo_partnerships')
         .select(`
@@ -35,11 +48,13 @@ const DuoSearch = () => {
           player2:player2_id (id, username, avatar_url, full_name),
           duo_statistics (*)
         `)
+        .or(`player1_id.eq.${currentUser.id},player2_id.eq.${currentUser.id}`)
         .eq('active', true);
 
       if (error) throw error;
       return data || [];
     },
+    enabled: !!currentUser?.id,
   });
 
   useEffect(() => {
@@ -92,8 +107,10 @@ const DuoSearch = () => {
   });
 
   const { data: pendingInvites, isLoading: invitesLoading } = useQuery({
-    queryKey: ['pending-invites'],
+    queryKey: ['pending-invites', currentUser?.id],
     queryFn: async () => {
+      if (!currentUser?.id) return [];
+
       const { data, error } = await supabase
         .from('duo_invites')
         .select(`
@@ -101,11 +118,13 @@ const DuoSearch = () => {
           sender:sender_id (id, username, avatar_url, full_name),
           receiver:receiver_id (id, username, avatar_url, full_name)
         `)
+        .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
         .eq('status', 'pending');
 
       if (error) throw error;
       return data || [];
     },
+    enabled: !!currentUser?.id,
   });
 
   const handleFilterChange = (newFilters: DuoSearchFilters) => {
