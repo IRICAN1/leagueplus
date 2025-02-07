@@ -1,3 +1,4 @@
+
 import { Table, TableBody } from "@/components/ui/table";
 import { UserRound } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,17 +42,38 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
       }
 
       if (isDuo) {
-        const mappedStats = playerStats.map((stat, index) => ({
-          id: stat.duo_partnership_id,
-          name: `${stat.player1?.username || 'Unknown'} & ${stat.player2?.username || 'Unknown'}`,
-          avatar_url: stat.player1?.avatar_url,
-          rank: sortBy === 'points' ? stat.rank : index + 1,
-          wins: stat.wins || 0,
-          losses: stat.losses || 0,
-          points: stat.points || 0,
-          matches_played: (stat.wins || 0) + (stat.losses || 0),
-          achievements: getPlayerAchievements(stat)
-        }));
+        // For duo partnerships, fetch detailed information about both players
+        const { data: duoPartnerships, error } = await supabase
+          .from('duo_partnerships')
+          .select(`
+            id,
+            player1:player1_id (id, username, avatar_url),
+            player2:player2_id (id, username, avatar_url)
+          `)
+          .in('id', playerStats.map(stat => stat.duo_partnership_id));
+
+        if (error) {
+          console.error('Error fetching duo partnerships:', error);
+          return [];
+        }
+
+        const mappedStats = playerStats.map((stat, index) => {
+          const partnership = duoPartnerships?.find(dp => dp.id === stat.duo_partnership_id);
+          return {
+            id: stat.duo_partnership_id,
+            name: partnership ? 
+              `${partnership.player1?.username || 'Unknown'} & ${partnership.player2?.username || 'Unknown'}` : 
+              'Unknown Partnership',
+            avatar_url: partnership?.player1?.avatar_url,
+            avatar_url2: partnership?.player2?.avatar_url,
+            rank: sortBy === 'points' ? stat.rank : index + 1,
+            wins: stat.wins || 0,
+            losses: stat.losses || 0,
+            points: stat.points || 0,
+            matches_played: (stat.wins || 0) + (stat.losses || 0),
+            achievements: getPlayerAchievements(stat)
+          };
+        });
 
         if (sortBy === 'matches') {
           mappedStats.sort((a, b) => b.matches_played - a.matches_played);
@@ -64,16 +86,25 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
       }
 
       // Regular player stats mapping
-      const mappedStats = playerStats.map((stat, index) => ({
-        id: stat.player_id,
-        name: stat.profiles?.username || 'Unknown Player',
-        avatar_url: stat.profiles?.avatar_url,
-        rank: sortBy === 'points' ? stat.rank : index + 1,
-        wins: stat.wins || 0,
-        losses: stat.losses || 0,
-        points: stat.points || 0,
-        matches_played: (stat.wins || 0) + (stat.losses || 0),
-        achievements: getPlayerAchievements(stat)
+      const mappedStats = await Promise.all(playerStats.map(async (stat, index) => {
+        // Fetch the profile information for each player
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', stat.player_id)
+          .single();
+
+        return {
+          id: stat.player_id,
+          name: profile?.username || 'Unknown Player',
+          avatar_url: profile?.avatar_url,
+          rank: sortBy === 'points' ? stat.rank : index + 1,
+          wins: stat.wins || 0,
+          losses: stat.losses || 0,
+          points: stat.points || 0,
+          matches_played: (stat.wins || 0) + (stat.losses || 0),
+          achievements: getPlayerAchievements(stat)
+        };
       }));
 
       if (sortBy === 'matches') {
