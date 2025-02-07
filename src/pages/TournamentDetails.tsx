@@ -1,9 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
-import { TournamentStats } from "@/components/tournament/TournamentStats";
 import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
 import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -42,7 +40,6 @@ const TournamentDetails = () => {
     };
   }, []);
 
-  // First, check if this is a duo league
   const { data: duoLeague, isLoading: isLoadingDuo } = useQuery({
     queryKey: ['duo-league', id],
     queryFn: async () => {
@@ -69,7 +66,6 @@ const TournamentDetails = () => {
     enabled: !!id && UUID_REGEX.test(id)
   });
 
-  // Get the player statistics for rankings
   const { data: playerStats } = useQuery({
     queryKey: ['player-statistics', id],
     queryFn: async () => {
@@ -94,7 +90,6 @@ const TournamentDetails = () => {
     enabled: !!id && !duoLeague
   });
 
-  // If not a duo league, try regular league
   const { data: league, isLoading: isLoadingLeague } = useQuery({
     queryKey: ['league', id],
     queryFn: async () => {
@@ -171,7 +166,6 @@ const TournamentDetails = () => {
     );
   }
 
-  // If this is a duo league, redirect to the correct page
   if (duoLeague) {
     navigate(`/duo-tournament/${id}`, { replace: true });
     return null;
@@ -233,7 +227,6 @@ const TournamentDetails = () => {
         
         <TabsContent value="rankings">
           <div className="space-y-6">
-            <TournamentStats leagueId={id} />
             <PlayerRankingsTable
               leagueId={id}
               sortBy="points"
