@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import { LogIn, Trophy, Calendar, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PlayerRankingsTable } from "@/components/tournament/PlayerRankingsTable";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -65,6 +67,31 @@ const TournamentDetails = () => {
     },
     retry: 1,
     enabled: !!id && UUID_REGEX.test(id)
+  });
+
+  // Get the player statistics for rankings
+  const { data: playerStats } = useQuery({
+    queryKey: ['player-statistics', id],
+    queryFn: async () => {
+      if (!id) return null;
+      
+      const { data, error } = await supabase
+        .from('player_statistics')
+        .select(`
+          *,
+          profiles:player_id (
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('league_id', id)
+        .order('rank', { ascending: true });
+        
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id && !duoLeague
   });
 
   // If not a duo league, try regular league
@@ -146,10 +173,6 @@ const TournamentDetails = () => {
 
   // If this is a duo league, redirect to the correct page
   if (duoLeague) {
-    toast({
-      title: "Redirecting...",
-      description: "This is a duo tournament. Redirecting to the correct page.",
-    });
     navigate(`/duo-tournament/${id}`, { replace: true });
     return null;
   }
@@ -209,7 +232,14 @@ const TournamentDetails = () => {
         </TabsList>
         
         <TabsContent value="rankings">
-          <TournamentStats leagueId={id} />
+          <div className="space-y-6">
+            <TournamentStats leagueId={id} />
+            <PlayerRankingsTable
+              leagueId={id}
+              sortBy="points"
+              playerStats={playerStats}
+            />
+          </div>
         </TabsContent>
         
         <TabsContent value="matches">
