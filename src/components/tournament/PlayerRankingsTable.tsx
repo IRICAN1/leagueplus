@@ -43,27 +43,25 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
       }
 
       if (isDuo) {
-        // Filter out any undefined duo_partnership_ids
         const validDuoPartnershipIds = playerStats
-          .filter(stat => stat.duo_partnership_id)
-          .map(stat => stat.duo_partnership_id);
+          .filter(stat => stat.id)
+          .map(stat => stat.id);
 
         if (validDuoPartnershipIds.length === 0) {
           console.log("No valid duo partnership IDs found");
           return [];
         }
 
-        // For duo partnerships, fetch detailed information about both players
-        const { data: duoPartnerships } = await supabase
+        const { data: duoPartnerships, error } = await supabase
           .from('duo_partnerships')
           .select(`
             id,
-            player1:profiles!duo_partnerships_player1_id_fkey(
+            player1:profiles!duo_partnerships_player1_id_fkey (
               id,
               username,
               avatar_url
             ),
-            player2:profiles!duo_partnerships_player2_id_fkey(
+            player2:profiles!duo_partnerships_player2_id_fkey (
               id,
               username,
               avatar_url
@@ -71,17 +69,22 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
           `)
           .in('id', validDuoPartnershipIds);
 
+        if (error) {
+          console.error("Error fetching duo partnerships:", error);
+          return [];
+        }
+
         if (!duoPartnerships) {
           console.log("No duo partnerships found");
           return [];
         }
 
         const mappedStats = playerStats
-          .filter(stat => stat.duo_partnership_id)
+          .filter(stat => stat.id)
           .map((stat, index) => {
-            const partnership = duoPartnerships.find(dp => dp.id === stat.duo_partnership_id);
+            const partnership = duoPartnerships.find(dp => dp.id === stat.id);
             return {
-              id: stat.duo_partnership_id,
+              id: stat.id,
               name: partnership ? 
                 `${partnership.player1?.username || 'Unknown'} & ${partnership.player2?.username || 'Unknown'}` : 
                 'Unknown Partnership',
