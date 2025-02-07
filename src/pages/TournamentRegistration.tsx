@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
@@ -55,13 +56,6 @@ const TournamentRegistration = () => {
     },
     enabled: !duoLeague, // Only run this query if it's not a duo league
   });
-
-  // If this is a duo league, redirect to the correct registration page
-  useEffect(() => {
-    if (duoLeague) {
-      navigate(`/duo-tournament/${id}/register`, { replace: true });
-    }
-  }, [duoLeague, id, navigate]);
 
   // Fetch duos without any conditions
   useEffect(() => {
@@ -354,3 +348,4 @@ const TournamentRegistration = () => {
 };
 
 export default TournamentRegistration;
+
