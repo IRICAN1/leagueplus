@@ -1,3 +1,4 @@
+
 import Profile from "@/pages/Profile";
 import TournamentRegistration from "@/pages/TournamentRegistration";
 import DuoTournamentRegistration from "@/pages/DuoTournamentRegistration";
