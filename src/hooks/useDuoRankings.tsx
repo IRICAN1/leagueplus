@@ -9,25 +9,28 @@ export const useDuoRankings = (id: string | undefined) => {
     queryFn: async () => {
       if (!id) return null;
 
-      console.log("Fetching duo rankings for league:", id);
-
-      const { data: participants, error } = await supabase
+      const { data, error } = await supabase
         .from('duo_league_participants')
         .select(`
-          id,
           duo_partnership:duo_partnerships!inner (
             id,
             player1:profiles!duo_partnerships_player1_id_fkey (
               id,
               username,
               full_name,
-              avatar_url
+              avatar_url,
+              primary_location,
+              skill_level,
+              gender
             ),
             player2:profiles!duo_partnerships_player2_id_fkey (
               id,
               username,
               full_name,
-              avatar_url
+              avatar_url,
+              primary_location,
+              skill_level,
+              gender
             ),
             duo_statistics (
               wins,
@@ -37,33 +40,24 @@ export const useDuoRankings = (id: string | undefined) => {
         `)
         .eq('league_id', id);
 
-      if (error) {
-        console.error('Error fetching duo rankings:', error);
-        throw error;
-      }
-
-      console.log("Fetched participants:", participants);
-      return participants;
+      if (error) throw error;
+      return data;
     },
     enabled: !!id
   });
 
-  const processedRankings: Player[] = duoRankings?.map((participant, index) => {
-    const partnership = participant.duo_partnership;
-    const stats = partnership.duo_statistics[0] || { wins: 0, losses: 0 };
-    
-    return {
-      id: partnership.id,
-      name: `${partnership.player1?.username || 'Unknown'} & ${partnership.player2?.username || 'Unknown'}`,
-      avatar_url: partnership.player1?.avatar_url,
-      avatar_url2: partnership.player2?.avatar_url,
-      rank: index + 1,
-      wins: stats.wins || 0,
-      losses: stats.losses || 0,
-      matches_played: (stats.wins || 0) + (stats.losses || 0),
-      points: 0  // We'll calculate this based on wins/losses if needed
-    };
-  }) || [];
+  const processedRankings: Player[] = duoRankings?.map((participant, index) => ({
+    id: participant.duo_partnership.id,
+    name: `${participant.duo_partnership.player1?.full_name || participant.duo_partnership.player1?.username || 'Unknown'} & ${participant.duo_partnership.player2?.full_name || participant.duo_partnership.player2?.username || 'Unknown'}`,
+    avatar_url: participant.duo_partnership.player1?.avatar_url,
+    avatar_url2: participant.duo_partnership.player2?.avatar_url,
+    rank: index + 1,
+    wins: participant.duo_partnership.duo_statistics[0]?.wins || 0,
+    losses: participant.duo_partnership.duo_statistics[0]?.losses || 0,
+    matches_played: (participant.duo_partnership.duo_statistics[0]?.wins || 0) + 
+                   (participant.duo_partnership.duo_statistics[0]?.losses || 0),
+    points: 0
+  })) || [];
 
   return { processedRankings };
 };

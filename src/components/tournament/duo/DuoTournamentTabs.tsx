@@ -4,11 +4,10 @@ import { Trophy, Calendar, History } from "lucide-react";
 import { PlayerRankingsTable } from "@/components/tournament/PlayerRankingsTable";
 import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
 import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
-import { Player } from "@/components/tournament/types";
 
 interface DuoTournamentTabsProps {
   leagueId: string;
-  processedRankings: Player[];
+  processedRankings: any[];
 }
 
 export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournamentTabsProps) => {
@@ -51,3 +50,4 @@ export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournament
     </Tabs>
   );
 };
+
