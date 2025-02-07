@@ -698,6 +698,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_duo_rankings: {
+        Args: {
+          league_id_param: string
+        }
+        Returns: {
+          partnership_id: string
+          player1_id: string
+          player1_username: string
+          player1_full_name: string
+          player1_avatar_url: string
+          player1_primary_location: string
+          player1_skill_level: number
+          player1_gender: string
+          player2_id: string
+          player2_username: string
+          player2_full_name: string
+          player2_avatar_url: string
+          player2_primary_location: string
+          player2_skill_level: number
+          player2_gender: string
+          wins: number
+          losses: number
+        }[]
+      }
       recalculate_all_player_statistics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
