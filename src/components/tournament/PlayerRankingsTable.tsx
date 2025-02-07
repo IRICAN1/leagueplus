@@ -43,6 +43,16 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
       }
 
       if (isDuo) {
+        // Filter out any undefined duo_partnership_ids
+        const validDuoPartnershipIds = playerStats
+          .filter(stat => stat.duo_partnership_id)
+          .map(stat => stat.duo_partnership_id);
+
+        if (validDuoPartnershipIds.length === 0) {
+          console.log("No valid duo partnership IDs found");
+          return [];
+        }
+
         // For duo partnerships, fetch detailed information about both players
         const { data: duoPartnerships } = await supabase
           .from('duo_partnerships')
@@ -59,30 +69,32 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
               avatar_url
             )
           `)
-          .in('id', playerStats.map(stat => stat.duo_partnership_id));
+          .in('id', validDuoPartnershipIds);
 
         if (!duoPartnerships) {
           console.log("No duo partnerships found");
           return [];
         }
 
-        const mappedStats = playerStats.map((stat, index) => {
-          const partnership = duoPartnerships.find(dp => dp.id === stat.duo_partnership_id);
-          return {
-            id: stat.duo_partnership_id,
-            name: partnership ? 
-              `${partnership.player1?.username || 'Unknown'} & ${partnership.player2?.username || 'Unknown'}` : 
-              'Unknown Partnership',
-            avatar_url: partnership?.player1?.avatar_url,
-            avatar_url2: partnership?.player2?.avatar_url,
-            rank: sortBy === 'points' ? stat.rank : index + 1,
-            wins: stat.wins || 0,
-            losses: stat.losses || 0,
-            points: stat.points || 0,
-            matches_played: (stat.wins || 0) + (stat.losses || 0),
-            achievements: getPlayerAchievements(stat)
-          };
-        });
+        const mappedStats = playerStats
+          .filter(stat => stat.duo_partnership_id)
+          .map((stat, index) => {
+            const partnership = duoPartnerships.find(dp => dp.id === stat.duo_partnership_id);
+            return {
+              id: stat.duo_partnership_id,
+              name: partnership ? 
+                `${partnership.player1?.username || 'Unknown'} & ${partnership.player2?.username || 'Unknown'}` : 
+                'Unknown Partnership',
+              avatar_url: partnership?.player1?.avatar_url,
+              avatar_url2: partnership?.player2?.avatar_url,
+              rank: sortBy === 'points' ? stat.rank : index + 1,
+              wins: stat.wins || 0,
+              losses: stat.losses || 0,
+              points: stat.points || 0,
+              matches_played: (stat.wins || 0) + (stat.losses || 0),
+              achievements: getPlayerAchievements(stat)
+            };
+          });
 
         if (sortBy === 'matches') {
           mappedStats.sort((a, b) => b.matches_played - a.matches_played);
