@@ -59,13 +59,9 @@ const TournamentRegistration = () => {
   // If this is a duo league, redirect to the correct registration page
   useEffect(() => {
     if (duoLeague) {
-      toast({
-        title: "Redirecting...",
-        description: "This is a duo tournament. Redirecting to the correct registration page.",
-      });
       navigate(`/duo-tournament/${id}/register`, { replace: true });
     }
-  }, [duoLeague, id, navigate, toast]);
+  }, [duoLeague, id, navigate]);
 
   // Fetch duos without any conditions
   useEffect(() => {
