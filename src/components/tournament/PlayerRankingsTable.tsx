@@ -37,7 +37,8 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
   const { data: players } = useQuery({
     queryKey: ['player-rankings', leagueId, sortBy, playerStats, isDuo],
     queryFn: async () => {
-      if (!playerStats) {
+      if (!playerStats || playerStats.length === 0) {
+        console.log("No player stats available");
         return [];
       }
 
@@ -61,6 +62,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
           .in('id', playerStats.map(stat => stat.duo_partnership_id));
 
         if (!duoPartnerships) {
+          console.log("No duo partnerships found");
           return [];
         }
 
@@ -89,6 +91,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
           });
         }
 
+        console.log("Mapped duo stats:", mappedStats);
         return mappedStats;
       }
 
@@ -121,6 +124,7 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
         });
       }
 
+      console.log("Mapped regular stats:", mappedStats);
       return mappedStats;
     },
     enabled: !!playerStats,
