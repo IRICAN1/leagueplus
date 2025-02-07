@@ -1,9 +1,10 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Calendar, History } from "lucide-react";
+import { Trophy, Calendar, History, Users } from "lucide-react";
 import { PlayerRankingsTable } from "@/components/tournament/PlayerRankingsTable";
 import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
 import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
+import { TournamentPlayersList } from "@/components/tournament/TournamentPlayersList";
 
 interface DuoTournamentTabsProps {
   leagueId: string;
@@ -29,6 +30,11 @@ export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournament
           <span className="hidden sm:inline">Match History</span>
           <span className="sm:hidden">History</span>
         </TabsTrigger>
+        <TabsTrigger value="players" className="flex-1 sm:flex-none">
+          <Users className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Players</span>
+          <span className="sm:hidden">Players</span>
+        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="rankings">
@@ -47,7 +53,10 @@ export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournament
       <TabsContent value="history">
         <MatchHistoryList leagueId={leagueId} />
       </TabsContent>
+
+      <TabsContent value="players">
+        <TournamentPlayersList leagueId={leagueId} isDuo={true} />
+      </TabsContent>
     </Tabs>
   );
 };
-
