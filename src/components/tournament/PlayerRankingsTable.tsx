@@ -43,22 +43,29 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
 
       if (isDuo) {
         // For duo partnerships, fetch detailed information about both players
-        const { data: duoPartnerships, error } = await supabase
+        const { data: duoPartnerships } = await supabase
           .from('duo_partnerships')
           .select(`
             id,
-            player1:player1_id (id, username, avatar_url),
-            player2:player2_id (id, username, avatar_url)
+            player1:profiles!duo_partnerships_player1_id_fkey(
+              id,
+              username,
+              avatar_url
+            ),
+            player2:profiles!duo_partnerships_player2_id_fkey(
+              id,
+              username,
+              avatar_url
+            )
           `)
           .in('id', playerStats.map(stat => stat.duo_partnership_id));
 
-        if (error) {
-          console.error('Error fetching duo partnerships:', error);
+        if (!duoPartnerships) {
           return [];
         }
 
         const mappedStats = playerStats.map((stat, index) => {
-          const partnership = duoPartnerships?.find(dp => dp.id === stat.duo_partnership_id);
+          const partnership = duoPartnerships.find(dp => dp.id === stat.duo_partnership_id);
           return {
             id: stat.duo_partnership_id,
             name: partnership ? 
