@@ -181,6 +181,7 @@ export type Database = {
       }
       duo_match_challenges: {
         Row: {
+          approver_id: string | null
           challenged_partnership_id: string
           challenger_partnership_id: string
           created_at: string
@@ -192,12 +193,14 @@ export type Database = {
           proposed_time: string
           result_status: string | null
           status: string
+          submitter_id: string | null
           updated_at: string
           winner_partnership_id: string | null
           winner_score: string | null
           winner_score_set3: string | null
         }
         Insert: {
+          approver_id?: string | null
           challenged_partnership_id: string
           challenger_partnership_id: string
           created_at?: string
@@ -209,12 +212,14 @@ export type Database = {
           proposed_time: string
           result_status?: string | null
           status?: string
+          submitter_id?: string | null
           updated_at?: string
           winner_partnership_id?: string | null
           winner_score?: string | null
           winner_score_set3?: string | null
         }
         Update: {
+          approver_id?: string | null
           challenged_partnership_id?: string
           challenger_partnership_id?: string
           created_at?: string
@@ -226,12 +231,20 @@ export type Database = {
           proposed_time?: string
           result_status?: string | null
           status?: string
+          submitter_id?: string | null
           updated_at?: string
           winner_partnership_id?: string | null
           winner_score?: string | null
           winner_score_set3?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "duo_match_challenges_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "duo_match_challenges_challenged_partnership_id_fkey"
             columns: ["challenged_partnership_id"]
@@ -251,6 +264,13 @@ export type Database = {
             columns: ["league_id"]
             isOneToOne: false
             referencedRelation: "duo_leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duo_match_challenges_submitter_id_fkey"
+            columns: ["submitter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {

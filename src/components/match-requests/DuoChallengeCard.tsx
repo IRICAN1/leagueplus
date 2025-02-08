@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Calendar, CircleDot, Check, Users } from "lucide-react";
@@ -7,6 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { MatchScoresTable } from "./MatchScoresTable";
 import { Button } from "@/components/ui/button";
+import { DuoMatchScoreDialog } from "./DuoMatchScoreDialog";
+import { DuoScoreApprovalCard } from "./DuoScoreApprovalCard";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface DuoChallengeCardProps {
   challenge: DuoChallenge;
@@ -15,6 +18,18 @@ interface DuoChallengeCardProps {
 }
 
 export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCardProps) => {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
+
   const currentPartnership = type === 'sent' ? challenge.challenger_partnership : challenge.challenged_partnership;
   const otherPartnership = type === 'sent' ? challenge.challenged_partnership : challenge.challenger_partnership;
 
@@ -73,6 +88,13 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
       </div>
     </div>
   );
+
+  const handleScoreApproved = () => {
+    // Refetch the challenges
+    if (onResponse) {
+      onResponse(challenge.id, true);
+    }
+  };
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80">
