@@ -1,13 +1,14 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { WinnerSelection } from "./WinnerSelection";
 import { SetScoreInput } from "./SetScoreInput";
 import { ThirdSetInput } from "./ThirdSetInput";
 import { validateMatchResult } from "./utils/scoreValidation";
-import { Challenge } from "@/types/match";
+import { Challenge, DuoChallenge } from "@/types/match";
 
 interface ScoreSubmissionFormProps {
-  challenge: Challenge;
+  challenge: Challenge | DuoChallenge;
   onSubmit: (data: {
     winnerId: string;
     winnerScore1: string;
@@ -19,12 +20,14 @@ interface ScoreSubmissionFormProps {
     showThirdSet: boolean;
   }) => void;
   isSubmitting: boolean;
+  isDuo?: boolean;
 }
 
 export const ScoreSubmissionForm = ({
   challenge,
   onSubmit,
-  isSubmitting
+  isSubmitting,
+  isDuo = false
 }: ScoreSubmissionFormProps) => {
   const [winnerScore1, setWinnerScore1] = useState("");
   const [loserScore1, setLoserScore1] = useState("");
@@ -71,6 +74,7 @@ export const ScoreSubmissionForm = ({
         challenge={challenge}
         winnerId={winnerId}
         setWinnerId={setWinnerId}
+        isDuo={isDuo}
       />
 
       <SetScoreInput
