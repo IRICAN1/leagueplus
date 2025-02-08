@@ -5,6 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, User, Trophy, Swords } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 interface TournamentPlayersListProps {
   leagueId: string;
@@ -12,6 +15,9 @@ interface TournamentPlayersListProps {
 }
 
 export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersListProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
   const { data: players, isLoading } = useQuery({
     queryKey: ['tournament-players', leagueId, isDuo],
     queryFn: async () => {
@@ -39,7 +45,8 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
               ),
               duo_statistics (
                 wins,
-                losses
+                losses,
+                rank
               )
             )
           `)
@@ -74,6 +81,12 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
     }
   });
 
+  const handleChallenge = (partnershipId: string, name: string) => {
+    navigate(`/player-challenge/${partnershipId}`, {
+      state: { playerName: name, leagueId }
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
@@ -100,8 +113,9 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
         <div className="grid gap-4">
           {isDuo ? (
             players.map((participant: any) => {
-              const stats = participant.duo_partnership.duo_statistics?.[0] || { wins: 0, losses: 0 };
+              const stats = participant.duo_partnership.duo_statistics?.[0] || { wins: 0, losses: 0, rank: '-' };
               const winRate = ((stats.wins / (stats.wins + stats.losses)) * 100 || 0).toFixed(1);
+              const duoName = `${participant.duo_partnership.player1.full_name || participant.duo_partnership.player1.username} & ${participant.duo_partnership.player2.full_name || participant.duo_partnership.player2.username}`;
               
               return (
                 <div 
@@ -121,10 +135,14 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
                         </Avatar>
                       </div>
                       <div>
-                        <div className="font-medium text-lg">
-                          {participant.duo_partnership.player1.full_name || participant.duo_partnership.player1.username}
-                          <span className="text-muted-foreground mx-2">&</span>
-                          {participant.duo_partnership.player2.full_name || participant.duo_partnership.player2.username}
+                        <div className="font-medium text-lg flex items-center gap-2">
+                          {duoName}
+                          {stats.rank !== '-' && (
+                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 border-none">
+                              <Trophy className="h-3 w-3 mr-1" />
+                              Rank #{stats.rank}
+                            </Badge>
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground flex items-center gap-2">
                           {participant.duo_partnership.player1.primary_location && (
@@ -153,6 +171,17 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
                       <Swords className="h-4 w-4 text-blue-600" />
                       <span>{stats.wins + stats.losses} matches played</span>
                     </div>
+                    {user && participant.duo_partnership.player1.id !== user.id && participant.duo_partnership.player2.id !== user.id && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-white hover:bg-blue-50 border-blue-200 text-blue-600 hover:text-blue-700"
+                        onClick={() => handleChallenge(participant.duo_partnership.id, duoName)}
+                      >
+                        <Swords className="h-4 w-4 mr-1" />
+                        Challenge
+                      </Button>
+                    )}
                   </div>
                 </div>
               );
@@ -227,4 +256,3 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
     </Card>
   );
 };
-
