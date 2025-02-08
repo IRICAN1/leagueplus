@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -63,7 +62,6 @@ const MatchRequests = () => {
 
       if (!userId) return [];
 
-      // First get user's partnerships
       const { data: partnerships } = await supabase
         .from('duo_partnerships')
         .select('id')
@@ -80,13 +78,13 @@ const MatchRequests = () => {
             *,
             challenger_partnership:duo_partnerships!duo_match_challenges_challenger_partnership_id_fkey(
               id,
-              player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+              player1:profiles!duo_partnerships_player1_id_fkey(id, username, full_name, avatar_url),
+              player2:profiles!duo_partnerships_player2_id_fkey(id, username, full_name, avatar_url)
             ),
             challenged_partnership:duo_partnerships!duo_match_challenges_challenged_partnership_id_fkey(
               id,
-              player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+              player1:profiles!duo_partnerships_player1_id_fkey(id, username, full_name, avatar_url),
+              player2:profiles!duo_partnerships_player2_id_fkey(id, username, full_name, avatar_url)
             ),
             league:duo_leagues(name)
           `)
@@ -99,13 +97,13 @@ const MatchRequests = () => {
             *,
             challenger_partnership:duo_partnerships!duo_match_challenges_challenger_partnership_id_fkey(
               id,
-              player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+              player1:profiles!duo_partnerships_player1_id_fkey(id, username, full_name, avatar_url),
+              player2:profiles!duo_partnerships_player2_id_fkey(id, username, full_name, avatar_url)
             ),
             challenged_partnership:duo_partnerships!duo_match_challenges_challenged_partnership_id_fkey(
               id,
-              player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+              player1:profiles!duo_partnerships_player1_id_fkey(id, username, full_name, avatar_url),
+              player2:profiles!duo_partnerships_player2_id_fkey(id, username, full_name, avatar_url)
             ),
             league:duo_leagues(name)
           `)
@@ -121,7 +119,7 @@ const MatchRequests = () => {
         ...receivedResponse.data.map(c => ({ ...c, challengeType: 'received' as const }))
       ].sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      ) as DuoChallenge[];
     }
   });
 
