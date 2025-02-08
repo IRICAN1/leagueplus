@@ -90,12 +90,21 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     </div>
   );
 
-  const handleScoreApproved = () => {
-    // Refetch the challenges
-    if (onResponse) {
-      onResponse(challenge.id, true);
-    }
-  };
+  // Check if the current user belongs to either partnership
+  const isParticipant = currentUserId && (
+    currentPartnership.player1.id === currentUserId ||
+    currentPartnership.player2.id === currentUserId ||
+    otherPartnership.player1.id === currentUserId ||
+    otherPartnership.player2.id === currentUserId
+  );
+
+  // Check if the match time has passed
+  const matchTime = new Date(challenge.proposed_time);
+  const now = new Date();
+  const canSubmitScore = isParticipant && 
+    challenge.status === 'accepted' && 
+    matchTime <= now && 
+    !challenge.winner_partnership_id;
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80">
@@ -162,6 +171,14 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
                 Accept
               </Button>
             </div>
+          )}
+
+          {canSubmitScore && currentUserId && (
+            <DuoMatchScoreDialog challenge={challenge} currentUserId={currentUserId} />
+          )}
+
+          {challenge.status === 'completed' && challenge.result_status === 'pending' && (
+            <DuoScoreApprovalCard challenge={challenge} currentUserId={currentUserId} />
           )}
         </div>
       </CardContent>
