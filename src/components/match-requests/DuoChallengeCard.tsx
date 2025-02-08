@@ -6,7 +6,7 @@ import { DuoChallenge, ChallengeType } from "@/types/match";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { MatchScoresTable } from "./MatchScoresTable";
-import { ChallengeStatus } from "./ChallengeStatus";
+import { Button } from "@/components/ui/button";
 
 interface DuoChallengeCardProps {
   challenge: DuoChallenge;
@@ -125,11 +125,19 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
           
           {challenge.status === 'pending' && type === 'received' && onResponse && (
             <div className="flex justify-end gap-2 mt-2">
-              <ChallengeStatus 
-                challenge={challenge} 
-                type={type} 
-                onResponse={onResponse}
-              />
+              <Button 
+                variant="outline" 
+                onClick={() => onResponse(challenge.id, false)}
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                Decline
+              </Button>
+              <Button 
+                onClick={() => onResponse(challenge.id, true)}
+                className="bg-green-600 text-white hover:bg-green-700"
+              >
+                Accept
+              </Button>
             </div>
           )}
         </div>
