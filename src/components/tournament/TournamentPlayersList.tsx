@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -87,9 +86,15 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
   });
 
   const handleChallenge = (partnershipId: string, name: string) => {
-    navigate(`/player-challenge/${partnershipId}`, {
-      state: { playerName: name, leagueId }
-    });
+    if (isDuo) {
+      navigate(`/duo-challenge/${partnershipId}`, {
+        state: { playerName: name, leagueId }
+      });
+    } else {
+      navigate(`/player-challenge/${partnershipId}`, {
+        state: { playerName: name, leagueId }
+      });
+    }
   };
 
   if (isLoading) {

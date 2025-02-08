@@ -1,8 +1,8 @@
-
 import Profile from "@/pages/Profile";
 import TournamentRegistration from "@/pages/TournamentRegistration";
 import DuoTournamentRegistration from "@/pages/DuoTournamentRegistration";
 import PlayerChallenge from "@/pages/PlayerChallenge";
+import DuoChallenge from "@/pages/DuoChallenge";
 import CreateLeague from "@/pages/CreateLeague";
 import CreateDuoLeague from "@/pages/CreateDuoLeague";
 import MyLeagues from "@/pages/MyLeagues";
@@ -80,6 +80,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <MyDuos />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/duo-challenge/:partnershipId",
+    element: (
+      <ProtectedRoute>
+        <DuoChallenge />
       </ProtectedRoute>
     )
   }
