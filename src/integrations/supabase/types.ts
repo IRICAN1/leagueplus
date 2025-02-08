@@ -179,6 +179,89 @@ export type Database = {
           },
         ]
       }
+      duo_match_challenges: {
+        Row: {
+          challenged_partnership_id: string
+          challenger_partnership_id: string
+          created_at: string
+          id: string
+          league_id: string
+          location: string
+          loser_score: string | null
+          loser_score_set3: string | null
+          proposed_time: string
+          result_status: string | null
+          status: string
+          updated_at: string
+          winner_partnership_id: string | null
+          winner_score: string | null
+          winner_score_set3: string | null
+        }
+        Insert: {
+          challenged_partnership_id: string
+          challenger_partnership_id: string
+          created_at?: string
+          id?: string
+          league_id: string
+          location: string
+          loser_score?: string | null
+          loser_score_set3?: string | null
+          proposed_time: string
+          result_status?: string | null
+          status?: string
+          updated_at?: string
+          winner_partnership_id?: string | null
+          winner_score?: string | null
+          winner_score_set3?: string | null
+        }
+        Update: {
+          challenged_partnership_id?: string
+          challenger_partnership_id?: string
+          created_at?: string
+          id?: string
+          league_id?: string
+          location?: string
+          loser_score?: string | null
+          loser_score_set3?: string | null
+          proposed_time?: string
+          result_status?: string | null
+          status?: string
+          updated_at?: string
+          winner_partnership_id?: string | null
+          winner_score?: string | null
+          winner_score_set3?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duo_match_challenges_challenged_partnership_id_fkey"
+            columns: ["challenged_partnership_id"]
+            isOneToOne: false
+            referencedRelation: "duo_partnerships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duo_match_challenges_challenger_partnership_id_fkey"
+            columns: ["challenger_partnership_id"]
+            isOneToOne: false
+            referencedRelation: "duo_partnerships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duo_match_challenges_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "duo_leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duo_match_challenges_winner_partnership_id_fkey"
+            columns: ["winner_partnership_id"]
+            isOneToOne: false
+            referencedRelation: "duo_partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       duo_partnerships: {
         Row: {
           active: boolean | null
