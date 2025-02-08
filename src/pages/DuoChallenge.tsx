@@ -130,6 +130,7 @@ const DuoChallenge = () => {
       <ChallengeConfirmationDialog
         isOpen={showConfirmation}
         onClose={() => setShowConfirmation(false)}
+        onConfirm={handleSubmit}
         challengeDetails={{
           playerName: location.state?.playerName || "Partnership",
           leagueName: location.state?.leagueName || "League",
