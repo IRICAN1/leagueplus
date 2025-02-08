@@ -106,6 +106,13 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     matchTime <= now && 
     !challenge.winner_partnership_id;
 
+  const handleScoreApproved = () => {
+    // Refetch the data by calling onResponse if it exists
+    if (onResponse) {
+      onResponse(challenge.id, true);
+    }
+  };
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80">
       <CardContent className="p-2 sm:p-3 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
@@ -178,7 +185,11 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
           )}
 
           {challenge.status === 'completed' && challenge.result_status === 'pending' && (
-            <DuoScoreApprovalCard challenge={challenge} currentUserId={currentUserId} />
+            <DuoScoreApprovalCard 
+              challenge={challenge} 
+              currentUserId={currentUserId} 
+              onScoreApproved={handleScoreApproved}
+            />
           )}
         </div>
       </CardContent>
