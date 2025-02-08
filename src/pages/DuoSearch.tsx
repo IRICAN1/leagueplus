@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +24,6 @@ const DuoSearch = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Get the current user's ID first
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
     queryFn: async () => {
@@ -121,7 +119,6 @@ const DuoSearch = () => {
     },
   });
 
-  // Show filters only when there are results or active filters
   useEffect(() => {
     setShowFilters(
       Boolean(searchQuery) || 
@@ -141,7 +138,6 @@ const DuoSearch = () => {
     setCurrentPage(1);
   };
 
-  // Pagination calculations
   const totalPlayers = players?.length || 0;
   const totalPages = Math.ceil(totalPlayers / PLAYERS_PER_PAGE);
   const startIndex = (currentPage - 1) * PLAYERS_PER_PAGE;
@@ -179,6 +175,21 @@ const DuoSearch = () => {
           </div>
         ) : (
           <div className="animate-fade-in space-y-4 md:space-y-6">
+            {pendingInvites && pendingInvites.length > 0 && (
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
+                <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Pending Invites
+                </h2>
+                <PendingInvites
+                  invites={pendingInvites}
+                  isLoading={invitesLoading}
+                  onInviteUpdated={() => {
+                    // Refetch queries
+                  }}
+                />
+              </div>
+            )}
+
             {!duosLoading && (!duos || duos.length === 0) ? (
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm text-center">
                 <h2 className="text-xl font-semibold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -195,32 +206,15 @@ const DuoSearch = () => {
                 </button>
               </div>
             ) : (
-              <>
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden">
-                  <ActiveDuosList
-                    duos={duos || []}
-                    isLoading={duosLoading}
-                    onDuoUpdated={() => {
-                      // Refetch queries
-                    }}
-                  />
-                </div>
-
-                {pendingInvites && pendingInvites.length > 0 && (
-                  <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
-                    <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      Pending Invites
-                    </h2>
-                    <PendingInvites
-                      invites={pendingInvites}
-                      isLoading={invitesLoading}
-                      onInviteUpdated={() => {
-                        // Refetch queries
-                      }}
-                    />
-                  </div>
-                )}
-              </>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden">
+                <ActiveDuosList
+                  duos={duos || []}
+                  isLoading={duosLoading}
+                  onDuoUpdated={() => {
+                    // Refetch queries
+                  }}
+                />
+              </div>
             )}
           </div>
         )}
