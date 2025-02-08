@@ -43,8 +43,8 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     if (challenge.status !== 'completed' || !challenge.winner_score) return null;
     
     const isWinner = challenge.winner_partnership_id === currentPartnership.id;
-    const winnerTeam = `${isWinner ? currentPartnership : otherPartnership}.player1.full_name & ${isWinner ? currentPartnership : otherPartnership}.player2.full_name`;
-    const loserTeam = `${!isWinner ? currentPartnership : otherPartnership}.player1.full_name & ${!isWinner ? currentPartnership : otherPartnership}.player2.full_name`;
+    const winnerTeam = `${isWinner ? currentPartnership.player1.full_name : otherPartnership.player1.full_name} & ${isWinner ? currentPartnership.player2.full_name : otherPartnership.player2.full_name}`;
+    const loserTeam = `${!isWinner ? currentPartnership.player1.full_name : otherPartnership.player1.full_name} & ${!isWinner ? currentPartnership.player2.full_name : otherPartnership.player2.full_name}`;
     
     const winnerSets = parseScore(challenge.winner_score);
     const loserSets = parseScore(challenge.loser_score);
@@ -55,12 +55,15 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     }
 
     return (
-      <MatchScoresTable
-        winnerName={winnerTeam}
-        loserName={loserTeam}
-        winnerSets={winnerSets}
-        loserSets={loserSets}
-      />
+      <div className="mt-3 p-2 bg-gray-50 rounded-md">
+        <h4 className="text-sm font-medium mb-2">Match Score:</h4>
+        <MatchScoresTable
+          winnerName={winnerTeam}
+          loserName={loserTeam}
+          winnerSets={winnerSets}
+          loserSets={loserSets}
+        />
+      </div>
     );
   };
 
