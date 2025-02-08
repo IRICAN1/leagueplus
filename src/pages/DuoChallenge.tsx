@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { LocationSelector } from "@/components/player-challenge/LocationSelector";
@@ -16,7 +15,7 @@ const DuoChallenge = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -27,16 +26,30 @@ const DuoChallenge = () => {
     { id: "loc3", name: "Tennis Court C", distance: "4.2 miles" },
   ];
 
-  const handleTimeSelect = (time: Date) => {
-    setSelectedTime(time);
+  // Mock available time slots - this should come from your backend
+  const availableTimeSlots = Array.from({ length: 7 }, (_, dayIndex) => ({
+    day: dayIndex,
+    slots: Array.from({ length: 12 }, (_, timeIndex) => ({
+      time: timeIndex + 8, // 8 AM to 8 PM
+      available: true,
+    })),
+  }));
+
+  const handleTimeSlotSelect = (slots: string[]) => {
+    setSelectedTimeSlots(slots);
   };
 
   const handleLocationSelect = (locationId: string) => {
     setSelectedLocation(locationId);
   };
 
+  const handleSelectAllDay = (day: number) => {
+    const daySlots = availableTimeSlots[day].slots.map((slot) => `${day}-${slot.time}`);
+    setSelectedTimeSlots((prev) => [...prev, ...daySlots]);
+  };
+
   const handleSubmit = async () => {
-    if (!selectedTime || !selectedLocation || !user || !partnershipId || !location.state?.leagueId) {
+    if (!selectedTimeSlots.length || !selectedLocation || !user || !partnershipId || !location.state?.leagueId) {
       toast({
         title: "Error",
         description: "Please select both a time and location for the challenge",
@@ -64,7 +77,7 @@ const DuoChallenge = () => {
           challenged_partnership_id: partnershipId,
           league_id: location.state.leagueId,
           location: selectedLocation,
-          proposed_time: selectedTime.toISOString(),
+          proposed_time: new Date(selectedTimeSlots[0]).toISOString(),
           status: 'pending'
         });
 
@@ -90,7 +103,14 @@ const DuoChallenge = () => {
       <h1 className="text-2xl font-bold">Challenge Partnership</h1>
       
       <div className="grid gap-6">
-        <WeeklySchedule onTimeSelect={handleTimeSelect} selectedTime={selectedTime} />
+        <WeeklySchedule
+          availableTimeSlots={availableTimeSlots}
+          selectedTimeSlots={selectedTimeSlots}
+          onTimeSlotSelect={handleTimeSlotSelect}
+          onSelectAllDay={handleSelectAllDay}
+          singleSelect={true}
+          isDuo={true}
+        />
         
         <LocationSelector
           locations={locations}
@@ -100,7 +120,7 @@ const DuoChallenge = () => {
 
         <Button
           onClick={() => setShowConfirmation(true)}
-          disabled={!selectedTime || !selectedLocation}
+          disabled={!selectedTimeSlots.length || !selectedLocation}
           className="w-full bg-blue-600 text-white hover:bg-blue-700"
         >
           Send Challenge
@@ -108,12 +128,16 @@ const DuoChallenge = () => {
       </div>
 
       <ChallengeConfirmationDialog
-        open={showConfirmation}
-        onOpenChange={setShowConfirmation}
-        onConfirm={handleSubmit}
-        challengedName={location.state?.playerName || "Partnership"}
-        proposedTime={selectedTime}
-        location={locations.find(loc => loc.id === selectedLocation)?.name || ""}
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        challengeDetails={{
+          playerName: location.state?.playerName || "Partnership",
+          leagueName: location.state?.leagueName || "League",
+          location: locations.find(loc => loc.id === selectedLocation)?.name || "",
+          proposedTime: selectedTimeSlots[0],
+          leagueId: location.state?.leagueId,
+          playerId: partnershipId || ""
+        }}
       />
     </div>
   );
