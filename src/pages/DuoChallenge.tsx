@@ -1,3 +1,4 @@
+
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -155,7 +156,8 @@ const DuoChallenge = () => {
           location: locations.find(loc => loc.id === selectedLocation)?.name || "",
           proposedTime: getProposedTime(selectedTimeSlots[0]),
           leagueId: location.state?.leagueId,
-          playerId: partnershipId || ""
+          playerId: partnershipId || "",
+          isDuo: true
         }}
       />
     </div>

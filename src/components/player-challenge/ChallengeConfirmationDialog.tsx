@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,12 +17,14 @@ interface ChallengeConfirmationDialogProps {
     proposedTime: string;
     leagueId: string;
     playerId: string;
+    isDuo?: boolean;  // Add this to differentiate between duo and regular challenges
   };
 }
 
 export const ChallengeConfirmationDialog = ({
   isOpen,
   onClose,
+  onConfirm: parentOnConfirm,
   challengeDetails,
 }: ChallengeConfirmationDialogProps) => {
   const { toast } = useToast();
@@ -38,6 +41,12 @@ export const ChallengeConfirmationDialog = ({
 
       // Get the stored proposed time
       const proposedTime = localStorage.getItem('proposedTime') || challengeDetails.proposedTime;
+
+      // If it's a duo challenge, let the parent component handle it
+      if (challengeDetails.isDuo) {
+        parentOnConfirm();
+        return;
+      }
 
       console.log("Creating challenge with:", {
         challenger_id: session.user.id,
