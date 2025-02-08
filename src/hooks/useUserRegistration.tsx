@@ -16,20 +16,21 @@ export const useUserRegistration = (id: string | undefined, userId: string | nul
         .from('duo_partnerships')
         .select('id')
         .or(`player1_id.eq.${userId},player2_id.eq.${userId}`)
-        .eq('active', true);
+        .eq('active', true)
+        .throwOnError();
 
       if (!partnerships || partnerships.length === 0) return false;
 
       // Then check if any of these partnerships are registered in the league
-      const { data, error } = await supabase
+      const { data: registration } = await supabase
         .from('duo_league_participants')
         .select()
         .eq('league_id', id)
         .in('duo_partnership_id', partnerships.map(p => p.id))
-        .maybeSingle();
+        .maybeSingle()
+        .throwOnError();
 
-      if (error) throw error;
-      return !!data;
+      return !!registration;
     },
     enabled: !!userId && !!id
   });
