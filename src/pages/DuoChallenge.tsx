@@ -1,4 +1,3 @@
-
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -164,4 +163,3 @@ const DuoChallenge = () => {
 };
 
 export default DuoChallenge;
-
