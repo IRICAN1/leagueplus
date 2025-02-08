@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,9 +146,9 @@ export const RegistrationHandler = ({
           .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
           .eq('active', true);
 
-        // Only add the not.in filter if there are registered duos
+        // Add the not.in filter only if there are registered duos
         if (registeredDuoIds.length > 0) {
-          query = query.not('id', 'in', registeredDuoIds);
+          query = query.not('id', 'in', `(${registeredDuoIds.join(',')})`);
         }
 
         const { data: partnerships, error } = await query;
