@@ -50,7 +50,8 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
               )
             )
           `)
-          .eq('league_id', leagueId);
+          .eq('league_id', leagueId)
+          .order('joined_at', { ascending: true });
 
         if (error) throw error;
         return data;
@@ -113,9 +114,10 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
         <div className="grid gap-4">
           {isDuo ? (
             players.map((participant: any) => {
-              const stats = participant.duo_partnership.duo_statistics?.[0] || { wins: 0, losses: 0, rank: '-' };
+              const stats = participant.duo_partnership.duo_statistics?.[0] || { wins: 0, losses: 0, rank: 999999 };
               const winRate = ((stats.wins / (stats.wins + stats.losses)) * 100 || 0).toFixed(1);
               const duoName = `${participant.duo_partnership.player1.full_name || participant.duo_partnership.player1.username} & ${participant.duo_partnership.player2.full_name || participant.duo_partnership.player2.username}`;
+              const showRank = stats.rank !== 999999 && (stats.wins > 0 || stats.losses > 0);
               
               return (
                 <div 
@@ -137,7 +139,7 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
                       <div>
                         <div className="font-medium text-lg flex items-center gap-2">
                           {duoName}
-                          {stats.rank !== '-' && (
+                          {showRank && (
                             <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 border-none">
                               <Trophy className="h-3 w-3 mr-1" />
                               Rank #{stats.rank}
