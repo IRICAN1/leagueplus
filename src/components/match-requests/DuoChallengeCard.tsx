@@ -1,7 +1,7 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Calendar, CircleDot, Check, Users } from "lucide-react";
-import { DuoChallenge, ChallengeType } from "@/types/match";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { MatchScoresTable } from "./MatchScoresTable";
@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { DuoMatchScoreDialog } from "./DuoMatchScoreDialog";
 import { DuoScoreApprovalCard } from "./DuoScoreApprovalCard";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
+import { DuoChallenge, ChallengeType } from "@/types/match";
 
 interface DuoChallengeCardProps {
   challenge: DuoChallenge;
