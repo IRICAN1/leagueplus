@@ -1,4 +1,5 @@
-import { useParams, useLocation } from "react-router-dom";
+
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlayerProfile } from "@/components/player-challenge/PlayerProfile";
@@ -7,10 +8,9 @@ import { ChallengeForm } from "@/components/player-challenge/ChallengeForm";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
-import { MapPin, Crown, Medal, Trophy, Star, Flame, Swords } from "lucide-react";
+import { MapPin, Crown, Medal, Trophy, Star, Flame, Swords, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 const PlayerChallenge = () => {
   const { playerId } = useParams();
@@ -21,7 +21,7 @@ const PlayerChallenge = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const { data: playerData, isLoading } = useQuery({
+  const { data: playerData, isLoading, error } = useQuery({
     queryKey: ['player', playerId, leagueId],
     queryFn: async () => {
       if (!playerId || !leagueId) return null;
@@ -31,7 +31,7 @@ const PlayerChallenge = () => {
           .from('profiles')
           .select('*')
           .eq('id', playerId)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('player_statistics')
           .select(`
@@ -42,16 +42,26 @@ const PlayerChallenge = () => {
           `)
           .eq('player_id', playerId)
           .eq('league_id', leagueId)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('leagues')
           .select('name')
           .eq('id', leagueId)
-          .single()
+          .maybeSingle()
       ]);
 
       if (profileResponse.error) throw profileResponse.error;
       if (leagueResponse.error) throw leagueResponse.error;
+
+      // Handle case where profile is not found
+      if (!profileResponse.data) {
+        throw new Error('Player profile not found');
+      }
+
+      // Handle case where league is not found
+      if (!leagueResponse.data) {
+        throw new Error('League not found');
+      }
 
       // Use the actual statistics from the database, defaulting to 0 if not found
       const stats = statsResponse.data || {
@@ -74,11 +84,15 @@ const PlayerChallenge = () => {
       };
     },
     enabled: !!playerId && !!leagueId,
-    refetchInterval: 5000 // Refresh every 5 seconds to keep stats current
+    retry: false
   });
 
   const handleChallenge = async () => {
     try {
+      if (!playerData) {
+        throw new Error('Player data not available');
+      }
+
       const { error } = await supabase
         .from('match_challenges')
         .insert({
@@ -111,9 +125,21 @@ const PlayerChallenge = () => {
     return <div>Loading...</div>;
   }
 
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {error instanceof Error ? error.message : 'An error occurred while loading player data'}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (!playerData) {
     return (
       <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           Player not found. Please try again.
         </AlertDescription>
