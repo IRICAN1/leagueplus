@@ -49,7 +49,7 @@ const DuoChallenge = () => {
   };
 
   const getProposedTime = (timeSlot: string) => {
-    if (!timeSlot) return new Date();
+    if (!timeSlot) return new Date().toISOString();
     const [day, hour] = timeSlot.split('-').map(Number);
     const proposedDate = new Date();
     proposedDate.setDate(proposedDate.getDate() + ((7 + day - proposedDate.getDay()) % 7));
@@ -58,10 +58,20 @@ const DuoChallenge = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedTimeSlots.length || !selectedLocation || !user || !partnershipId || !location.state?.leagueId) {
+    if (!selectedTimeSlots.length || !selectedLocation || !user || !partnershipId) {
       toast({
         title: "Error",
         description: "Please select both a time and location for the challenge",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if we have the league ID from location state
+    if (!location.state?.leagueId) {
+      toast({
+        title: "Error",
+        description: "League information is missing. Please try again.",
         variant: "destructive",
       });
       return;
