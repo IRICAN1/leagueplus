@@ -12,6 +12,7 @@ export const useUserRegistration = (id: string | undefined, userId: string | nul
         .from('duo_league_participants')
         .select('id')
         .eq('league_id', id)
+        .eq('player_id', userId)
         .maybeSingle();
 
       if (error) throw error;
