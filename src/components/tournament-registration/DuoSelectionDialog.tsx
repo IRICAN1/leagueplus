@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { useState } from "react";
@@ -6,7 +7,9 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Users } from "lucide-react";
+import { Check, Trophy, Users2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 interface DuoSelectionDialogProps {
   isOpen: boolean;
@@ -87,9 +90,9 @@ export const DuoSelectionDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Select Duo Partner & Availability</DialogTitle>
+          <DialogTitle>Select Partnership for Tournament</DialogTitle>
           <DialogDescription>
-            Choose a duo partner and set your availability schedule for league matches
+            Choose your duo partnership and set your availability schedule for tournament matches
           </DialogDescription>
         </DialogHeader>
         
@@ -106,31 +109,39 @@ export const DuoSelectionDialog = ({
                 onClick={() => setSelectedDuo(duo.id)}
               >
                 <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium">
-                        {duo.player1.username} & {duo.player2.username}
-                      </h3>
-                      <Badge variant="secondary">
-                        Win Rate: {
-                          duo.duo_statistics[0]
-                            ? Math.round(
-                                (duo.duo_statistics[0].wins /
-                                  (duo.duo_statistics[0].wins + duo.duo_statistics[0].losses)) *
-                                  100
-                              )
-                            : 0
-                        }%
-                      </Badge>
-                      {!duo.active && (
-                        <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-                          Inactive
-                        </Badge>
-                      )}
+                  <div className="flex items-center gap-4">
+                    <div className="flex -space-x-2">
+                      <Avatar className="h-12 w-12 border-2 border-white ring-2 ring-blue-100">
+                        <AvatarImage src={duo.player1.avatar_url} />
+                        <AvatarFallback>{duo.player1.username?.[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <Avatar className="h-12 w-12 border-2 border-white ring-2 ring-purple-100">
+                        <AvatarImage src={duo.player2.avatar_url} />
+                        <AvatarFallback>{duo.player2.username?.[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
                     </div>
-                    <p className="text-sm text-gray-600">
-                      Matches: {duo.duo_statistics[0]?.wins || 0} W - {duo.duo_statistics[0]?.losses || 0} L
-                    </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium">
+                          {duo.player1.full_name || duo.player1.username} & {duo.player2.full_name || duo.player2.username}
+                        </h3>
+                        <Badge variant="secondary" className="font-normal">
+                          Combined Skill: {Math.floor((duo.player1.skill_level + duo.player2.skill_level) / 2)}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Trophy className="h-4 w-4" />
+                          <span>Wins: {duo.duo_statistics[0]?.wins || 0}</span>
+                        </div>
+                        <div>Losses: {duo.duo_statistics[0]?.losses || 0}</div>
+                        {duo.duo_statistics[0]?.rank !== 999999 && (
+                          <Badge variant="outline" className="bg-blue-50">
+                            Rank #{duo.duo_statistics[0]?.rank}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   {selectedDuo === duo.id && (
                     <Check className="h-5 w-5 text-blue-500" />
@@ -141,24 +152,31 @@ export const DuoSelectionDialog = ({
           </div>
 
           {selectedDuo && (
-            <div className="space-y-4">
-              <WeeklySchedule
-                availableTimeSlots={availableTimeSlots}
-                selectedTimeSlots={selectedTimeSlots}
-                onTimeSlotSelect={handleTimeSlotSelect}
-                onSelectAllDay={handleSelectAllDay}
-                isDuo={true}
-              />
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Users2 className="h-5 w-5" />
+                  <span>Set your availability for tournament matches</span>
+                </div>
+                <WeeklySchedule
+                  availableTimeSlots={availableTimeSlots}
+                  selectedTimeSlots={selectedTimeSlots}
+                  onTimeSlotSelect={handleTimeSlotSelect}
+                  onSelectAllDay={handleSelectAllDay}
+                  isDuo={true}
+                />
 
-              <Button
-                className="w-full"
-                onClick={() => handleDuoSelect(selectedDuo)}
-                disabled={selectedTimeSlots.length === 0}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Complete Registration
-              </Button>
-            </div>
+                <Button
+                  className="w-full"
+                  onClick={() => handleDuoSelect(selectedDuo)}
+                  disabled={selectedTimeSlots.length === 0}
+                >
+                  <Users2 className="mr-2 h-4 w-4" />
+                  Complete Registration with Selected Partnership
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </DialogContent>

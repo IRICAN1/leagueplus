@@ -91,18 +91,6 @@ export const RegistrationHandler = ({
         return false;
       }
 
-      // Check if user is already registered
-      const { data: existingRegistration } = await supabase
-        .from('duo_league_participants')
-        .select('id')
-        .eq('league_id', leagueId)
-        .single();
-
-      if (existingRegistration) {
-        toast.error("You are already registered for this tournament");
-        return false;
-      }
-
       return true;
     } catch (error) {
       console.error('Error checking registration eligibility:', error);
@@ -155,14 +143,7 @@ export const RegistrationHandler = ({
 
         if (error) throw error;
 
-        // Transform the data to show both players' information
-        const transformedPartnerships = partnerships?.map(partnership => ({
-          ...partnership,
-          player1: partnership.player1,
-          player2: partnership.player2
-        })) || [];
-
-        setDuos(transformedPartnerships);
+        setDuos(partnerships || []);
       } catch (error) {
         console.error('Error fetching duos:', error);
         toast.error("Failed to fetch duo partnerships");
