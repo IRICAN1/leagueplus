@@ -17,6 +17,8 @@ export const DuoTournamentHeader = ({
   isUserRegistered,
   onRegisterClick,
 }: DuoTournamentHeaderProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="w-full">
@@ -37,8 +39,24 @@ export const DuoTournamentHeader = ({
             Register Now
           </Button>
         )}
+        {!isAuthenticated && (
+          <Button 
+            className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
+            onClick={() => navigate('/login', { state: { returnTo: window.location.pathname } })}
+          >
+            Login to Register
+          </Button>
+        )}
+        {isUserRegistered && (
+          <Button
+            variant="secondary"
+            className="w-full sm:w-auto"
+            disabled
+          >
+            Already Registered
+          </Button>
+        )}
       </div>
     </div>
   );
 };
-
