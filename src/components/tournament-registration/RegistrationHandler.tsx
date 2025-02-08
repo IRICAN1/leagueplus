@@ -2,13 +2,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { DuoSelectionDialog } from "./DuoSelectionDialog";
 import { toast } from "sonner";
 import { RegistrationButton } from "./RegistrationButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Trophy, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AvailabilitySection } from "./AvailabilitySection";
 
 interface RegistrationHandlerProps {
   leagueId: string;
@@ -26,7 +27,8 @@ export const RegistrationHandler = ({
   requirements,
 }: RegistrationHandlerProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedDuoId, setSelectedDuoId] = useState<string | null>(null);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [duos, setDuos] = useState<any[]>([]);
   const [activeDuos, setActiveDuos] = useState<any[]>([]);
   const [canRegister, setCanRegister] = useState<boolean>(false);
@@ -158,7 +160,12 @@ export const RegistrationHandler = ({
     fetchDuos();
   }, [leagueId]);
 
-  const handleRegistration = async (duoId: string) => {
+  const handleRegistration = async () => {
+    if (!selectedDuoId) {
+      toast.error("Please select a duo partnership");
+      return;
+    }
+
     try {
       setIsLoading(true);
 
@@ -171,7 +178,7 @@ export const RegistrationHandler = ({
         .from('duo_league_participants')
         .insert({
           league_id: leagueId,
-          duo_partnership_id: duoId,
+          duo_partnership_id: selectedDuoId,
         });
 
       if (registrationError) throw registrationError;
@@ -183,7 +190,6 @@ export const RegistrationHandler = ({
       toast.error("Failed to register for the tournament");
     } finally {
       setIsLoading(false);
-      setIsDialogOpen(false);
     }
   };
 
@@ -197,13 +203,13 @@ export const RegistrationHandler = ({
 
   return (
     <div className="space-y-6">
-      {activeDuos.length > 0 && (
+      {duos.length > 0 ? (
         <Card className="bg-white/80 backdrop-blur-sm border-blue-100">
           <CardHeader>
-            <CardTitle>Your Active Partnerships</CardTitle>
+            <CardTitle>Select Your Partnership</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {activeDuos.map((duo) => {
+            {duos.map((duo) => {
               const stats = duo.duo_statistics?.[0] || { wins: 0, losses: 0, rank: '-' };
               const winRate = stats.wins + stats.losses > 0
                 ? ((stats.wins / (stats.wins + stats.losses)) * 100).toFixed(1)
@@ -212,7 +218,12 @@ export const RegistrationHandler = ({
               return (
                 <div
                   key={duo.id}
-                  className="p-4 rounded-lg border border-blue-100 hover:border-blue-200 transition-all bg-white/50"
+                  className={`p-4 rounded-lg border transition-all cursor-pointer ${
+                    selectedDuoId === duo.id 
+                      ? 'border-blue-500 bg-blue-50/50' 
+                      : 'border-blue-100 hover:border-blue-200 bg-white/50'
+                  }`}
+                  onClick={() => setSelectedDuoId(duo.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -263,26 +274,39 @@ export const RegistrationHandler = ({
             })}
           </CardContent>
         </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center text-gray-500">
+              No available partnerships found. Create a duo partnership first to register for this tournament.
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedDuoId && (
+        <Card className="bg-white/80 backdrop-blur-sm border-blue-100">
+          <CardHeader>
+            <CardTitle>Set Your Availability</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AvailabilitySection onTimeSlotSelect={setSelectedTimeSlots} />
+          </CardContent>
+        </Card>
       )}
 
       <div className="flex justify-center">
-        <RegistrationButton 
-          onClick={() => setIsDialogOpen(true)} 
-          disabled={!canRegister || isLoading}
-        />
+        <Button
+          onClick={handleRegistration}
+          disabled={!canRegister || isLoading || !selectedDuoId}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-lg font-medium"
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : null}
+          Register for Tournament
+        </Button>
       </div>
-
-      <DuoSelectionDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        duos={duos}
-        onSelect={handleRegistration}
-        leagueRequirements={{
-          skillLevel: requirements?.skillLevel,
-          ageCategory: requirements?.ageCategory,
-          genderCategory: requirements?.genderCategory,
-        }}
-      />
     </div>
   );
 };
