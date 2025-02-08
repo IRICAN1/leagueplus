@@ -57,11 +57,26 @@ const DuoSearch = () => {
     enabled: !!currentUser?.id,
   });
 
-  useEffect(() => {
-    if (!duosLoading && (!duos || duos.length === 0)) {
-      setActiveTab('search');
-    }
-  }, [duos, duosLoading]);
+  const { data: pendingInvites, isLoading: invitesLoading } = useQuery({
+    queryKey: ['pending-invites', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return [];
+
+      const { data, error } = await supabase
+        .from('duo_invites')
+        .select(`
+          *,
+          sender:sender_id (id, username, avatar_url, full_name),
+          receiver:receiver_id (id, username, avatar_url, full_name)
+        `)
+        .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentUser?.id,
+  });
 
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['duo-search', filters, searchQuery],
@@ -106,26 +121,14 @@ const DuoSearch = () => {
     },
   });
 
-  const { data: pendingInvites, isLoading: invitesLoading } = useQuery({
-    queryKey: ['pending-invites', currentUser?.id],
-    queryFn: async () => {
-      if (!currentUser?.id) return [];
-
-      const { data, error } = await supabase
-        .from('duo_invites')
-        .select(`
-          *,
-          sender:sender_id (id, username, avatar_url, full_name),
-          receiver:receiver_id (id, username, avatar_url, full_name)
-        `)
-        .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
-        .eq('status', 'pending');
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!currentUser?.id,
-  });
+  // Show filters only when there are results or active filters
+  useEffect(() => {
+    setShowFilters(
+      Boolean(searchQuery) || 
+      Object.values(filters).some(value => value !== undefined) ||
+      (players && players.length > 0)
+    );
+  }, [searchQuery, filters, players]);
 
   const handleFilterChange = (newFilters: DuoSearchFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -144,15 +147,6 @@ const DuoSearch = () => {
   const startIndex = (currentPage - 1) * PLAYERS_PER_PAGE;
   const endIndex = startIndex + PLAYERS_PER_PAGE;
   const currentPlayers = players?.slice(startIndex, endIndex) || [];
-
-  // Show filters only when there are results or active filters
-  useEffect(() => {
-    setShowFilters(
-      Boolean(searchQuery) || 
-      Object.values(filters).some(value => value !== undefined) ||
-      (players && players.length > 0)
-    );
-  }, [searchQuery, filters, players]);
 
   return (
     <div className="min-h-screen pt-4 md:pt-8 bg-gradient-to-br from-blue-50 via-white to-purple-50">
