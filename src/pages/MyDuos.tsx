@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +9,7 @@ import { Settings2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { WeeklySchedule } from "@/components/player-challenge/WeeklySchedule";
 import { isAvailabilitySchedule } from "@/types/availability";
+import { DuoNotifications } from "@/components/duo-search/DuoNotifications";
 
 const MyDuos = () => {
   const [activeDuos, setActiveDuos] = useState<any[]>([]);
@@ -162,15 +164,18 @@ const MyDuos = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">My Duos</h1>
-        <button
-          className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-          onClick={() => {
-            loadDuoAvailability();
-            setShowSettings(true);
-          }}
-        >
-          <Settings2 className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <DuoNotifications />
+          <button
+            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+            onClick={() => {
+              loadDuoAvailability();
+              setShowSettings(true);
+            }}
+          >
+            <Settings2 className="h-5 w-5" />
+          </button>
+        </div>
       </div>
       
       <Tabs defaultValue="active" className="w-full">

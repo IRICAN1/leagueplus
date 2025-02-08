@@ -550,6 +550,7 @@ export type Database = {
           id: string
           message: string
           read: boolean | null
+          related_duo_invite_id: string | null
           related_match_id: string | null
           title: string
           type: string
@@ -560,6 +561,7 @@ export type Database = {
           id?: string
           message: string
           read?: boolean | null
+          related_duo_invite_id?: string | null
           related_match_id?: string | null
           title: string
           type: string
@@ -570,12 +572,20 @@ export type Database = {
           id?: string
           message?: string
           read?: boolean | null
+          related_duo_invite_id?: string | null
           related_match_id?: string | null
           title?: string
           type?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_related_duo_invite_id_fkey"
+            columns: ["related_duo_invite_id"]
+            isOneToOne: false
+            referencedRelation: "duo_invites"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
