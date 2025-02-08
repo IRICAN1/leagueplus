@@ -227,6 +227,7 @@ export type Database = {
           id: string
           losses: number | null
           partnership_id: string
+          points: number | null
           rank: number | null
           updated_at: string
           wins: number | null
@@ -236,6 +237,7 @@ export type Database = {
           id?: string
           losses?: number | null
           partnership_id: string
+          points?: number | null
           rank?: number | null
           updated_at?: string
           wins?: number | null
@@ -245,6 +247,7 @@ export type Database = {
           id?: string
           losses?: number | null
           partnership_id?: string
+          points?: number | null
           rank?: number | null
           updated_at?: string
           wins?: number | null

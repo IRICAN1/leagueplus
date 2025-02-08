@@ -156,7 +156,7 @@ export const TournamentPlayersList = ({ leagueId, isDuo }: TournamentPlayersList
                   const stats = participant.duo_partnership.duo_statistics?.[0] || { wins: 0, losses: 0, rank: 999999, points: 0 };
                   const winRate = ((stats.wins / (stats.wins + stats.losses)) * 100 || 0).toFixed(1);
                   const duoName = `${participant.duo_partnership.player1.full_name || participant.duo_partnership.player1.username} & ${participant.duo_partnership.player2.full_name || participant.duo_partnership.player2.username}`;
-                  const showRank = stats.rank !== 999999 && (stats.wins > 0 || stats.losses > 0);
+                  const showRank = stats.rank !== 999999 && (stats.wins > 0 || stats.losses > 0 || stats.points > 0);
                   const isTopRank = showRank && stats.rank <= 3;
                   
                   return (
