@@ -48,6 +48,15 @@ const DuoChallenge = () => {
     setSelectedTimeSlots((prev) => [...prev, ...daySlots]);
   };
 
+  const getProposedTime = (timeSlot: string) => {
+    if (!timeSlot) return new Date();
+    const [day, hour] = timeSlot.split('-').map(Number);
+    const proposedDate = new Date();
+    proposedDate.setDate(proposedDate.getDate() + ((7 + day - proposedDate.getDay()) % 7));
+    proposedDate.setHours(hour, 0, 0, 0);
+    return proposedDate.toISOString();
+  };
+
   const handleSubmit = async () => {
     if (!selectedTimeSlots.length || !selectedLocation || !user || !partnershipId || !location.state?.leagueId) {
       toast({
@@ -77,7 +86,7 @@ const DuoChallenge = () => {
           challenged_partnership_id: partnershipId,
           league_id: location.state.leagueId,
           location: selectedLocation,
-          proposed_time: new Date(selectedTimeSlots[0]).toISOString(),
+          proposed_time: getProposedTime(selectedTimeSlots[0]),
           status: 'pending'
         });
 
@@ -135,7 +144,7 @@ const DuoChallenge = () => {
           playerName: location.state?.playerName || "Partnership",
           leagueName: location.state?.leagueName || "League",
           location: locations.find(loc => loc.id === selectedLocation)?.name || "",
-          proposedTime: selectedTimeSlots[0],
+          proposedTime: getProposedTime(selectedTimeSlots[0]),
           leagueId: location.state?.leagueId,
           playerId: partnershipId || ""
         }}
@@ -145,3 +154,4 @@ const DuoChallenge = () => {
 };
 
 export default DuoChallenge;
+
