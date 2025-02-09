@@ -113,9 +113,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
-      <div className="container max-w-4xl mx-auto py-4 md:py-8 space-y-6 px-4">
+      <div className="container max-w-4xl mx-auto py-4 md:py-8 space-y-6 px-4 mt-16 md:mt-20">
         <div className="text-center space-y-4 mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-transparent bg-clip-text">
+          <h1 className="text-3xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-transparent bg-clip-text">
             Serve, Smash, Conquer!
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -205,3 +205,4 @@ const Index = () => {
 };
 
 export default Index;
+
