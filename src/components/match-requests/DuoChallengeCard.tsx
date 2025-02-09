@@ -40,16 +40,17 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
   };
 
   const renderScores = () => {
-    if (challenge.status !== 'completed' || !challenge.winner_score) return null;
+    if (challenge.status !== 'completed' || !challenge.winner_partnership_id) return null;
     
     const isWinner = challenge.winner_partnership_id === currentPartnership.id;
     const winnerTeam = `${isWinner ? currentPartnership.player1.full_name : otherPartnership.player1.full_name} & ${isWinner ? currentPartnership.player2.full_name : otherPartnership.player2.full_name}`;
     const loserTeam = `${!isWinner ? currentPartnership.player1.full_name : otherPartnership.player1.full_name} & ${!isWinner ? currentPartnership.player2.full_name : otherPartnership.player2.full_name}`;
     
-    const winnerSets = parseScore(challenge.winner_score);
-    const loserSets = parseScore(challenge.loser_score);
+    let winnerSets = parseScore(challenge.winner_score);
+    let loserSets = parseScore(challenge.loser_score);
 
-    if (challenge.winner_score_set3) {
+    // Add third set scores if they exist
+    if (challenge.winner_score_set3 && challenge.loser_score_set3) {
       winnerSets.push(challenge.winner_score_set3);
       loserSets.push(challenge.loser_score_set3);
     }
@@ -112,6 +113,7 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     !challenge.winner_partnership_id;
 
   const handleScoreApproved = () => {
+    console.log('Score approved for challenge:', challenge.id);
     // Refetch the data by calling onResponse if it exists
     if (onResponse) {
       onResponse(challenge.id, true);
@@ -201,4 +203,3 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     </Card>
   );
 };
-

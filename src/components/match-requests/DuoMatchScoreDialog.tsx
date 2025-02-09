@@ -34,22 +34,30 @@ export const DuoMatchScoreDialog = ({ challenge, currentUserId }: DuoMatchScoreD
   const handleScoreSubmit = async (formData: any) => {
     setIsSubmitting(true);
     try {
-      const winnerPartnershipId = formData.winnerId === challenge.challenger_partnership.id 
-        ? challenge.challenger_partnership.id 
-        : challenge.challenged_partnership.id;
+      const winnerPartnershipId = formData.winnerId;
+      const winnerScore = `${formData.winnerScore1}-${formData.winnerScore2}`;
+      const loserScore = `${formData.loserScore1}-${formData.loserScore2}`;
+
+      const updateData: any = {
+        winner_partnership_id: winnerPartnershipId,
+        winner_score: winnerScore,
+        loser_score: loserScore,
+        status: 'completed',
+        result_status: 'pending',
+        submitter_id: currentUserId
+      };
+
+      // Add third set scores if provided
+      if (formData.showThirdSet && formData.winnerScore3 && formData.loserScore3) {
+        updateData.winner_score_set3 = formData.winnerScore3;
+        updateData.loser_score_set3 = formData.loserScore3;
+      }
+
+      console.log('Submitting score data:', updateData);
 
       const { error } = await supabase
         .from('duo_match_challenges')
-        .update({
-          winner_partnership_id: winnerPartnershipId,
-          winner_score: formData.winnerScore,
-          loser_score: formData.loserScore,
-          winner_score_set3: formData.winnerScore3,
-          loser_score_set3: formData.loserScore3,
-          status: 'completed',
-          result_status: 'pending',
-          submitter_id: currentUserId
-        })
+        .update(updateData)
         .eq('id', challenge.id);
 
       if (error) throw error;
