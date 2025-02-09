@@ -1,3 +1,4 @@
+
 import { SearchHeader } from "@/components/SearchHeader";
 import { FilterBar } from "@/components/FilterBar";
 import { ResultCard } from "@/components/ResultCard";
@@ -115,10 +116,10 @@ const Index = () => {
       <div className="container max-w-4xl mx-auto py-4 md:py-8 space-y-6 px-4">
         <div className="text-center space-y-4 mb-8 animate-fade-in">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-transparent bg-clip-text">
-            Find Competitions
+            Serve, Smash, Conquer!
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover sports competitions near you and join the excitement
+            Join thrilling Padel and Badminton leagues - Where every match is an adventure
           </p>
         </div>
 
