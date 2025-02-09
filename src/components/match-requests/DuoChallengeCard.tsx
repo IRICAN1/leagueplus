@@ -70,16 +70,18 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
   const renderPartnership = (partnership: DuoChallenge['challenger_partnership'], isWinner?: boolean) => (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8 border-2 border-blue-100">
-          <AvatarImage src={partnership.player1.avatar_url || undefined} />
-          <AvatarFallback>{partnership.player1.full_name?.[0]}</AvatarFallback>
-        </Avatar>
-        <Avatar className="h-8 w-8 border-2 border-purple-100">
-          <AvatarImage src={partnership.player2.avatar_url || undefined} />
-          <AvatarFallback>{partnership.player2.full_name?.[0]}</AvatarFallback>
-        </Avatar>
+        <div className="flex -space-x-2">
+          <Avatar className="h-8 w-8 border-2 border-blue-100">
+            <AvatarImage src={partnership.player1.avatar_url || undefined} />
+            <AvatarFallback>{partnership.player1.full_name?.[0]}</AvatarFallback>
+          </Avatar>
+          <Avatar className="h-8 w-8 border-2 border-purple-100">
+            <AvatarImage src={partnership.player2.avatar_url || undefined} />
+            <AvatarFallback>{partnership.player2.full_name?.[0]}</AvatarFallback>
+          </Avatar>
+        </div>
         <div className="flex flex-col">
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium line-clamp-1">
             {partnership.player1.full_name} & {partnership.player2.full_name}
           </span>
           {isWinner && (
@@ -120,36 +122,34 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md animate-fade-in border-l-4 border-l-blue-400 hover:scale-[1.01] bg-white/80">
       <CardContent className="p-2 sm:p-3 bg-gradient-to-r from-gray-50/90 via-blue-50/50 to-gray-50/90">
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="flex-1">
               {renderPartnership(currentPartnership, challenge.winner_partnership_id === currentPartnership.id)}
             </div>
 
-            <div className="text-sm font-medium text-gray-500">vs</div>
+            <div className="text-sm font-medium text-gray-500 self-center">vs</div>
 
             <div className="flex-1">
               {renderPartnership(otherPartnership, challenge.winner_partnership_id === otherPartnership.id)}
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${
-                challenge.status === 'completed' 
-                  ? 'bg-green-50 text-green-600 border-green-200' 
-                  : challenge.status === 'pending'
-                  ? 'bg-yellow-50 text-yellow-600 border-yellow-200'
-                  : 'bg-blue-50 text-blue-600 border-blue-200'
-              }`}>
-                {challenge.status === 'completed' ? (
-                  <Check className="h-3 w-3" />
-                ) : (
-                  <CircleDot className="h-3 w-3" />
-                )}
-                {challenge.status}
-              </Badge>
-            </div>
+            <Badge variant="outline" className={`text-xs px-1.5 py-0.5 self-start sm:self-center whitespace-nowrap ${
+              challenge.status === 'completed' 
+                ? 'bg-green-50 text-green-600 border-green-200' 
+                : challenge.status === 'pending'
+                ? 'bg-yellow-50 text-yellow-600 border-yellow-200'
+                : 'bg-blue-50 text-blue-600 border-blue-200'
+            }`}>
+              {challenge.status === 'completed' ? (
+                <Check className="h-3 w-3 mr-1" />
+              ) : (
+                <CircleDot className="h-3 w-3 mr-1" />
+              )}
+              {challenge.status}
+            </Badge>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 mt-2">
             <Badge variant="secondary" className="bg-blue-50 text-blue-600 hover:bg-blue-100">
               {challenge.league.name}
             </Badge>
@@ -171,12 +171,14 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
                 variant="outline" 
                 onClick={() => onResponse(challenge.id, false)}
                 className="text-red-600 border-red-200 hover:bg-red-50"
+                size="sm"
               >
                 Decline
               </Button>
               <Button 
                 onClick={() => onResponse(challenge.id, true)}
                 className="bg-green-600 text-white hover:bg-green-700"
+                size="sm"
               >
                 Accept
               </Button>
@@ -199,3 +201,4 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     </Card>
   );
 };
+
