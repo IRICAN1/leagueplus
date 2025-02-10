@@ -4,10 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { DuoChallenge } from "@/types/match";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DuoScoreApprovalCardProps {
   challenge: DuoChallenge;
-  currentUserId: string;
+  currentUserId: string | null;
   onScoreApproved: () => void;
 }
 
@@ -17,23 +18,34 @@ export const DuoScoreApprovalCard = ({
   onScoreApproved 
 }: DuoScoreApprovalCardProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleScoreResponse = async (approved: boolean) => {
     try {
+      console.log('Updating duo match challenge:', challenge.id, 'with approval:', approved);
+      
       const { error } = await supabase
         .from('duo_match_challenges')
         .update({
           result_status: approved ? 'approved' : 'disputed',
-          approver_id: currentUserId
+          approver_id: currentUserId,
+          updated_at: new Date().toISOString()
         })
         .eq('id', challenge.id);
 
       if (error) throw error;
 
+      // Invalidate relevant queries to refresh the data
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['duo-match-challenges'] }),
+        queryClient.invalidateQueries({ queryKey: ['duo-rankings'] }),
+        queryClient.invalidateQueries({ queryKey: ['duo-statistics'] })
+      ]);
+
       toast({
         title: approved ? "Score approved" : "Score disputed",
         description: approved 
-          ? "The match result has been confirmed" 
+          ? "The match result has been confirmed and rankings have been updated" 
           : "The match result has been marked as disputed",
       });
 
@@ -41,7 +53,7 @@ export const DuoScoreApprovalCard = ({
         onScoreApproved();
       }
     } catch (error: any) {
-      console.error('Error handling score response:', error);
+      console.error('Error in handleScoreResponse:', error);
       toast({
         title: "Error",
         description: error.message,
