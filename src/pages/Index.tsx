@@ -30,7 +30,7 @@ const Index = () => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<LeagueFilters>({});
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
-  const [leagueType, setLeagueType] = useState<LeagueType>('individual');
+  const [leagueType, setLeagueType] = useState<LeagueType>('duo'); // Set default to 'duo'
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['leagues', page, filters, selectedLeagueId, leagueType],
@@ -41,6 +41,7 @@ const Index = () => {
       let query = supabase
         .from(tableName)
         .select(`*, ${participantsTable}(count)`)
+        .order('sport_type', { ascending: false }) // Put Padel first
         .order('created_at', { ascending: false });
 
       if (selectedLeagueId) {
@@ -125,17 +126,6 @@ const Index = () => {
 
         <div className="flex justify-center gap-2 mb-6">
           <Button
-            variant={leagueType === 'individual' ? 'default' : 'outline'}
-            onClick={() => setLeagueType('individual')}
-            className="relative overflow-hidden transition-all duration-300"
-          >
-            <User className="h-4 w-4 mr-2" />
-            Individual Leagues
-            {leagueType === 'individual' && (
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
-            )}
-          </Button>
-          <Button
             variant={leagueType === 'duo' ? 'default' : 'outline'}
             onClick={() => setLeagueType('duo')}
             className="relative overflow-hidden transition-all duration-300"
@@ -143,6 +133,17 @@ const Index = () => {
             <Users className="h-4 w-4 mr-2" />
             Duo Leagues
             {leagueType === 'duo' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
+            )}
+          </Button>
+          <Button
+            variant={leagueType === 'individual' ? 'default' : 'outline'}
+            onClick={() => setLeagueType('individual')}
+            className="relative overflow-hidden transition-all duration-300"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Individual Leagues
+            {leagueType === 'individual' && (
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
             )}
           </Button>
@@ -167,11 +168,12 @@ const Index = () => {
                   location={league.location}
                   distance={0}
                   date={format(new Date(league.start_date), 'MMMM d, yyyy')}
-                  type={league.format}
+                  type={league.status || 'open'}
                   sportType={league.sport_type}
                   skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
                   genderCategory={league.gender_category}
                   participants={league.max_participants}
+                  format={leagueType === 'duo' ? 'Team' : 'Individual'}
                 />
               ))}
               {!selectedLeagueId && (
@@ -205,4 +207,3 @@ const Index = () => {
 };
 
 export default Index;
-
