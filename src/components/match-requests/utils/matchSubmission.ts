@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Challenge } from "@/types/match";
 
@@ -65,6 +66,7 @@ export const submitMatchResult = async (
       throw error;
     }
 
+    // Invalidate queries to refresh the rankings
     console.log('Match result submitted successfully:', data);
     return data;
   } catch (error) {
