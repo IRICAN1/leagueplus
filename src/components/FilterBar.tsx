@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { RotateCcw, SlidersHorizontal } from "lucide-react";
-import { LeagueFilters } from "@/pages/Index";
+import { LeagueFilters } from "@/types/league";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SportTypeFilter } from "./filters/SportTypeFilter";

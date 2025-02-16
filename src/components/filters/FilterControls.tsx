@@ -6,7 +6,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LeagueFilters } from "@/pages/Index";
+import { LeagueFilters } from "@/types/league";
 import { Database } from "@/integrations/supabase/types";
 
 interface FilterControlsProps {
