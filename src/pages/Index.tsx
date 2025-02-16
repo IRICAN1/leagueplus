@@ -50,7 +50,12 @@ const Index = () => {
       
       let query = supabase
         .from(tableName)
-        .select(`*, ${participantsTable}(count)`)
+        .select(`
+          *,
+          ${participantsTable} (
+            id
+          )
+        `)
         .order('sport_type', { ascending: false }) // Put Padel first
         .order('created_at', { ascending: false });
 
@@ -93,9 +98,6 @@ const Index = () => {
             break;
         }
       }
-      if (filters.hasSpots === true) {
-        query = query.neq(`${participantsTable}.count`, leagueType === 'individual' ? 'max_participants' : 'max_duo_pairs');
-      }
 
       const { data, error } = await query;
 
@@ -103,7 +105,17 @@ const Index = () => {
         throw error;
       }
 
-      return data as (Tables<'leagues'> & { league_participants: { count: number }[] })[];
+      // Filter leagues with available spots in memory
+      let filteredData = data;
+      if (filters.hasSpots) {
+        filteredData = data.filter(league => {
+          const participantCount = league[participantsTable]?.length || 0;
+          const maxParticipants = leagueType === 'individual' ? league.max_participants : league.max_duo_pairs;
+          return participantCount < maxParticipants;
+        });
+      }
+
+      return filteredData;
     },
   });
 
@@ -182,7 +194,7 @@ const Index = () => {
                   sportType={league.sport_type}
                   skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
                   genderCategory={league.gender_category}
-                  participants={league.max_participants}
+                  participants={leagueType === 'individual' ? league.max_participants : league.max_duo_pairs}
                   format={leagueType === 'duo' ? 'Team' : 'Individual'}
                 />
               ))}
