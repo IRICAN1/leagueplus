@@ -26,6 +26,16 @@ export type LeagueFilters = {
 
 type LeagueType = 'individual' | 'duo';
 
+const calculateLeagueStatus = (startDate: string, endDate: string): 'active' | 'upcoming' | 'completed' => {
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (now < start) return 'upcoming';
+  if (now > end) return 'completed';
+  return 'active';
+};
+
 const Index = () => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<LeagueFilters>({});
@@ -168,7 +178,7 @@ const Index = () => {
                   location={league.location}
                   distance={0}
                   date={format(new Date(league.start_date), 'MMMM d, yyyy')}
-                  type={league.status || 'open'}
+                  type={calculateLeagueStatus(league.start_date, league.end_date)}
                   sportType={league.sport_type}
                   skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
                   genderCategory={league.gender_category}
