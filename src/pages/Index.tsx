@@ -26,6 +26,14 @@ export type LeagueFilters = {
 
 type LeagueType = 'individual' | 'duo';
 
+type DuoLeague = Tables<'duo_leagues'> & {
+  duo_league_participants: { id: string }[];
+};
+
+type IndividualLeague = Tables<'leagues'> & {
+  league_participants: { id: string }[];
+};
+
 const calculateLeagueStatus = (startDate: string, endDate: string): 'active' | 'upcoming' | 'completed' => {
   const now = new Date();
   const start = new Date(startDate);
@@ -36,11 +44,15 @@ const calculateLeagueStatus = (startDate: string, endDate: string): 'active' | '
   return 'active';
 };
 
+const isDuoLeague = (league: DuoLeague | IndividualLeague): league is DuoLeague => {
+  return 'max_duo_pairs' in league;
+};
+
 const Index = () => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<LeagueFilters>({});
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
-  const [leagueType, setLeagueType] = useState<LeagueType>('duo'); // Set default to 'duo'
+  const [leagueType, setLeagueType] = useState<LeagueType>('duo');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['leagues', page, filters, selectedLeagueId, leagueType],
@@ -56,7 +68,7 @@ const Index = () => {
             id
           )
         `)
-        .order('sport_type', { ascending: false }) // Put Padel first
+        .order('sport_type', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (selectedLeagueId) {
@@ -106,11 +118,15 @@ const Index = () => {
       }
 
       // Filter leagues with available spots in memory
-      let filteredData = data;
+      let filteredData = data as (DuoLeague | IndividualLeague)[];
       if (filters.hasSpots) {
-        filteredData = data.filter(league => {
-          const participantCount = league[participantsTable]?.length || 0;
-          const maxParticipants = leagueType === 'individual' ? league.max_participants : league.max_duo_pairs;
+        filteredData = filteredData.filter(league => {
+          const participantCount = isDuoLeague(league) 
+            ? league.duo_league_participants.length 
+            : league.league_participants.length;
+          const maxParticipants = isDuoLeague(league) 
+            ? league.max_duo_pairs 
+            : league.max_participants;
           return participantCount < maxParticipants;
         });
       }
@@ -194,7 +210,7 @@ const Index = () => {
                   sportType={league.sport_type}
                   skillLevel={`${league.skill_level_min}-${league.skill_level_max}`}
                   genderCategory={league.gender_category}
-                  participants={leagueType === 'individual' ? league.max_participants : league.max_duo_pairs}
+                  participants={isDuoLeague(league) ? league.max_duo_pairs : league.max_participants}
                   format={leagueType === 'duo' ? 'Team' : 'Individual'}
                 />
               ))}
