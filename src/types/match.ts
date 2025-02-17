@@ -15,6 +15,7 @@ export type Challenge = Tables<"match_challenges"> & {
   league: {
     name: string;
   };
+  challengeType?: 'sent' | 'received';
 };
 
 export type DuoChallenge = Tables<"duo_match_challenges"> & {
