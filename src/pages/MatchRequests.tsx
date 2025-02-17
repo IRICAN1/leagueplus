@@ -187,20 +187,6 @@ const MatchRequests = () => {
   const hasIndividualMatches = individualChallenges && individualChallenges.length > 0;
   const hasDuoMatches = duoChallenges && duoChallenges.length > 0;
 
-  const getRecentMatches = (challenges: Challenge[]) => {
-    return challenges?.filter(c => 
-      c.status === 'pending' || 
-      (c.status === 'completed' && new Date(c.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-    ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  };
-
-  const getRecentDuoMatches = (challenges: DuoChallenge[]) => {
-    return challenges?.filter(c => 
-      c.status === 'pending' || 
-      (c.status === 'completed' && new Date(c.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-    ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  };
-
   return (
     <div className="container max-w-5xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">My Matches</h1>
@@ -212,127 +198,37 @@ const MatchRequests = () => {
         </TabsList>
 
         <TabsContent value="individual" className="space-y-4">
-          <Tabs defaultValue="recent" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="recent">Recent Matches</TabsTrigger>
-              <TabsTrigger value="all">All Challenges</TabsTrigger>
-              <TabsTrigger value="history">Match History</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="recent" className="space-y-4">
-              {!hasIndividualMatches ? (
-                <p className="text-gray-500 text-center py-8">No recent matches found</p>
-              ) : (
-                <div className="grid gap-4">
-                  {getRecentMatches(individualChallenges).map(challenge => (
-                    <ChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      type={challenge.challengeType}
-                      onResponse={handleIndividualResponse}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="all" className="space-y-4">
-              {!hasIndividualMatches ? (
-                <p className="text-gray-500 text-center py-8">No individual challenges found</p>
-              ) : (
-                <div className="grid gap-4">
-                  {individualChallenges.map(challenge => (
-                    <ChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      type={challenge.challengeType}
-                      onResponse={handleIndividualResponse}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="history" className="space-y-4">
-              {!hasIndividualMatches || !individualChallenges?.filter(c => c.status === 'completed')?.length ? (
-                <p className="text-gray-500 text-center py-8">No completed individual matches yet</p>
-              ) : (
-                <div className="grid gap-4">
-                  {individualChallenges
-                    ?.filter(c => c.status === 'completed')
-                    .map(challenge => (
-                      <ChallengeCard
-                        key={challenge.id}
-                        challenge={challenge}
-                        type={challenge.challengeType}
-                      />
-                    ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          {!hasIndividualMatches ? (
+            <p className="text-gray-500 text-center py-8">No individual matches found</p>
+          ) : (
+            <div className="grid gap-4">
+              {individualChallenges.map(challenge => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  type={challenge.challengeType}
+                  onResponse={handleIndividualResponse}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="duo" className="space-y-4">
-          <Tabs defaultValue="recent" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="recent">Recent Duo Matches</TabsTrigger>
-              <TabsTrigger value="all">All Duo Challenges</TabsTrigger>
-              <TabsTrigger value="history">Duo Match History</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="recent" className="space-y-4">
-              {!hasDuoMatches ? (
-                <p className="text-gray-500 text-center py-8">No recent duo matches found</p>
-              ) : (
-                <div className="grid gap-4">
-                  {getRecentDuoMatches(duoChallenges).map(challenge => (
-                    <DuoChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      type={challenge.challengeType}
-                      onResponse={handleDuoResponse}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="all" className="space-y-4">
-              {!hasDuoMatches ? (
-                <p className="text-gray-500 text-center py-8">No duo challenges found</p>
-              ) : (
-                <div className="grid gap-4">
-                  {duoChallenges.map(challenge => (
-                    <DuoChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      type={challenge.challengeType}
-                      onResponse={handleDuoResponse}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="history" className="space-y-4">
-              {!hasDuoMatches || !duoChallenges?.filter(c => c.status === 'completed')?.length ? (
-                <p className="text-gray-500 text-center py-8">No completed duo matches yet</p>
-              ) : (
-                <div className="grid gap-4">
-                  {duoChallenges
-                    ?.filter(c => c.status === 'completed')
-                    .map(challenge => (
-                      <DuoChallengeCard
-                        key={challenge.id}
-                        challenge={challenge}
-                        type={challenge.challengeType}
-                      />
-                    ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          {!hasDuoMatches ? (
+            <p className="text-gray-500 text-center py-8">No duo matches found</p>
+          ) : (
+            <div className="grid gap-4">
+              {duoChallenges.map(challenge => (
+                <DuoChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  type={challenge.challengeType}
+                  onResponse={handleDuoResponse}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
