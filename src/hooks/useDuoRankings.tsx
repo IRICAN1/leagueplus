@@ -9,23 +9,46 @@ export const useDuoRankings = (id: string | undefined) => {
     queryFn: async () => {
       if (!id) return null;
 
-      const { data: rankings, error } = await supabase
-        .rpc('get_duo_rankings', {
-          league_id_param: id
-        });
+      // First get all participants in the league
+      const { data: participants, error: participantsError } = await supabase
+        .from('duo_league_participants')
+        .select(`
+          duo_partnership:duo_partnerships!inner (
+            id,
+            player1:profiles!duo_partnerships_player1_id_fkey (
+              id,
+              username,
+              full_name,
+              avatar_url,
+              primary_location,
+              skill_level,
+              gender
+            ),
+            player2:profiles!duo_partnerships_player2_id_fkey (
+              id,
+              username,
+              full_name,
+              avatar_url,
+              primary_location,
+              skill_level,
+              gender
+            ),
+            duo_statistics (
+              wins,
+              losses,
+              points,
+              rank
+            )
+          )
+        `)
+        .eq('league_id', id);
 
-      if (error) throw error;
+      if (participantsError) throw participantsError;
 
-      const { data: stats, error: statsError } = await supabase
-        .from('duo_statistics')
-        .select('*')
-        .in('partnership_id', rankings.map(r => r.partnership_id));
-
-      if (statsError) throw statsError;
-
-      // Combine rankings with statistics
-      const processedRankings = rankings.map(partnership => {
-        const partnershipStats = stats.find(s => s.partnership_id === partnership.partnership_id) || {
+      // Process the participants data
+      const processedRankings = participants.map(participant => {
+        const partnership = participant.duo_partnership;
+        const stats = partnership.duo_statistics[0] || {
           wins: 0,
           losses: 0,
           points: 0,
@@ -33,30 +56,26 @@ export const useDuoRankings = (id: string | undefined) => {
         };
 
         return {
-          ...partnership,
-          ...partnershipStats
+          id: partnership.id,
+          name: `${partnership.player1.full_name || partnership.player1.username || 'Unknown'} & ${partnership.player2.full_name || partnership.player2.username || 'Unknown'}`,
+          avatar_url: partnership.player1.avatar_url,
+          avatar_url2: partnership.player2.avatar_url,
+          rank: stats.rank || 999999,
+          wins: stats.wins || 0,
+          losses: stats.losses || 0,
+          matches_played: (stats.wins || 0) + (stats.losses || 0),
+          points: stats.points || 0,
+          primary_location: partnership.player1.primary_location,
+          skill_level: partnership.player1.skill_level,
+          gender: partnership.player1.gender
         };
       });
 
-      return processedRankings;
+      // Sort by rank
+      return processedRankings.sort((a, b) => (a.rank || 999999) - (b.rank || 999999));
     },
     enabled: !!id
   });
 
-  const processedRankings: Player[] = duoRankings?.map((partnership) => ({
-    id: partnership.partnership_id,
-    name: `${partnership.player1_full_name || partnership.player1_username || 'Unknown'} & ${partnership.player2_full_name || partnership.player2_username || 'Unknown'}`,
-    avatar_url: partnership.player1_avatar_url,
-    avatar_url2: partnership.player2_avatar_url,
-    rank: partnership.rank || 999999,
-    wins: partnership.wins || 0,
-    losses: partnership.losses || 0,
-    matches_played: (partnership.wins || 0) + (partnership.losses || 0),
-    points: partnership.points || 0,
-    primary_location: partnership.player1_primary_location,
-    skill_level: partnership.player1_skill_level,
-    gender: partnership.player1_gender
-  })) || [];
-
-  return { processedRankings };
+  return { processedRankings: duoRankings || [] };
 };
