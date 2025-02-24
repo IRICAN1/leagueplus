@@ -841,6 +841,10 @@ export type Database = {
           losses: number
         }[]
       }
+      recalculate_all_duo_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       recalculate_all_player_statistics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
