@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,12 +7,39 @@ import { Trophy } from "lucide-react";
 
 interface MatchHistoryListProps {
   leagueId: string;
+  isDuo?: boolean;
 }
 
-export const MatchHistoryList = ({ leagueId }: MatchHistoryListProps) => {
+export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => {
   const { data: matches, isLoading } = useQuery({
-    queryKey: ['match-history', leagueId],
+    queryKey: ['match-history', leagueId, isDuo],
     queryFn: async () => {
+      if (isDuo) {
+        const { data, error } = await supabase
+          .from('duo_match_challenges')
+          .select(`
+            *,
+            challenger_partnership:duo_partnerships!duo_match_challenges_challenger_partnership_id_fkey(
+              id,
+              player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
+              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+            ),
+            challenged_partnership:duo_partnerships!duo_match_challenges_challenged_partnership_id_fkey(
+              id,
+              player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
+              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+            ),
+            league:duo_leagues(name)
+          `)
+          .eq('league_id', leagueId)
+          .eq('result_status', 'approved')
+          .eq('status', 'completed')
+          .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+        return data;
+      }
+
       const { data, error } = await supabase
         .from('match_challenges')
         .select(`
@@ -60,6 +88,68 @@ export const MatchHistoryList = ({ leagueId }: MatchHistoryListProps) => {
   return (
     <div className="space-y-4">
       {matches.map((match) => {
+        if (isDuo) {
+          const winnerPartnership = match.winner_partnership_id === match.challenger_partnership.id
+            ? match.challenger_partnership
+            : match.challenged_partnership;
+          const loserPartnership = match.winner_partnership_id === match.challenger_partnership.id
+            ? match.challenged_partnership
+            : match.challenger_partnership;
+
+          return (
+            <div 
+              key={match.id}
+              className="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="flex -space-x-2">
+                    <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-green-500">
+                      <AvatarImage src={winnerPartnership.player1.avatar_url} />
+                      <AvatarFallback>{winnerPartnership.player1.full_name?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-green-500">
+                      <AvatarImage src={winnerPartnership.player2.avatar_url} />
+                      <AvatarFallback>{winnerPartnership.player2.full_name?.[0]}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-green-600 truncate">
+                      {winnerPartnership.player1.full_name} & {winnerPartnership.player2.full_name}
+                      <Trophy className="h-4 w-4 inline ml-1 text-yellow-500" />
+                    </p>
+                    <p className="text-sm text-green-700">{match.winner_score}</p>
+                  </div>
+                </div>
+
+                <div className="text-sm font-medium text-gray-500">vs</div>
+
+                <div className="flex items-center gap-3 flex-1 justify-end">
+                  <div className="min-w-0 text-right">
+                    <p className="font-medium text-gray-600 truncate">
+                      {loserPartnership.player1.full_name} & {loserPartnership.player2.full_name}
+                    </p>
+                    <p className="text-sm text-gray-700">{match.loser_score}</p>
+                  </div>
+                  <div className="flex -space-x-2">
+                    <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-gray-200">
+                      <AvatarImage src={loserPartnership.player1.avatar_url} />
+                      <AvatarFallback>{loserPartnership.player1.full_name?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-gray-200">
+                      <AvatarImage src={loserPartnership.player2.avatar_url} />
+                      <AvatarFallback>{loserPartnership.player2.full_name?.[0]}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500 text-right">
+                {format(new Date(match.updated_at), 'MMM d, yyyy')}
+              </div>
+            </div>
+          );
+        }
+
         const isWinnerChallenger = match.winner_id === match.challenger_id;
         const winner = isWinnerChallenger ? match.challenger : match.challenged;
         const loser = isWinnerChallenger ? match.challenged : match.challenger;

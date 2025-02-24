@@ -40,7 +40,7 @@ export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournament
       </TabsContent>
 
       <TabsContent value="history">
-        <MatchHistoryList leagueId={leagueId} />
+        <MatchHistoryList leagueId={leagueId} isDuo={true} />
       </TabsContent>
     </Tabs>
   );
