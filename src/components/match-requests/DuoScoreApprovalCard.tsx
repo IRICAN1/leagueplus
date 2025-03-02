@@ -54,13 +54,16 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
       }
       
       // Update the match challenge with the appropriate approval status
+      // The issue is with the chaining of methods - restructuring the Supabase query
+      const updateObject = {
+        result_status: approved ? 'approved' : 'disputed',
+        approver_id: currentUserId,
+        updated_at: new Date().toISOString()
+      };
+      
       const { error } = await supabase
         .from('duo_match_challenges')
-        .update({
-          result_status: approved ? 'approved' : 'disputed',
-          approver_id: currentUserId,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateObject)
         .eq('id', challenge.id);
 
       if (error) {
