@@ -53,26 +53,42 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
         throw new Error("Cannot update match: missing challenge ID");
       }
 
-      // Add debugging to check if ID is valid
+      // Add detailed debugging information
       console.log('Challenge ID type:', typeof challenge.id);
       console.log('Challenge ID value:', challenge.id);
       
-      // Create update object
-      const updateData = {
-        result_status: approved ? 'approved' : 'disputed',
-        approver_id: currentUserId,
-        updated_at: new Date().toISOString()
-      };
-      
-      // Use a simplified update approach
+      // Use the most explicit and specific query possible
       const { error } = await supabase
         .from('duo_match_challenges')
-        .update(updateData)
-        .eq('id', challenge.id);
+        .update({
+          result_status: approved ? 'approved' : 'disputed',
+          approver_id: currentUserId,
+          updated_at: new Date().toISOString()
+        })
+        .match({ id: challenge.id });  // Using match instead of eq for robustness
 
       if (error) {
         console.error('Error in handleScoreResponse:', error);
-        throw error;
+        
+        // If match fails, try with eq as fallback
+        if (error.code === '21000') {
+          console.log('Trying alternative update method...');
+          const { error: fallbackError } = await supabase
+            .from('duo_match_challenges')
+            .update({
+              result_status: approved ? 'approved' : 'disputed',
+              approver_id: currentUserId,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', challenge.id);
+            
+          if (fallbackError) {
+            console.error('Fallback update also failed:', fallbackError);
+            throw fallbackError;
+          }
+        } else {
+          throw error;
+        }
       }
 
       // Invalidate relevant queries to refresh data
