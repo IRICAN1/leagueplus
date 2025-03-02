@@ -50,6 +50,7 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
       console.log('Updating duo match challenge:', challenge.id, 'with approval:', approved);
       
       // Update the match challenge with the appropriate approval status
+      // FIX: Add the WHERE clause to specify which match to update
       const { error } = await supabase
         .from('duo_match_challenges')
         .update({
