@@ -47,17 +47,18 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
 
   const handleScoreResponse = async (approved: boolean) => {
     try {
-      console.log('Updating duo match challenge:', challenge.id, 'with approval:', approved);
+      console.log('Updating duo match challenge with ID:', challenge.id);
+      console.log('Setting result_status to:', approved ? 'approved' : 'disputed');
       
       if (!challenge.id) {
         throw new Error("Cannot update match: missing challenge ID");
       }
 
-      // Add detailed debugging information
-      console.log('Challenge ID type:', typeof challenge.id);
-      console.log('Challenge ID value:', challenge.id);
+      // More explicit approach with stringified query parameters
+      const challengeId = challenge.id.toString();
+      console.log('Using challenge ID (string):', challengeId);
       
-      // Use the most explicit and specific query possible
+      // Use the single record update endpoint to avoid WHERE clause issues
       const { error } = await supabase
         .from('duo_match_challenges')
         .update({
@@ -65,31 +66,14 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
           approver_id: currentUserId,
           updated_at: new Date().toISOString()
         })
-        .match({ id: challenge.id });  // Using match instead of eq for robustness
+        .eq('id', challengeId);
 
       if (error) {
-        console.error('Error in handleScoreResponse:', error);
-        
-        // If match fails, try with eq as fallback
-        if (error.code === '21000') {
-          console.log('Trying alternative update method...');
-          const { error: fallbackError } = await supabase
-            .from('duo_match_challenges')
-            .update({
-              result_status: approved ? 'approved' : 'disputed',
-              approver_id: currentUserId,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', challenge.id);
-            
-          if (fallbackError) {
-            console.error('Fallback update also failed:', fallbackError);
-            throw fallbackError;
-          }
-        } else {
-          throw error;
-        }
+        console.error('Error updating match challenge:', error);
+        throw error;
       }
+
+      console.log('Successfully updated challenge with ID:', challengeId);
 
       // Invalidate relevant queries to refresh data
       await Promise.all([
@@ -114,7 +98,7 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
       console.error('Error in handleScoreResponse:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to process score response",
         variant: "destructive",
       });
     }
