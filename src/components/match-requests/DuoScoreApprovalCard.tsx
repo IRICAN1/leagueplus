@@ -49,8 +49,11 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
     try {
       console.log('Updating duo match challenge:', challenge.id, 'with approval:', approved);
       
+      if (!challenge.id) {
+        throw new Error("Cannot update match: missing challenge ID");
+      }
+      
       // Update the match challenge with the appropriate approval status
-      // FIX: Add the WHERE clause to specify which match to update
       const { error } = await supabase
         .from('duo_match_challenges')
         .update({
@@ -58,7 +61,7 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
           approver_id: currentUserId,
           updated_at: new Date().toISOString()
         })
-        .eq('id', challenge.id); // Add the WHERE clause to specify which match to update
+        .eq('id', challenge.id);
 
       if (error) {
         console.error('Error in handleScoreResponse:', error);
