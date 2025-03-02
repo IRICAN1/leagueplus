@@ -19,7 +19,7 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
     try {
       console.log('Updating match challenge:', challenge.id, 'with approval:', approved);
       
-      // First update the match challenge status
+      // First update the match challenge status - use a simpler approach
       const { error: updateError } = await supabase
         .from('match_challenges')
         .update({
@@ -28,14 +28,20 @@ export const ResultApprovalCard = ({ challenge, currentUserId }: ResultApprovalC
         })
         .eq('id', challenge.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating match challenge:', updateError);
+        throw updateError;
+      }
 
       // If approved, trigger the recalculation of all player statistics
       if (approved) {
         const { error: recalcError } = await supabase
           .rpc('recalculate_all_player_statistics');
         
-        if (recalcError) throw recalcError;
+        if (recalcError) {
+          console.error('Error recalculating player statistics:', recalcError);
+          throw recalcError;
+        }
       }
 
       await Promise.all([
