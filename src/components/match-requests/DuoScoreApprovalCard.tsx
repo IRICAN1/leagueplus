@@ -19,6 +19,32 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Check if the current user is from the opposing partnership
+  const isFromOpposingPartnership = () => {
+    // If the current user is the submitter, they can't approve
+    if (challenge.submitter_id === currentUserId) {
+      return false;
+    }
+
+    // Determine which partnership the submitter belongs to
+    const submitterPartnership = 
+      (challenge.challenger_partnership.player1.id === challenge.submitter_id || 
+       challenge.challenger_partnership.player2.id === challenge.submitter_id) 
+        ? challenge.challenger_partnership 
+        : challenge.challenged_partnership;
+    
+    // Check if current user is in the other partnership
+    const opposingPartnership = 
+      submitterPartnership.id === challenge.challenger_partnership.id 
+        ? challenge.challenged_partnership 
+        : challenge.challenger_partnership;
+    
+    return (
+      opposingPartnership.player1.id === currentUserId || 
+      opposingPartnership.player2.id === currentUserId
+    );
+  };
+
   const handleScoreResponse = async (approved: boolean) => {
     try {
       console.log('Updating duo match challenge:', challenge.id, 'with approval:', approved);
@@ -69,9 +95,14 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
 
   // Skip rendering if the current user submitted the score
   if (challenge.submitter_id === currentUserId) {
+    return null;
+  }
+
+  // Skip rendering if the current user is not from the opposing partnership
+  if (!isFromOpposingPartnership()) {
     return (
-      <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
-        <p className="text-sm text-yellow-800">Waiting for opponent to approve the result</p>
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        <p className="text-sm text-gray-500">Only players from the opposing partnership can approve the result</p>
       </div>
     );
   }

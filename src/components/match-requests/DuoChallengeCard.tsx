@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, CircleDot, Check, Users } from "lucide-react";
+import { Trophy, Calendar, CircleDot, Check, Users, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { MatchScoresTable } from "./MatchScoresTable";
@@ -112,12 +112,60 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
     matchTime <= now && 
     !challenge.winner_partnership_id;
 
+  // Check if the current user has submitted a score
+  const hasSubmittedScore = challenge.submitter_id === currentUserId;
+
   const handleScoreApproved = () => {
     console.log('Score approved for challenge:', challenge.id);
     // Refetch the data by calling onResponse if it exists
     if (onResponse) {
       onResponse(challenge.id, true);
     }
+  };
+
+  // Get the appropriate status badge based on challenge status and result status
+  const getStatusBadge = () => {
+    if (challenge.status === 'completed') {
+      if (challenge.result_status === 'pending') {
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200">
+            <Clock className="h-3 w-3 mr-1" />
+            Awaiting Approval
+          </Badge>
+        );
+      } else if (challenge.result_status === 'approved') {
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
+            <Check className="h-3 w-3 mr-1" />
+            Completed
+          </Badge>
+        );
+      } else if (challenge.result_status === 'disputed') {
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">
+            <CircleDot className="h-3 w-3 mr-1" />
+            Disputed
+          </Badge>
+        );
+      }
+    }
+    
+    return (
+      <Badge variant="outline" className={`text-xs px-1.5 py-0.5 self-start sm:self-center whitespace-nowrap ${
+        challenge.status === 'completed' 
+          ? 'bg-green-50 text-green-600 border-green-200' 
+          : challenge.status === 'pending'
+          ? 'bg-yellow-50 text-yellow-600 border-yellow-200'
+          : 'bg-blue-50 text-blue-600 border-blue-200'
+      }`}>
+        {challenge.status === 'completed' ? (
+          <Check className="h-3 w-3 mr-1" />
+        ) : (
+          <CircleDot className="h-3 w-3 mr-1" />
+        )}
+        {challenge.status}
+      </Badge>
+    );
   };
 
   return (
@@ -135,20 +183,7 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
               {renderPartnership(otherPartnership, challenge.winner_partnership_id === otherPartnership.id)}
             </div>
 
-            <Badge variant="outline" className={`text-xs px-1.5 py-0.5 self-start sm:self-center whitespace-nowrap ${
-              challenge.status === 'completed' 
-                ? 'bg-green-50 text-green-600 border-green-200' 
-                : challenge.status === 'pending'
-                ? 'bg-yellow-50 text-yellow-600 border-yellow-200'
-                : 'bg-blue-50 text-blue-600 border-blue-200'
-            }`}>
-              {challenge.status === 'completed' ? (
-                <Check className="h-3 w-3 mr-1" />
-              ) : (
-                <CircleDot className="h-3 w-3 mr-1" />
-              )}
-              {challenge.status}
-            </Badge>
+            {getStatusBadge()}
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 mt-2">
@@ -191,7 +226,13 @@ export const DuoChallengeCard = ({ challenge, type, onResponse }: DuoChallengeCa
             <DuoMatchScoreDialog challenge={challenge} currentUserId={currentUserId} />
           )}
 
-          {challenge.status === 'completed' && challenge.result_status === 'pending' && (
+          {challenge.status === 'completed' && challenge.result_status === 'pending' && hasSubmittedScore && (
+            <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+              <p className="text-sm text-yellow-800">Waiting for opponent to approve the result</p>
+            </div>
+          )}
+
+          {challenge.status === 'completed' && challenge.result_status === 'pending' && !hasSubmittedScore && (
             <DuoScoreApprovalCard 
               challenge={challenge} 
               currentUserId={currentUserId} 
