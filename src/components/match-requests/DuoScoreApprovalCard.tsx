@@ -49,9 +49,14 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
     try {
       console.log('Updating duo match challenge with ID:', challenge.id);
       console.log('Setting result_status to:', approved ? 'approved' : 'disputed');
+      console.log('Setting approver_id to:', currentUserId);
       
       if (!challenge.id) {
         throw new Error("Cannot update match: missing challenge ID");
+      }
+
+      if (!currentUserId) {
+        throw new Error("Cannot update match: user not authenticated");
       }
 
       // More explicit approach with stringified query parameters
@@ -74,6 +79,7 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
       }
 
       console.log('Successfully updated challenge with ID:', challengeId);
+      console.log('Approver ID set to:', currentUserId);
 
       // Invalidate relevant queries to refresh data
       await Promise.all([
