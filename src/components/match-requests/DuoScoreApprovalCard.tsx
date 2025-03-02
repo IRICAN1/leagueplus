@@ -53,14 +53,14 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
         throw new Error("Cannot update match: missing challenge ID");
       }
       
-      // Update the match challenge with the appropriate approval status
-      // The issue is with the chaining of methods - restructuring the Supabase query
+      // Fix the update query by first constructing the update object
       const updateObject = {
         result_status: approved ? 'approved' : 'disputed',
         approver_id: currentUserId,
         updated_at: new Date().toISOString()
       };
       
+      // Use the more explicit form of the query with proper chaining
       const { error } = await supabase
         .from('duo_match_challenges')
         .update(updateObject)
