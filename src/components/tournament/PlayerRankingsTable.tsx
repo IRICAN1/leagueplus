@@ -1,4 +1,3 @@
-
 import { Table, TableBody } from "@/components/ui/table";
 import { UserRound } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,14 +41,10 @@ export const PlayerRankingsTable = ({ leagueId, sortBy, playerStats, isDuo }: Pl
       }
 
       if (isDuo) {
-        console.log("Processing duo stats, total entries:", playerStats.length);
         const mappedStats = playerStats.map((stat, index) => ({
-          id: stat.id,
-          name: `${stat.player1?.username || stat.player1?.full_name || 'Unknown'} & ${stat.player2?.username || stat.player2?.full_name || 'Unknown'}`,
+          id: stat.duo_partnership_id,
+          name: `${stat.player1?.username || 'Unknown'} & ${stat.player2?.username || 'Unknown'}`,
           avatar_url: stat.player1?.avatar_url,
-          avatar_url2: stat.player2?.avatar_url,
-          player1_id: stat.player1_id,
-          player2_id: stat.player2_id,
           rank: sortBy === 'points' ? stat.rank : index + 1,
           wins: stat.wins || 0,
           losses: stat.losses || 0,

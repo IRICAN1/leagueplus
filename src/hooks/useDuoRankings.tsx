@@ -9,7 +9,7 @@ export const useDuoRankings = (id: string | undefined) => {
     queryFn: async () => {
       if (!id) return null;
 
-      // Get all participants in the league - the query should return ALL partnerships
+      // First get all participants in the league
       const { data: participants, error: participantsError } = await supabase
         .from('duo_league_participants')
         .select(`
@@ -43,15 +43,10 @@ export const useDuoRankings = (id: string | undefined) => {
         `)
         .eq('league_id', id);
 
-      if (participantsError) {
-        console.error("Error fetching duo participants:", participantsError);
-        throw participantsError;
-      }
-
-      console.log("Fetched duo participants:", participants?.length);
+      if (participantsError) throw participantsError;
 
       // Process the participants data
-      const processedRankings = participants?.map(participant => {
+      const processedRankings = participants.map(participant => {
         const partnership = participant.duo_partnership;
         const stats = partnership.duo_statistics[0] || {
           wins: 0,
@@ -70,13 +65,11 @@ export const useDuoRankings = (id: string | undefined) => {
           losses: stats.losses || 0,
           matches_played: (stats.wins || 0) + (stats.losses || 0),
           points: stats.points || 0,
-          player1_id: partnership.player1.id,
-          player2_id: partnership.player2.id,
           primary_location: partnership.player1.primary_location,
           skill_level: partnership.player1.skill_level,
           gender: partnership.player1.gender
         };
-      }) || [];
+      });
 
       // Sort by rank
       return processedRankings.sort((a, b) => (a.rank || 999999) - (b.rank || 999999));

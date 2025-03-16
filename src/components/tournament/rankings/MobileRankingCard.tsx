@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Swords } from "lucide-react";
@@ -25,11 +24,6 @@ export const MobileRankingCard = ({
     ? ((player.wins / player.matches_played) * 100).toFixed(1)
     : "0.0";
 
-  // Check if current user is a member of this partnership (for duo)
-  const isUserInPartnership = 
-    (player.player1_id && player.player1_id === currentUserId) || 
-    (player.player2_id && player.player2_id === currentUserId);
-
   return (
     <div 
       key={player.id}
@@ -54,7 +48,7 @@ export const MobileRankingCard = ({
             <span className="text-blue-600">{player.matches_played} matches</span>
           )}
         </div>
-        {currentUserId && !isUserInPartnership && (
+        {currentUserId && player.id !== currentUserId && (
           <Button
             size="sm"
             variant="outline"

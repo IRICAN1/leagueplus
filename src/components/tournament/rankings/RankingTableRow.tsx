@@ -1,4 +1,3 @@
-
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Swords } from "lucide-react";
@@ -25,11 +24,6 @@ export const RankingTableRow = ({
   const winRate = player.matches_played > 0 
     ? ((player.wins / player.matches_played) * 100).toFixed(1)
     : "0.0";
-
-  // Check if current user is a member of this partnership (for duo)
-  const isUserInPartnership = 
-    (player.player1_id && player.player1_id === currentUserId) || 
-    (player.player2_id && player.player2_id === currentUserId);
 
   return (
     <TableRow 
@@ -62,7 +56,7 @@ export const RankingTableRow = ({
         </span>
       </TableCell>
       <TableCell>
-        {currentUserId && !isUserInPartnership && (
+        {currentUserId && player.id !== currentUserId && (
           <Button
             size="sm"
             variant="outline"
