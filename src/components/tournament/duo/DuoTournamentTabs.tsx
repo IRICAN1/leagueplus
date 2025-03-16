@@ -4,6 +4,7 @@ import { Calendar, History, Trophy } from "lucide-react";
 import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
 import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
 import { TournamentPlayersList } from "@/components/tournament/TournamentPlayersList";
+import { PlayerRankingsTable } from "@/components/tournament/PlayerRankingsTable";
 
 interface DuoTournamentTabsProps {
   leagueId: string;
@@ -32,7 +33,16 @@ export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournament
       </TabsList>
       
       <TabsContent value="rankings">
-        <TournamentPlayersList leagueId={leagueId} isDuo={true} />
+        {processedRankings && processedRankings.length > 0 ? (
+          <PlayerRankingsTable
+            leagueId={leagueId}
+            sortBy="points"
+            playerStats={processedRankings}
+            isDuo={true}
+          />
+        ) : (
+          <TournamentPlayersList leagueId={leagueId} isDuo={true} />
+        )}
       </TabsContent>
 
       <TabsContent value="matches">
