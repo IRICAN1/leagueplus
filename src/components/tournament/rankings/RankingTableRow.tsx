@@ -28,8 +28,8 @@ export const RankingTableRow = ({
 
   // Check if current user is a member of this partnership (for duo)
   const isUserInPartnership = 
-    player.player1_id === currentUserId || 
-    player.player2_id === currentUserId;
+    (player.player1_id && player.player1_id === currentUserId) || 
+    (player.player2_id && player.player2_id === currentUserId);
 
   return (
     <TableRow 
