@@ -19,7 +19,7 @@ const Index = () => {
   const [filters, setFilters] = useState<LeagueFilters>({});
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
   const [leagueType, setLeagueType] = useState<LeagueType>('duo');
-  const [activeTab, setActiveTab] = useState<'leagues' | 'duos'>('leagues');
+  const [activeTab, setActiveTab] = useState<'leagues' | 'duos'>('duos'); // Set duos as default
 
   // Query for standard leagues
   const { data, isLoading, error } = useQuery({

@@ -33,9 +33,16 @@ export const SearchHeader = ({ onSearch, activeTab = 'leagues', onTabChange }: S
     setIsLoading(true);
     try {
       const tableName = activeTab === 'duos' ? 'duo_leagues' : 'leagues';
+      const participantsTable = activeTab === 'duos' ? 'duo_league_participants' : 'league_participants';
+      
       const { data, error } = await supabase
         .from(tableName)
-        .select('id, name')
+        .select(`
+          *,
+          ${participantsTable} (
+            id
+          )
+        `)
         .ilike('name', `%${value}%`)
         .order('name')
         .limit(10);
@@ -86,7 +93,7 @@ export const SearchHeader = ({ onSearch, activeTab = 'leagues', onTabChange }: S
             onClick={() => onTabChange('duos')}
           >
             <Users2 className="h-4 w-4 inline mr-2" />
-            Duo Leagues
+            Duo Tournaments
           </button>
         </div>
       )}
@@ -95,7 +102,7 @@ export const SearchHeader = ({ onSearch, activeTab = 'leagues', onTabChange }: S
         <div className="relative">
           <Input
             type="text"
-            placeholder={`Search ${activeTab === 'duos' ? 'duo leagues' : 'leagues'}...`}
+            placeholder={`Search ${activeTab === 'duos' ? 'duo tournaments' : 'leagues'}...`}
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-full h-12 pl-4 pr-12 text-left font-normal bg-white/80 border-blue-100 focus-visible:ring-blue-400"

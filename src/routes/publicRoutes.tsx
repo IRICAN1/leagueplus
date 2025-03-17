@@ -1,3 +1,4 @@
+
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -8,6 +9,10 @@ import DuoTournamentDetails from "@/pages/DuoTournamentDetails";
 export const publicRoutes = [
   {
     path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/duo-leagues",
     element: <Index />,
   },
   {
