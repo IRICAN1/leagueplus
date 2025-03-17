@@ -9,6 +9,8 @@ import { LeagueTypeSelector } from "@/components/leagues/LeagueTypeSelector";
 import { LeaguesList } from "@/components/leagues/LeaguesList";
 import { LeagueGlobalRankingPreview } from "@/components/leagues/LeagueGlobalRankingPreview";
 import { LeagueType, LeagueFilters, DuoLeague, IndividualLeague, isDuoLeague } from "@/types/league";
+import { PublicDuoLeaguesList } from "@/components/leagues/PublicDuoLeaguesList";
+import { useAllDuoLeagues } from "@/hooks/useAllDuoLeagues";
 
 const LEAGUES_PER_PAGE = 10;
 
@@ -17,7 +19,9 @@ const Index = () => {
   const [filters, setFilters] = useState<LeagueFilters>({});
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
   const [leagueType, setLeagueType] = useState<LeagueType>('duo');
+  const [activeTab, setActiveTab] = useState<'leagues' | 'duos'>('leagues');
 
+  // Query for standard leagues
   const { data, isLoading, error } = useQuery({
     queryKey: ['leagues', page, filters, selectedLeagueId, leagueType],
     queryFn: async () => {
@@ -96,7 +100,14 @@ const Index = () => {
 
       return filteredData;
     },
+    enabled: activeTab === 'leagues',
   });
+
+  // Get all duo leagues for the public display
+  const { 
+    data: duoLeaguesData, 
+    isLoading: duoLeaguesLoading 
+  } = useAllDuoLeagues(page, LEAGUES_PER_PAGE);
 
   if (error) {
     toast.error('Failed to load leagues');
@@ -113,6 +124,12 @@ const Index = () => {
     setPage(1);
   };
 
+  const handleTabChange = (tab: 'leagues' | 'duos') => {
+    setActiveTab(tab);
+    setSelectedLeagueId(null);
+    setPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
       <div className="container max-w-4xl mx-auto py-4 md:py-8 space-y-6 px-4 mt-16 md:mt-20">
@@ -125,35 +142,54 @@ const Index = () => {
           </p>
         </div>
 
-        <LeagueTypeSelector 
-          leagueType={leagueType} 
-          onLeagueTypeChange={setLeagueType} 
+        {activeTab === 'leagues' && (
+          <LeagueTypeSelector 
+            leagueType={leagueType} 
+            onLeagueTypeChange={setLeagueType} 
+          />
+        )}
+
+        <SearchHeader 
+          onSearch={handleSearch} 
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
         />
 
-        <SearchHeader onSearch={handleSearch} />
-        <FilterBar 
-          onFilterChange={handleFilterChange}
-          filters={filters}
-        />
+        {activeTab === 'leagues' && (
+          <FilterBar 
+            onFilterChange={handleFilterChange}
+            filters={filters}
+          />
+        )}
 
         {selectedLeagueId && (
           <div className="mb-6">
             <LeagueGlobalRankingPreview 
               leagueId={selectedLeagueId} 
-              leagueType={leagueType} 
+              leagueType={activeTab === 'duos' ? 'duo' : leagueType} 
             />
           </div>
         )}
 
-        <LeaguesList
-          data={data || []}
-          isLoading={isLoading}
-          leagueType={leagueType}
-          selectedLeagueId={selectedLeagueId}
-          page={page}
-          onPageChange={setPage}
-          itemsPerPage={LEAGUES_PER_PAGE}
-        />
+        {activeTab === 'leagues' ? (
+          <LeaguesList
+            data={data || []}
+            isLoading={isLoading}
+            leagueType={leagueType}
+            selectedLeagueId={selectedLeagueId}
+            page={page}
+            onPageChange={setPage}
+            itemsPerPage={LEAGUES_PER_PAGE}
+          />
+        ) : (
+          <PublicDuoLeaguesList
+            leagues={duoLeaguesData?.leagues || []}
+            isLoading={duoLeaguesLoading}
+            currentPage={page}
+            totalPages={duoLeaguesData?.totalPages || 1}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   );
