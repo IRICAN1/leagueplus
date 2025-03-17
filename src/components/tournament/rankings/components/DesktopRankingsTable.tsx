@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface DesktopRankingsTableProps {
   players: any[];
-  sortType: 'points' | 'matches' | 'winrate';
+  sortType: 'points' | 'matches' | 'winrate' | 'global';
 }
 
 export const DesktopRankingsTable = ({ players, sortType }: DesktopRankingsTableProps) => {
@@ -19,16 +19,16 @@ export const DesktopRankingsTable = ({ players, sortType }: DesktopRankingsTable
           <TableHead className="text-right">Location</TableHead>
           <TableHead className="text-right">W/L</TableHead>
           <TableHead className="text-right">
-            {sortType === 'points' ? 'Points' : 
+            {sortType === 'points' || sortType === 'global' ? 'Points' : 
              sortType === 'matches' ? 'Matches' : 'Win Rate'}
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {players.map((player, index) => (
-          <TableRow key={player.id} className={index < 3 && sortType !== 'winrate' ? 'bg-blue-50/30' : ''}>
+          <TableRow key={player.id} className={index < 3 && (sortType !== 'winrate' && sortType !== 'global') ? 'bg-blue-50/30' : ''}>
             <TableCell className="font-medium">
-              {sortType !== 'winrate' && player.stats.rank <= 3 ? (
+              {sortType !== 'winrate' && sortType !== 'global' && player.stats.rank <= 3 ? (
                 player.stats.rank === 1 ? (
                   <Trophy className="h-5 w-5 text-yellow-500 inline-block mr-1" />
                 ) : player.stats.rank === 2 ? (
@@ -37,7 +37,7 @@ export const DesktopRankingsTable = ({ players, sortType }: DesktopRankingsTable
                   <Medal className="h-5 w-5 text-amber-500 inline-block mr-1" />
                 )
               ) : null}
-              #{sortType === 'winrate' ? index + 1 : (player.stats.rank === 999999 ? '-' : player.stats.rank)}
+              #{sortType === 'winrate' || sortType === 'global' ? index + 1 : (player.stats.rank === 999999 ? '-' : player.stats.rank)}
             </TableCell>
             <TableCell>
               <div className="flex items-center space-x-3">
@@ -64,11 +64,11 @@ export const DesktopRankingsTable = ({ players, sortType }: DesktopRankingsTable
             </TableCell>
             <TableCell className="text-right">
               <Badge variant="outline" className={`
-                ${sortType === 'points' ? 'bg-blue-100 text-blue-700 border-blue-200' : 
+                ${sortType === 'points' || sortType === 'global' ? 'bg-blue-100 text-blue-700 border-blue-200' : 
                   sortType === 'matches' ? 'bg-green-100 text-green-700 border-green-200' :
                   'bg-purple-100 text-purple-700 border-purple-200'}
               `}>
-                {sortType === 'points' ? `${player.stats.points}` : 
+                {sortType === 'points' || sortType === 'global' ? `${player.stats.points}` : 
                  sortType === 'matches' ? `${player.stats.matchesPlayed}` :
                  `${player.stats.winRate}%`}
               </Badge>

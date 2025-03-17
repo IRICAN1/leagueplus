@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface MobileRankingsListProps {
   players: any[];
-  sortType: 'points' | 'matches' | 'winrate';
+  sortType: 'points' | 'matches' | 'winrate' | 'global';
 }
 
 export const MobileRankingsList = ({ players, sortType }: MobileRankingsListProps) => {
@@ -16,7 +16,7 @@ export const MobileRankingsList = ({ players, sortType }: MobileRankingsListProp
           <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-purple-50 p-2">
             <div className="flex items-center space-x-2">
               <Badge variant="outline" className="bg-white text-blue-600 font-bold">
-                #{sortType === 'winrate' ? index + 1 : (player.stats.rank === 999999 ? '-' : player.stats.rank)}
+                #{sortType === 'winrate' || sortType === 'global' ? index + 1 : (player.stats.rank === 999999 ? '-' : player.stats.rank)}
               </Badge>
               <div className="flex -space-x-2">
                 <Avatar className="h-8 w-8 border-2 border-white">
@@ -31,12 +31,12 @@ export const MobileRankingsList = ({ players, sortType }: MobileRankingsListProp
             </div>
             <Badge 
               className={`${
-                sortType === 'points' ? 'bg-blue-100 text-blue-700' : 
+                sortType === 'points' || sortType === 'global' ? 'bg-blue-100 text-blue-700' : 
                 sortType === 'matches' ? 'bg-green-100 text-green-700' :
                 'bg-purple-100 text-purple-700'
               }`}
             >
-              {sortType === 'points' ? `${player.stats.points} pts` : 
+              {sortType === 'points' || sortType === 'global' ? `${player.stats.points} pts` : 
                sortType === 'matches' ? `${player.stats.matchesPlayed} matches` :
                `${player.stats.winRate}% wins`}
             </Badge>
