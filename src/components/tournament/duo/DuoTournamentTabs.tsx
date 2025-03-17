@@ -1,9 +1,10 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, History, Trophy } from "lucide-react";
+import { Calendar, History, Trophy, Globe } from "lucide-react";
 import { UpcomingMatches } from "@/components/tournament/matches/UpcomingMatches";
 import { MatchHistoryList } from "@/components/tournament/matches/MatchHistoryList";
 import { TournamentPlayersList } from "@/components/tournament/TournamentPlayersList";
+import { LeagueGlobalRankings } from "@/components/tournament/rankings/LeagueGlobalRankings";
 
 interface DuoTournamentTabsProps {
   leagueId: string;
@@ -19,6 +20,11 @@ export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournament
           <span className="hidden sm:inline">Rankings</span>
           <span className="sm:hidden">Rank</span>
         </TabsTrigger>
+        <TabsTrigger value="global" className="flex-1 sm:flex-none">
+          <Globe className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Global Stats</span>
+          <span className="sm:hidden">Stats</span>
+        </TabsTrigger>
         <TabsTrigger value="matches" className="flex-1 sm:flex-none">
           <Calendar className="h-4 w-4 mr-2" />
           <span className="hidden sm:inline">Upcoming Matches</span>
@@ -33,6 +39,10 @@ export const DuoTournamentTabs = ({ leagueId, processedRankings }: DuoTournament
       
       <TabsContent value="rankings">
         <TournamentPlayersList leagueId={leagueId} isDuo={true} />
+      </TabsContent>
+
+      <TabsContent value="global">
+        <LeagueGlobalRankings leagueId={leagueId} />
       </TabsContent>
 
       <TabsContent value="matches">
