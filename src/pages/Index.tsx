@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { LeagueTypeSelector } from "@/components/leagues/LeagueTypeSelector";
 import { LeaguesList } from "@/components/leagues/LeaguesList";
+import { LeagueGlobalRankingPreview } from "@/components/leagues/LeagueGlobalRankingPreview";
 import { LeagueType, LeagueFilters, DuoLeague, IndividualLeague, isDuoLeague } from "@/types/league";
 
 const LEAGUES_PER_PAGE = 10;
@@ -134,6 +135,15 @@ const Index = () => {
           onFilterChange={handleFilterChange}
           filters={filters}
         />
+
+        {selectedLeagueId && (
+          <div className="mb-6">
+            <LeagueGlobalRankingPreview 
+              leagueId={selectedLeagueId} 
+              leagueType={leagueType} 
+            />
+          </div>
+        )}
 
         <LeaguesList
           data={data || []}
