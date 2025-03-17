@@ -41,12 +41,6 @@ export const LeagueGlobalRankings = ({ leagueId }: LeagueGlobalRankingsProps) =>
               primary_location,
               skill_level,
               gender
-            ),
-            duo_statistics (
-              wins,
-              losses,
-              points,
-              rank
             )
           )
         `)
@@ -54,9 +48,32 @@ export const LeagueGlobalRankings = ({ leagueId }: LeagueGlobalRankingsProps) =>
 
       if (error) throw error;
       
+      // Get all partnership IDs to fetch stats
+      const partnershipIds = data.map(item => item.duo_partnership.id);
+      
+      // Fetch all statistics in a separate query
+      const { data: statsData, error: statsError } = await supabase
+        .from('duo_statistics')
+        .select('*')
+        .in('partnership_id', partnershipIds);
+        
+      if (statsError) throw statsError;
+      
+      // Create a map for easy lookup
+      const statsMap = new Map();
+      statsData?.forEach(stat => {
+        statsMap.set(stat.partnership_id, stat);
+      });
+      
       const processedData = data.map(item => {
         const partnership = item.duo_partnership;
-        const stats = partnership.duo_statistics[0] || { wins: 0, losses: 0, points: 0, rank: 999999 };
+        // Look up stats or use default values
+        const stats = statsMap.get(partnership.id) || { 
+          wins: 0, 
+          losses: 0, 
+          points: 0, 
+          rank: 999999 
+        };
         
         return {
           id: partnership.id,
@@ -85,7 +102,7 @@ export const LeagueGlobalRankings = ({ leagueId }: LeagueGlobalRankingsProps) =>
         };
       });
       
-      const pointsSorted = [...processedData].sort((a, b) => a.stats.rank - b.stats.rank);
+      const pointsSorted = [...processedData].sort((a, b) => b.stats.points - a.stats.points || a.stats.rank - b.stats.rank);
       const matchesSorted = [...processedData].sort((a, b) => b.stats.matchesPlayed - a.stats.matchesPlayed);
       const winRateSorted = [...processedData]
         .filter(player => player.stats.matchesPlayed > 0)
@@ -94,7 +111,8 @@ export const LeagueGlobalRankings = ({ leagueId }: LeagueGlobalRankingsProps) =>
       return {
         byPoints: pointsSorted,
         byMatches: matchesSorted,
-        byWinRate: winRateSorted
+        byWinRate: winRateSorted,
+        all: processedData // Include all players for complete reference
       };
     }
   });
@@ -160,15 +178,20 @@ export const LeagueGlobalRankings = ({ leagueId }: LeagueGlobalRankingsProps) =>
   );
 
   function renderRankingTable(players: any[], sortType: 'points' | 'matches' | 'winrate') {
+    // For winrate, only show players with matches
+    const displayPlayers = sortType === 'winrate' 
+      ? players 
+      : rankings.all; // Use all players for points and matches tabs
+    
     if (isMobile) {
       return (
         <div className="p-3 space-y-3">
-          {players.map((player, index) => (
+          {displayPlayers.map((player, index) => (
             <Card key={player.id} className="overflow-hidden shadow-sm">
               <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-purple-50 p-2">
                 <div className="flex items-center space-x-2">
                   <Badge variant="outline" className="bg-white text-blue-600 font-bold">
-                    #{index + 1}
+                    #{sortType === 'winrate' ? index + 1 : (player.stats.rank === 999999 ? '-' : player.stats.rank)}
                   </Badge>
                   <div className="flex -space-x-2">
                     <Avatar className="h-8 w-8 border-2 border-white">
@@ -227,17 +250,19 @@ export const LeagueGlobalRankings = ({ leagueId }: LeagueGlobalRankingsProps) =>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {players.map((player, index) => (
-            <TableRow key={player.id} className={index < 3 ? 'bg-blue-50/30' : ''}>
+          {displayPlayers.map((player, index) => (
+            <TableRow key={player.id} className={index < 3 && sortType !== 'winrate' ? 'bg-blue-50/30' : ''}>
               <TableCell className="font-medium">
-                {index === 0 ? (
-                  <Trophy className="h-5 w-5 text-yellow-500 inline-block mr-1" />
-                ) : index === 1 ? (
-                  <Medal className="h-5 w-5 text-gray-500 inline-block mr-1" />
-                ) : index === 2 ? (
-                  <Medal className="h-5 w-5 text-amber-500 inline-block mr-1" />
+                {sortType !== 'winrate' && player.stats.rank <= 3 ? (
+                  player.stats.rank === 1 ? (
+                    <Trophy className="h-5 w-5 text-yellow-500 inline-block mr-1" />
+                  ) : player.stats.rank === 2 ? (
+                    <Medal className="h-5 w-5 text-gray-500 inline-block mr-1" />
+                  ) : (
+                    <Medal className="h-5 w-5 text-amber-500 inline-block mr-1" />
+                  )
                 ) : null}
-                #{index + 1}
+                #{sortType === 'winrate' ? index + 1 : (player.stats.rank === 999999 ? '-' : player.stats.rank)}
               </TableCell>
               <TableCell>
                 <div className="flex items-center space-x-3">
