@@ -5,6 +5,7 @@ import Register from "@/pages/Register";
 import DuoSearch from "@/pages/DuoSearch";
 import TournamentDetails from "@/pages/TournamentDetails";
 import DuoTournamentDetails from "@/pages/DuoTournamentDetails";
+import AllDuoLeagues from "@/pages/AllDuoLeagues";
 
 export const publicRoutes = [
   {
@@ -14,6 +15,10 @@ export const publicRoutes = [
   {
     path: "/duo-leagues",
     element: <Index />,
+  },
+  {
+    path: "/all-duo-leagues",
+    element: <AllDuoLeagues />,
   },
   {
     path: "/login",

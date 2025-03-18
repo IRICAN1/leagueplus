@@ -11,6 +11,8 @@ import { LeagueGlobalRankingPreview } from "@/components/leagues/LeagueGlobalRan
 import { LeagueType, LeagueFilters, DuoLeague, IndividualLeague, isDuoLeague } from "@/types/league";
 import { PublicDuoLeaguesList } from "@/components/leagues/PublicDuoLeaguesList";
 import { useAllDuoLeagues } from "@/hooks/useAllDuoLeagues";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const LEAGUES_PER_PAGE = 10;
 
@@ -163,6 +165,14 @@ const Index = () => {
             onFilterChange={handleFilterChange}
             filters={filters}
           />
+        )}
+
+        {activeTab === 'duos' && (
+          <div className="flex justify-center mb-4">
+            <Button asChild className="bg-blue-600 hover:bg-blue-700">
+              <Link to="/all-duo-leagues">View All Duo Tournaments</Link>
+            </Button>
+          </div>
         )}
 
         {selectedLeagueId && (
