@@ -1,9 +1,9 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Trophy } from "lucide-react";
+import { Trophy, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface MatchHistoryListProps {
   leagueId: string;
@@ -22,12 +22,14 @@ export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => 
             challenger_partnership:duo_partnerships!duo_match_challenges_challenger_partnership_id_fkey(
               id,
               player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url),
+              duo_statistics(points, wins, losses)
             ),
             challenged_partnership:duo_partnerships!duo_match_challenges_challenged_partnership_id_fkey(
               id,
               player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+              player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url),
+              duo_statistics(points, wins, losses)
             ),
             league:duo_leagues(name)
           `)
@@ -37,6 +39,20 @@ export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => 
           .order('updated_at', { ascending: false });
 
         if (error) throw error;
+        
+        // Add console logs to check the data
+        console.log('Duo match history data:', data);
+        if (data && data.length > 0) {
+          console.log('Sample match statistics:', {
+            winner: data[0].winner_partnership_id === data[0].challenger_partnership_id 
+              ? data[0].challenger_partnership.duo_statistics 
+              : data[0].challenged_partnership.duo_statistics,
+            loser: data[0].winner_partnership_id === data[0].challenger_partnership_id 
+              ? data[0].challenged_partnership.duo_statistics 
+              : data[0].challenger_partnership.duo_statistics
+          });
+        }
+        
         return data;
       }
 
@@ -95,6 +111,10 @@ export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => 
           const loserPartnership = match.winner_partnership_id === match.challenger_partnership.id
             ? match.challenged_partnership
             : match.challenger_partnership;
+            
+          // Get the statistics (points, wins, losses)
+          const winnerStats = winnerPartnership.duo_statistics[0] || { points: 0, wins: 0, losses: 0 };
+          const loserStats = loserPartnership.duo_statistics[0] || { points: 0, wins: 0, losses: 0 };
 
           return (
             <div 
@@ -118,7 +138,13 @@ export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => 
                       {winnerPartnership.player1.full_name} & {winnerPartnership.player2.full_name}
                       <Trophy className="h-4 w-4 inline ml-1 text-yellow-500" />
                     </p>
-                    <p className="text-sm text-green-700">{match.winner_score}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-green-700">{match.winner_score}</p>
+                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600">
+                        <Star className="h-3 w-3 mr-1" />
+                        {winnerStats.points} pts (W: {winnerStats.wins}, L: {winnerStats.losses})
+                      </Badge>
+                    </div>
                   </div>
                 </div>
 
@@ -129,7 +155,13 @@ export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => 
                     <p className="font-medium text-gray-600 truncate">
                       {loserPartnership.player1.full_name} & {loserPartnership.player2.full_name}
                     </p>
-                    <p className="text-sm text-gray-700">{match.loser_score}</p>
+                    <div className="flex items-center justify-end gap-2">
+                      <p className="text-sm text-gray-700">{match.loser_score}</p>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600">
+                        <Star className="h-3 w-3 mr-1" />
+                        {loserStats.points} pts (W: {loserStats.wins}, L: {loserStats.losses})
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex -space-x-2">
                     <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-gray-200">
