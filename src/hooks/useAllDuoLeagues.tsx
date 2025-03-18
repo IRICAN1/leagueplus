@@ -30,6 +30,8 @@ export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
         throw error;
       }
 
+      console.log("Fetched duo leagues:", data?.length, "Total count:", count);
+      
       return {
         leagues: data || [],
         totalCount: count || 0,

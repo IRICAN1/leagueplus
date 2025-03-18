@@ -1,3 +1,4 @@
+
 import { SearchHeader } from "@/components/SearchHeader";
 import { FilterBar } from "@/components/FilterBar";
 import { useQuery } from "@tanstack/react-query";
@@ -128,6 +129,9 @@ const Index = () => {
     setSelectedLeagueId(null);
     setPage(1);
   };
+
+  // Add console logs to debug the data
+  console.log("Duo leagues data:", duoLeaguesData);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
