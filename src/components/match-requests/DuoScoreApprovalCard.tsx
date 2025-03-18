@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { useState } from "react";
@@ -59,13 +60,12 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
         throw new Error("Cannot update match: user not authenticated");
       }
 
-      // Properly handle the ID for the database query
-      // Make sure we have a string value for the ID
+      // Ensure we have a valid string ID for the query
       const challengeId = String(challenge.id);
       
       console.log('Using challenge ID for update:', challengeId);
       
-      // Use an explicit WHERE clause with the eq operator
+      // Fixed query with proper WHERE clause using eq method
       const { data, error } = await supabase
         .from('duo_match_challenges')
         .update({
