@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MatchScoreDisplay } from "./MatchScoreDisplay";
 import { DuoChallenge } from "@/types/match";
 import { useQueryClient } from "@tanstack/react-query";
+import { ApprovalActions } from "./ApprovalActions";
 
 interface DuoScoreApprovalCardProps {
   challenge: DuoChallenge;
@@ -49,7 +50,6 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
     try {
       console.log('Updating duo match challenge with ID:', challenge.id);
       console.log('Setting result_status to:', approved ? 'approved' : 'disputed');
-      console.log('Setting approver_id to:', currentUserId);
       
       if (!challenge.id) {
         throw new Error("Cannot update match: missing challenge ID");
@@ -59,11 +59,11 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
         throw new Error("Cannot update match: user not authenticated");
       }
 
-      // More explicit approach with stringified query parameters
-      const challengeId = challenge.id.toString();
-      console.log('Using challenge ID (string):', challengeId);
+      // The key fix: Ensure we're using the exact ID for the update with a proper WHERE clause
+      // Convert the ID to string to ensure consistency
+      const challengeId = typeof challenge.id === 'string' ? challenge.id : challenge.id.toString();
       
-      // Use the single record update endpoint to avoid WHERE clause issues
+      // Use an explicit WHERE clause with the eq operator
       const { error } = await supabase
         .from('duo_match_challenges')
         .update({
@@ -79,7 +79,6 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
       }
 
       console.log('Successfully updated challenge with ID:', challengeId);
-      console.log('Approver ID set to:', currentUserId);
 
       // Invalidate relevant queries to refresh data
       await Promise.all([
@@ -138,20 +137,10 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
           }
         />
         <div className="flex gap-2 mt-4">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setIsOpen(true)}
-          >
-            Dispute
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => handleScoreResponse(true)}
-          >
-            Approve
-          </Button>
+          <ApprovalActions 
+            onDispute={() => setIsOpen(true)}
+            onApprove={() => handleScoreResponse(true)}
+          />
         </div>
       </div>
 
