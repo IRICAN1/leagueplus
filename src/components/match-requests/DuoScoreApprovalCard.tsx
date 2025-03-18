@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { useState } from "react";
@@ -22,6 +21,7 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
 
   // Check if the current user is from the opposing partnership
   const isFromOpposingPartnership = () => {
+    
     // If the current user is the submitter, they can't approve
     if (challenge.submitter_id === currentUserId) {
       return false;
@@ -59,12 +59,14 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
         throw new Error("Cannot update match: user not authenticated");
       }
 
-      // Fix for the TypeScript error - handle the ID type safely
-      // We know challenge.id exists because we checked above, so we can safely assert it
+      // Properly handle the ID for the database query
+      // Make sure we have a string value for the ID
       const challengeId = String(challenge.id);
       
+      console.log('Using challenge ID for update:', challengeId);
+      
       // Use an explicit WHERE clause with the eq operator
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('duo_match_challenges')
         .update({
           result_status: approved ? 'approved' : 'disputed',
@@ -79,6 +81,7 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
       }
 
       console.log('Successfully updated challenge with ID:', challengeId);
+      console.log('Update response data:', data);
 
       // Invalidate relevant queries to refresh data
       await Promise.all([
@@ -109,6 +112,7 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
     }
   };
 
+  
   // Skip rendering if the current user submitted the score
   if (challenge.submitter_id === currentUserId) {
     return null;
