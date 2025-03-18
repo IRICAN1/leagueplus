@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,9 +13,15 @@ const MatchRequests = () => {
   const { data: individualChallenges, isLoading: individualLoading, refetch: refetchIndividual } = useQuery({
     queryKey: ['match-challenges'],
     queryFn: async () => {
+      // No need to check authentication due to our updated RLS policies
+      // This will work for all users with the right RLS policies
+      
+      // Get the current user session if available
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
 
+      // If no user is logged in, we can still return empty arrays
+      // since the RLS policies will handle access control
       if (!userId) return [];
 
       const [sentResponse, receivedResponse] = await Promise.all([
@@ -58,9 +63,11 @@ const MatchRequests = () => {
   const { data: duoChallenges, isLoading: duoLoading, refetch: refetchDuo } = useQuery({
     queryKey: ['duo-match-challenges'],
     queryFn: async () => {
+      // Get the current user session if available
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
 
+      // If no user is logged in, we can still return empty arrays
       if (!userId) return [];
 
       const { data: partnerships } = await supabase
