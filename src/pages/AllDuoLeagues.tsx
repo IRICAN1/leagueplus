@@ -3,11 +3,11 @@ import { useAllDuoLeagues } from "@/hooks/useAllDuoLeagues";
 import { PublicDuoLeaguesList } from "@/components/leagues/PublicDuoLeaguesList";
 
 const AllDuoLeagues = () => {
-  // Fetch all duo leagues without pagination
+  // Fetch all duo leagues - ensuring showAll is true to get everything
   const { 
     data: duoLeaguesData, 
     isLoading: duoLeaguesLoading 
-  } = useAllDuoLeagues(1, 100, true); // Set showAll to true to get all leagues
+  } = useAllDuoLeagues(1, 1000, true); // Set showAll to true and high limit to ensure we get all leagues
 
   console.log("All Duo Leagues page data:", duoLeaguesData);
 
@@ -20,6 +20,9 @@ const AllDuoLeagues = () => {
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Browse all available duo tournaments for Padel and Badminton
+          </p>
+          <p className="text-sm text-blue-600">
+            Showing {duoLeaguesData?.leagues?.length || 0} tournaments in total
           </p>
         </div>
 

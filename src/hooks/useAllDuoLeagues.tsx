@@ -6,6 +6,7 @@ export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
   return useQuery({
     queryKey: ['all-duo-leagues', page, limit, showAll],
     queryFn: async () => {
+      // Start by selecting all data from duo_leagues, including the relationship count
       let query = supabase
         .from('duo_leagues')
         .select(`
@@ -27,10 +28,11 @@ export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
       const { data, error, count } = await query;
 
       if (error) {
+        console.error("Error fetching duo leagues:", error);
         throw error;
       }
 
-      console.log("Fetched duo leagues:", data?.length, "Total count:", count);
+      console.log("Fetched all duo leagues:", data);
       
       return {
         leagues: data || [],
