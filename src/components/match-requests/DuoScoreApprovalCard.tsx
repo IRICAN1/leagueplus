@@ -59,9 +59,9 @@ export const DuoScoreApprovalCard = ({ challenge, currentUserId, onScoreApproved
         throw new Error("Cannot update match: user not authenticated");
       }
 
-      // The key fix: Ensure we're using the exact ID for the update with a proper WHERE clause
-      // Convert the ID to string to ensure consistency
-      const challengeId = typeof challenge.id === 'string' ? challenge.id : challenge.id.toString();
+      // Fix for the TypeScript error - handle the ID type safely
+      // We know challenge.id exists because we checked above, so we can safely assert it
+      const challengeId = String(challenge.id);
       
       // Use an explicit WHERE clause with the eq operator
       const { error } = await supabase
