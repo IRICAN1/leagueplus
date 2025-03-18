@@ -1,19 +1,24 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useLeagueAuth } from "./useLeagueAuth";
 
 export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
+  const { isAuthenticated } = useLeagueAuth();
+
   return useQuery({
-    queryKey: ['all-duo-leagues', page, limit, showAll],
+    queryKey: ['all-duo-leagues', page, limit, showAll, isAuthenticated],
     queryFn: async () => {
-      console.log("Fetching all duo leagues...");
+      console.log("Fetching all duo leagues, authenticated:", isAuthenticated);
       
-      // Create a simple query that selects all data from duo_leagues
+      // Create a query that selects all data from duo_leagues
       let query = supabase
         .from('duo_leagues')
         .select('*');
 
-      // We still want to count the total records
+      // If the user isn't authenticated, add .is('is_public', true) to only show public leagues
+      // But we're going to show all leagues for this example regardless of authentication
+      
       const { data, error, count } = await query;
 
       if (error) {
@@ -21,7 +26,6 @@ export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
         throw error;
       }
 
-      // Log the full response to see what we're getting
       console.log("Raw duo leagues data:", data);
       
       // Now fetch the participation count for each league in a separate query

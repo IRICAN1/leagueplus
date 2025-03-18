@@ -1,15 +1,19 @@
 
 import { useAllDuoLeagues } from "@/hooks/useAllDuoLeagues";
 import { PublicDuoLeaguesList } from "@/components/leagues/PublicDuoLeaguesList";
+import { useLeagueAuth } from "@/hooks/useLeagueAuth";
 
 const AllDuoLeagues = () => {
+  const { isAuthenticated } = useLeagueAuth();
+  
   // Fetch all duo leagues - ensuring showAll is true to get everything
   const { 
     data: duoLeaguesData, 
     isLoading: duoLeaguesLoading 
-  } = useAllDuoLeagues(1, 1000, true); // Set showAll to true and high limit to ensure we get all leagues
+  } = useAllDuoLeagues(1, 1000, true);
 
   console.log("All Duo Leagues page data:", duoLeaguesData);
+  console.log("User authenticated:", isAuthenticated);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
