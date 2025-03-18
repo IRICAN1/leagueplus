@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Trophy, MapPin, Calendar, Users, Star } from "lucide-react";
 import { format } from "date-fns";
@@ -25,8 +26,11 @@ export const PublicDuoLeaguesList = ({
 }: PublicDuoLeaguesListProps) => {
   const navigate = useNavigate();
 
+  // Add more detailed logging to debug the received data
   console.log("PublicDuoLeaguesList received leagues:", leagues);
-
+  console.log("PublicDuoLeaguesList leagues length:", leagues?.length);
+  console.log("PublicDuoLeaguesList leagues data type:", typeof leagues);
+  
   if (isLoading) {
     return (
       <div className="text-center py-8 text-gray-600">

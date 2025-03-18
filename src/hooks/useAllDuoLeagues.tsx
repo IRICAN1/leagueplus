@@ -6,25 +6,14 @@ export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
   return useQuery({
     queryKey: ['all-duo-leagues', page, limit, showAll],
     queryFn: async () => {
-      // Start by selecting all data from duo_leagues, including the relationship count
+      console.log("Fetching all duo leagues...");
+      
+      // Create a simple query that selects all data from duo_leagues
       let query = supabase
         .from('duo_leagues')
-        .select(`
-          *,
-          duo_league_participants (
-            id
-          )
-        `, { count: 'exact' })
-        .order('created_at', { ascending: false });
+        .select('*');
 
-      // Only apply pagination if not showing all
-      if (!showAll) {
-        // Calculate the range for pagination
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
-        query = query.range(from, to);
-      }
-
+      // We still want to count the total records
       const { data, error, count } = await query;
 
       if (error) {
@@ -32,12 +21,46 @@ export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
         throw error;
       }
 
-      console.log("Fetched all duo leagues:", data);
+      // Log the full response to see what we're getting
+      console.log("Raw duo leagues data:", data);
+      
+      // Now fetch the participation count for each league in a separate query
+      if (data && data.length > 0) {
+        const leaguesWithParticipants = await Promise.all(
+          data.map(async (league) => {
+            const { data: participants, error: participantsError } = await supabase
+              .from('duo_league_participants')
+              .select('id')
+              .eq('league_id', league.id);
+              
+            if (participantsError) {
+              console.error("Error fetching participants:", participantsError);
+              return {
+                ...league,
+                duo_league_participants: []
+              };
+            }
+            
+            return {
+              ...league,
+              duo_league_participants: participants || []
+            };
+          })
+        );
+        
+        console.log("Processed duo leagues with participants:", leaguesWithParticipants);
+        
+        return {
+          leagues: leaguesWithParticipants || [],
+          totalCount: leaguesWithParticipants.length,
+          totalPages: 1
+        };
+      }
       
       return {
         leagues: data || [],
-        totalCount: count || 0,
-        totalPages: count && !showAll ? Math.ceil(count / limit) : 1
+        totalCount: data?.length || 0,
+        totalPages: 1
       };
     },
   });
