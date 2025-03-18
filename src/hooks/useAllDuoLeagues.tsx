@@ -1,23 +1,20 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useLeagueAuth } from "./useLeagueAuth";
 
 export const useAllDuoLeagues = (page = 1, limit = 10, showAll = false) => {
-  const { isAuthenticated } = useLeagueAuth();
-
   return useQuery({
-    queryKey: ['all-duo-leagues', page, limit, showAll, isAuthenticated],
+    queryKey: ['all-duo-leagues', page, limit, showAll],
     queryFn: async () => {
-      console.log("Fetching all duo leagues, authenticated:", isAuthenticated);
+      console.log("Fetching all duo leagues...");
       
       // Create a query that selects all data from duo_leagues
       let query = supabase
         .from('duo_leagues')
         .select('*');
 
-      // If the user isn't authenticated, add .is('is_public', true) to only show public leagues
-      // But we're going to show all leagues for this example regardless of authentication
+      // Thanks to our updated RLS policies, this will work for all users
+      // whether they're authenticated or not
       
       const { data, error, count } = await query;
 
