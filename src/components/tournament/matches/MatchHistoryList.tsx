@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +11,19 @@ interface MatchHistoryListProps {
   leagueId: string;
   isDuo?: boolean;
 }
+
+// Helper function to determine if a match is a duo match
+const isDuoMatch = (match: any): match is {
+  challenger_partnership_id: string;
+  challenged_partnership_id: string;
+  challenger_partnership: any;
+  challenged_partnership: any;
+  winner_partnership_id: string;
+} => {
+  return 'challenger_partnership_id' in match && 
+         'challenged_partnership_id' in match &&
+         'winner_partnership_id' in match;
+};
 
 export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => {
   const { data: matches, isLoading } = useQuery({
@@ -102,19 +116,21 @@ export const MatchHistoryList = ({ leagueId, isDuo }: MatchHistoryListProps) => 
     );
   }
 
-  // Group matches by partnership pairs for duo matches
+  // Group matches by partnership pairs for duo matches only when isDuo is true
   const groupedMatches = isDuo ? 
-    matches.reduce((acc, match) => {
-      // Create a unique key for each duo partnership pair, regardless of who challenged who
-      const partnership1 = match.challenger_partnership_id;
-      const partnership2 = match.challenged_partnership_id;
-      const pairKey = [partnership1, partnership2].sort().join('-');
-      
-      if (!acc[pairKey]) {
-        acc[pairKey] = [];
+    matches.reduce((acc: Record<string, any[]>, match: any) => {
+      if (isDuoMatch(match)) {
+        // Create a unique key for each duo partnership pair, regardless of who challenged who
+        const partnership1 = match.challenger_partnership_id;
+        const partnership2 = match.challenged_partnership_id;
+        const pairKey = [partnership1, partnership2].sort().join('-');
+        
+        if (!acc[pairKey]) {
+          acc[pairKey] = [];
+        }
+        
+        acc[pairKey].push(match);
       }
-      
-      acc[pairKey].push(match);
       return acc;
     }, {}) : null;
 
