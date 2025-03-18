@@ -1,4 +1,3 @@
-
 import { SearchHeader } from "@/components/SearchHeader";
 import { FilterBar } from "@/components/FilterBar";
 import { useQuery } from "@tanstack/react-query";
@@ -103,11 +102,11 @@ const Index = () => {
     enabled: activeTab === 'leagues',
   });
 
-  // Get all duo leagues for the public display
+  // Get all duo leagues for the public display - now with showAll parameter
   const { 
     data: duoLeaguesData, 
     isLoading: duoLeaguesLoading 
-  } = useAllDuoLeagues(page, LEAGUES_PER_PAGE);
+  } = useAllDuoLeagues(page, LEAGUES_PER_PAGE, true); // Set showAll to true
 
   if (error) {
     toast.error('Failed to load leagues');
@@ -185,9 +184,10 @@ const Index = () => {
           <PublicDuoLeaguesList
             leagues={duoLeaguesData?.leagues || []}
             isLoading={duoLeaguesLoading}
-            currentPage={page}
-            totalPages={duoLeaguesData?.totalPages || 1}
-            onPageChange={setPage}
+            currentPage={1}
+            totalPages={1}
+            onPageChange={() => {}}
+            showPagination={false}
           />
         )}
       </div>

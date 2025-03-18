@@ -13,6 +13,7 @@ interface PublicDuoLeaguesListProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  showPagination?: boolean;
 }
 
 export const PublicDuoLeaguesList = ({
@@ -20,7 +21,8 @@ export const PublicDuoLeaguesList = ({
   isLoading,
   currentPage,
   totalPages,
-  onPageChange
+  onPageChange,
+  showPagination = true
 }: PublicDuoLeaguesListProps) => {
   const navigate = useNavigate();
 
@@ -135,7 +137,7 @@ export const PublicDuoLeaguesList = ({
         })}
       </div>
 
-      {totalPages > 1 && (
+      {showPagination && totalPages > 1 && (
         <Pagination className="mt-6">
           <PaginationContent>
             <PaginationItem>
