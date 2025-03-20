@@ -20,26 +20,24 @@ export const MatchActions = ({ challenge, currentUserId, isMatchTime }: MatchAct
     }
 
     // If a user has submitted a result and it's pending
-    if (challenge.status === 'completed' && challenge.result_status === 'pending') {
+    if (challenge.winner_id && challenge.result_status === 'pending') {
       // If this user submitted the result, show waiting message
-      if (challenge.winner_id) {
-        const isSubmitter = challenge.winner_id === currentUserId;
-        const winnerUsername = challenge.winner_id === challenge.challenger_id 
-          ? challenge.challenger.username 
-          : challenge.challenged.username;
+      const isSubmitter = challenge.winner_id === currentUserId;
+      const winnerUsername = challenge.winner_id === challenge.challenger_id 
+        ? challenge.challenger.username 
+        : challenge.challenged.username;
 
-        if (isSubmitter) {
-          return (
-            <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
-              <p className="text-sm font-medium mb-2">Result Submitted - Waiting for Approval</p>
-              <MatchScoreDisplay
-                winnerScore={challenge.winner_score}
-                loserScore={challenge.loser_score}
-                winnerUsername={winnerUsername}
-              />
-            </div>
-          );
-        }
+      if (isSubmitter) {
+        return (
+          <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+            <p className="text-sm font-medium mb-2">Result Submitted - Waiting for Approval</p>
+            <MatchScoreDisplay
+              winnerScore={challenge.winner_score}
+              loserScore={challenge.loser_score}
+              winnerUsername={winnerUsername}
+            />
+          </div>
+        );
       }
     }
     
