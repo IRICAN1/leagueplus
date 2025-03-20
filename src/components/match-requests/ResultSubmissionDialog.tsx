@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,11 @@ export const ResultSubmissionDialog = ({ challenge, currentUserId }: ResultSubmi
 
   // Check if the current user is a participant in the match
   const isParticipant = currentUserId === challenge.challenger_id || currentUserId === challenge.challenged_id;
+  
+  // Check if the user has already submitted a result and it's pending approval
+  const hasSubmittedResult = challenge.status === 'completed' && 
+                            challenge.result_status === 'pending' && 
+                            challenge.winner_id !== null;
 
   const handleResultSubmit = async (formData: any) => {
     setIsSubmitting(true);
@@ -49,7 +55,7 @@ export const ResultSubmissionDialog = ({ challenge, currentUserId }: ResultSubmi
     }
   };
 
-  if (!isParticipant) {
+  if (!isParticipant || hasSubmittedResult) {
     return null;
   }
 

@@ -31,6 +31,11 @@ export const DuoMatchScoreDialog = ({ challenge, currentUserId }: DuoMatchScoreD
      challenge.challenged_partnership.player1.id === currentUserId ||
      challenge.challenged_partnership.player2.id === currentUserId);
 
+  // Check if the match already has a submitted result waiting for approval
+  const hasSubmittedResult = challenge.status === 'completed' && 
+                            challenge.result_status === 'pending' && 
+                            challenge.winner_partnership_id !== null;
+
   const handleScoreSubmit = async (formData: any) => {
     setIsSubmitting(true);
     try {
@@ -87,6 +92,10 @@ export const DuoMatchScoreDialog = ({ challenge, currentUserId }: DuoMatchScoreD
   const matchTime = new Date(challenge.proposed_time);
   const now = new Date();
   if (matchTime > now) {
+    return null;
+  }
+
+  if (hasSubmittedResult) {
     return null;
   }
 
