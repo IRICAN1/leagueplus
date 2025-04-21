@@ -14,14 +14,14 @@ export const MatchActions = ({ challenge, currentUserId, isMatchTime }: MatchAct
   const renderResultSubmission = () => {
     if (challenge.status !== 'accepted' || !isMatchTime) return null;
     
-    // Only show submission form if there's no winner yet
+    // Only show submission form if there's no winner yet and no result pending
     if (!challenge.winner_id) {
       return <ResultSubmissionDialog challenge={challenge} currentUserId={currentUserId} />;
     }
 
-    // If a user has submitted a result and it's pending
+    // If a result has been submitted and it's pending approval
     if (challenge.winner_id && challenge.result_status === 'pending') {
-      // If this user submitted the result, show waiting message
+      // If this user submitted the result, show waiting message without any buttons
       const isSubmitter = challenge.winner_id === currentUserId;
       const winnerUsername = challenge.winner_id === challenge.challenger_id 
         ? challenge.challenger.username 
@@ -40,7 +40,8 @@ export const MatchActions = ({ challenge, currentUserId, isMatchTime }: MatchAct
         );
       }
     }
-    
+
+    // Show nothing otherwise (so no submit button if result pending)
     return null;
   };
 
@@ -51,3 +52,4 @@ export const MatchActions = ({ challenge, currentUserId, isMatchTime }: MatchAct
     </>
   );
 };
+
