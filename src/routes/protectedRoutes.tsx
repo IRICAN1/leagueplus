@@ -1,3 +1,4 @@
+
 import Profile from "@/pages/Profile";
 import TournamentRegistration from "@/pages/TournamentRegistration";
 import DuoTournamentRegistration from "@/pages/DuoTournamentRegistration";
@@ -8,6 +9,7 @@ import CreateDuoLeague from "@/pages/CreateDuoLeague";
 import MyLeagues from "@/pages/MyLeagues";
 import MatchRequests from "@/pages/MatchRequests";
 import MyDuos from "@/pages/MyDuos";
+import History from "@/pages/History";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export const protectedRoutes = [
@@ -32,6 +34,14 @@ export const protectedRoutes = [
     element: (
       <ProtectedRoute>
         <MatchRequests />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/history",
+    element: (
+      <ProtectedRoute>
+        <History />
       </ProtectedRoute>
     )
   },

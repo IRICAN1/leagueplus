@@ -275,25 +275,25 @@ const History = () => {
     <div className="container max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Match History</h1>
       
-      <Tabs defaultValue="history" className="space-y-6">
+      <Tabs defaultValue="duo" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="history">Individual Matches</TabsTrigger>
           <TabsTrigger value="duo">Duo Matches</TabsTrigger>
+          <TabsTrigger value="history">Individual Matches</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="history" className="space-y-4">
-          {!matches?.length ? (
-            <p className="text-gray-500 text-center py-8">No completed matches yet</p>
-          ) : (
-            matches.map(match => renderMatchCard(match))
-          )}
-        </TabsContent>
 
         <TabsContent value="duo" className="space-y-4">
           {!duoMatches?.length ? (
             <p className="text-gray-500 text-center py-8">No completed duo matches</p>
           ) : (
             duoMatches.map(match => renderDuoMatchCard(match))
+          )}
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4">
+          {!matches?.length ? (
+            <p className="text-gray-500 text-center py-8">No completed matches yet</p>
+          ) : (
+            matches.map(match => renderMatchCard(match))
           )}
         </TabsContent>
       </Tabs>
