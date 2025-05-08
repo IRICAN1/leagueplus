@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,8 +37,12 @@ export const ProfilePicture = ({ currentUrl, onImageChange, isEditing }: Profile
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="relative group">
-        <Avatar className={`${avatarSize} ring-2 ring-purple-100 transition-all duration-300 group-hover:ring-purple-300`}>
-          <AvatarImage src={preview || currentUrl} className="object-cover" />
+        <Avatar className={`${avatarSize} ring-2 ring-purple-100 transition-all duration-300 group-hover:ring-purple-300 overflow-hidden`}>
+          <AvatarImage 
+            src={preview || currentUrl} 
+            alt="Profile picture"
+            className="object-cover w-full h-full" 
+          />
           <AvatarFallback className="bg-gradient-to-br from-purple-100 to-blue-100">
             <User className={iconSize} />
           </AvatarFallback>

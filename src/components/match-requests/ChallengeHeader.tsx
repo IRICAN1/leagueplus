@@ -1,3 +1,4 @@
+
 import { ExternalLink, ArrowLeftRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,10 +22,14 @@ export const ChallengeHeader = ({ challenge, type }: ChallengeHeaderProps) => {
   return (
     <div className="flex items-center gap-2">
       <Avatar 
-        className="h-8 w-8 ring-1 ring-offset-1 ring-blue-100 cursor-pointer hover:ring-blue-300 transition-all"
+        className="h-8 w-8 ring-1 ring-offset-1 ring-blue-100 cursor-pointer hover:ring-blue-300 transition-all overflow-hidden"
         onClick={handleProfileClick}
       >
-        <AvatarImage src={profile.avatar_url || undefined} />
+        <AvatarImage 
+          src={profile.avatar_url || undefined} 
+          alt={profile.username}
+          className="object-cover w-full h-full"
+        />
         <AvatarFallback className="bg-gradient-to-br from-blue-100 to-purple-100 text-blue-700 font-medium text-xs">
           {profile.username?.[0]?.toUpperCase()}
         </AvatarFallback>
