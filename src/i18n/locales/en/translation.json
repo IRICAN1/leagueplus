@@ -1,0 +1,61 @@
+
+{
+  "app": {
+    "name": "LeaguePlus"
+  },
+  "nav": {
+    "home": "Home",
+    "leagues": "Leagues",
+    "matches": "Matches",
+    "duos": "DUOs",
+    "history": "History",
+    "profile": "Profile",
+    "createLeague": "Create League",
+    "createDuoLeague": "Create Duo League",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "common": {
+    "loading": "Loading...",
+    "noData": "No data found",
+    "search": "Search",
+    "filter": "Filter",
+    "accept": "Accept",
+    "reject": "Reject",
+    "decline": "Decline"
+  },
+  "matches": {
+    "title": "Matches",
+    "duoMatches": "Duo Matches",
+    "individualMatches": "Individual Matches",
+    "noDuoMatches": "No duo matches found",
+    "noIndividualMatches": "No individual matches found",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "completed": "Completed"
+  },
+  "history": {
+    "title": "Match History",
+    "noCompletedMatches": "No completed matches yet",
+    "noCompletedDuoMatches": "No completed duo matches",
+    "winner": "Winner",
+    "winners": "Winners",
+    "player": "Player",
+    "team": "Team",
+    "set": "Set"
+  },
+  "league": {
+    "viewAll": "View All Duo Tournaments"
+  },
+  "home": {
+    "title": "Serve, Smash, Conquer!",
+    "subtitle": "Join thrilling Padel and Badminton tournaments - Where every match is an adventure"
+  },
+  "language": {
+    "en": "English",
+    "fr": "French",
+    "es": "Spanish"
+  }
+}

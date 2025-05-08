@@ -1,6 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Challenge, ChallengeType } from "@/types/match";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface ChallengeStatusProps {
   challenge: Challenge;
@@ -10,12 +12,17 @@ interface ChallengeStatusProps {
 
 export const ChallengeStatus = ({ challenge, type, onResponse }: ChallengeStatusProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800",
     accepted: "bg-green-100 text-green-800",
     rejected: "bg-red-100 text-red-800",
     completed: "bg-gray-100 text-gray-800"
+  };
+
+  const getStatusTranslation = (status: string) => {
+    return t(`matches.${status}`);
   };
 
   const handleResponse = async (accept: boolean) => {
@@ -27,7 +34,7 @@ export const ChallengeStatus = ({ challenge, type, onResponse }: ChallengeStatus
   return (
     <div className="flex flex-col items-end gap-4">
       <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColors[challenge.status]}`}>
-        {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
+        {getStatusTranslation(challenge.status)}
       </span>
       
       {type === 'received' && challenge.status === 'pending' && onResponse && (
@@ -38,14 +45,14 @@ export const ChallengeStatus = ({ challenge, type, onResponse }: ChallengeStatus
             onClick={() => handleResponse(false)}
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
-            Decline
+            {t('common.decline')}
           </Button>
           <Button
             size="sm"
             onClick={() => handleResponse(true)}
             className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
           >
-            Accept
+            {t('common.accept')}
           </Button>
         </div>
       )}

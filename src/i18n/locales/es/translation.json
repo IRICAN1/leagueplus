@@ -1,0 +1,61 @@
+
+{
+  "app": {
+    "name": "LeaguePlus"
+  },
+  "nav": {
+    "home": "Inicio",
+    "leagues": "Ligas",
+    "matches": "Partidos",
+    "duos": "DÚOs",
+    "history": "Historial",
+    "profile": "Perfil",
+    "createLeague": "Crear Liga",
+    "createDuoLeague": "Crear Liga de Dúos",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar Sesión"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "noData": "No se encontraron datos",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "decline": "Rechazar"
+  },
+  "matches": {
+    "title": "Partidos",
+    "duoMatches": "Partidos en Dúo",
+    "individualMatches": "Partidos Individuales",
+    "noDuoMatches": "No se encontraron partidos en dúo",
+    "noIndividualMatches": "No se encontraron partidos individuales",
+    "pending": "Pendiente",
+    "accepted": "Aceptado",
+    "rejected": "Rechazado",
+    "completed": "Completado"
+  },
+  "history": {
+    "title": "Historial de Partidos",
+    "noCompletedMatches": "No hay partidos completados todavía",
+    "noCompletedDuoMatches": "No hay partidos de dúo completados",
+    "winner": "Ganador",
+    "winners": "Ganadores",
+    "player": "Jugador",
+    "team": "Equipo",
+    "set": "Set"
+  },
+  "league": {
+    "viewAll": "Ver Todos los Torneos de Dúo"
+  },
+  "home": {
+    "title": "¡Sirve, Smash, Conquista!",
+    "subtitle": "Únete a emocionantes torneos de Pádel y Bádminton - Donde cada partido es una aventura"
+  },
+  "language": {
+    "en": "Inglés",
+    "fr": "Francés",
+    "es": "Español"
+  }
+}

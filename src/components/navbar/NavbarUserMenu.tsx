@@ -1,8 +1,5 @@
 
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Settings, LogOut, Medal, Users, History } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,111 +8,79 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { LogOut, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export const NavbarUserMenu = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [userProfile, setUserProfile] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        setUserProfile(profile);
-      }
-    };
-    fetchProfile();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            setUserProfile(data);
-          });
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate("/login");
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
       toast({
-        title: "Logged out successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error logging out",
+        title: "Error",
+        description: error.message,
         variant: "destructive",
       });
+    } else {
+      toast({
+        title: "Success",
+        description: "You have been logged out.",
+      });
+      navigate("/");
     }
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center space-x-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={userProfile?.avatar_url} />
-            <AvatarFallback>
-              {userProfile?.full_name?.[0]?.toUpperCase() || userProfile?.username?.[0]?.toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <span className="hidden md:inline-block">
-            {userProfile?.full_name || userProfile?.username || 'User'}
-          </span>
+        <Button variant="ghost" size="icon">
+          <User className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>{t('nav.profile')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center w-full">
-            <Settings className="h-4 w-4 mr-2" />
-            <span>Profile Settings</span>
+          <Link to="/profile" className="w-full cursor-pointer">
+            {t('nav.profile')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/my-leagues" className="flex items-center w-full">
-            <Medal className="h-4 w-4 mr-2" />
-            <span>Leagues</span>
+          <Link to="/my-leagues" className="w-full cursor-pointer">
+            {t('nav.leagues')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/friends" className="flex items-center w-full">
-            <Users className="h-4 w-4 mr-2" />
-            <span>Friends</span>
+          <Link to="/my-matches" className="w-full cursor-pointer">
+            {t('nav.matches')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/history" className="flex items-center w-full">
-            <History className="h-4 w-4 mr-2" />
-            <span>Match History</span>
+          <Link to="/my-duos" className="w-full cursor-pointer">
+            {t('nav.duos')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/create-league" className="w-full cursor-pointer">
+            {t('nav.createLeague')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/create-duo-league" className="w-full cursor-pointer">
+            {t('nav.createDuoLeague')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={handleLogout}
-          className="text-red-600 focus:text-red-600"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          <span>Logout</span>
+        <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>{t('nav.logout')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

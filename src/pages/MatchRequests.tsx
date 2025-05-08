@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,9 +6,11 @@ import { Loader2 } from "lucide-react";
 import { ChallengeCard } from "@/components/match-requests/ChallengeCard";
 import { DuoChallengeCard } from "@/components/match-requests/DuoChallengeCard";
 import { Challenge, DuoChallenge } from "@/types/match";
+import { useTranslation } from "react-i18next";
 
 const MatchRequests = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const { data: individualChallenges, isLoading: individualLoading, refetch: refetchIndividual } = useQuery({
     queryKey: ['match-challenges'],
@@ -197,17 +198,17 @@ const MatchRequests = () => {
 
   return (
     <div className="container max-w-5xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">My Matches</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('matches.title')}</h1>
       
       <Tabs defaultValue="duo" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="duo">Duo Matches</TabsTrigger>
-          <TabsTrigger value="individual">Individual Matches</TabsTrigger>
+          <TabsTrigger value="duo">{t('matches.duoMatches')}</TabsTrigger>
+          <TabsTrigger value="individual">{t('matches.individualMatches')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="duo" className="space-y-4">
           {!hasDuoMatches ? (
-            <p className="text-gray-500 text-center py-8">No duo matches found</p>
+            <p className="text-gray-500 text-center py-8">{t('matches.noDuoMatches')}</p>
           ) : (
             <div className="grid gap-4">
               {duoChallenges.map(challenge => (
@@ -224,7 +225,7 @@ const MatchRequests = () => {
 
         <TabsContent value="individual" className="space-y-4">
           {!hasIndividualMatches ? (
-            <p className="text-gray-500 text-center py-8">No individual matches found</p>
+            <p className="text-gray-500 text-center py-8">{t('matches.noIndividualMatches')}</p>
           ) : (
             <div className="grid gap-4">
               {individualChallenges.map(challenge => (

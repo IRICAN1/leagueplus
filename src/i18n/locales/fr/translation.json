@@ -1,0 +1,61 @@
+
+{
+  "app": {
+    "name": "LeaguePlus"
+  },
+  "nav": {
+    "home": "Accueil",
+    "leagues": "Ligues",
+    "matches": "Matchs",
+    "duos": "DUOs",
+    "history": "Historique",
+    "profile": "Profil",
+    "createLeague": "Créer une Ligue",
+    "createDuoLeague": "Créer une Ligue Duo",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "logout": "Déconnexion"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "noData": "Aucune donnée trouvée",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "accept": "Accepter",
+    "reject": "Rejeter",
+    "decline": "Refuser"
+  },
+  "matches": {
+    "title": "Matchs",
+    "duoMatches": "Matchs en Duo",
+    "individualMatches": "Matchs Individuels",
+    "noDuoMatches": "Aucun match en duo trouvé",
+    "noIndividualMatches": "Aucun match individuel trouvé",
+    "pending": "En attente",
+    "accepted": "Accepté",
+    "rejected": "Rejeté",
+    "completed": "Terminé"
+  },
+  "history": {
+    "title": "Historique des Matchs",
+    "noCompletedMatches": "Aucun match terminé pour l'instant",
+    "noCompletedDuoMatches": "Aucun match en duo terminé",
+    "winner": "Gagnant",
+    "winners": "Gagnants",
+    "player": "Joueur",
+    "team": "Équipe",
+    "set": "Set"
+  },
+  "league": {
+    "viewAll": "Voir tous les tournois en duo"
+  },
+  "home": {
+    "title": "Servez, Smashz, Conquérez!",
+    "subtitle": "Rejoignez des tournois passionnants de Padel et de Badminton - Où chaque match est une aventure"
+  },
+  "language": {
+    "en": "Anglais",
+    "fr": "Français",
+    "es": "Espagnol"
+  }
+}

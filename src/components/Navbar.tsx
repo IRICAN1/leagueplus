@@ -5,9 +5,12 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { NavbarLinks } from "./navbar/NavbarLinks";
 import { NavbarAuth } from "./navbar/NavbarAuth";
+import { LanguageSelector } from "./LanguageSelector";
+import { useTranslation } from "react-i18next";
 
 export const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,13 +36,14 @@ export const Navbar = () => {
           <div className="flex items-center space-x-4 sm:space-x-8">
             <Link to="/" className="flex items-center space-x-2">
               <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
-              <span className="font-bold text-lg sm:text-xl text-purple-600">LeaguePlus</span>
+              <span className="font-bold text-lg sm:text-xl text-purple-600">{t('app.name')}</span>
             </Link>
             <NavbarLinks isAuthenticated={isAuthenticated} />
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
             <NavbarAuth isAuthenticated={isAuthenticated} />
           </div>
         </div>

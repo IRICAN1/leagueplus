@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -14,8 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "react-i18next";
 
 const History = () => {
+  const { t } = useTranslation();
+  
   const { data: matches, isLoading: isLoadingHistory } = useQuery({
     queryKey: ['match-history'],
     queryFn: async () => {
@@ -67,12 +69,12 @@ const History = () => {
           challenger_partnership:duo_partnerships!duo_match_challenges_challenger_partnership_id_fkey(
             id,
             player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-            player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+            player2:profiles!duo_partnerships_player2_id_fkey(id, username, full_name, avatar_url)
           ),
           challenged_partnership:duo_partnerships!duo_match_challenges_challenged_partnership_id_fkey(
             id,
             player1:profiles!duo_partnerships_player1_id_fkey(username, full_name, avatar_url),
-            player2:profiles!duo_partnerships_player2_id_fkey(username, full_name, avatar_url)
+            player2:profiles!duo_partnerships_player2_id_fkey(id, username, full_name, avatar_url)
           ),
           league:duo_leagues(name)
         `)
@@ -125,7 +127,7 @@ const History = () => {
             {showScore && (
               <Badge variant="outline" className="bg-green-50 border-green-200 text-green-600">
                 <Trophy className="h-4 w-4 mr-1" />
-                Winner: {winnerName}
+                {t('history.winner')}: {winnerName}
               </Badge>
             )}
           </div>
@@ -135,10 +137,10 @@ const History = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-blue-50/50">
-                    <TableHead className="w-[200px] font-semibold text-gray-700">Player</TableHead>
+                    <TableHead className="w-[200px] font-semibold text-gray-700">{t('history.player')}</TableHead>
                     {winnerSets.map((_, index) => (
                       <TableHead key={index} className="text-center font-semibold text-gray-700">
-                        Set {index + 1}
+                        {t('history.set')} {index + 1}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -212,7 +214,7 @@ const History = () => {
             </div>
             <Badge variant="outline" className="bg-green-50 border-green-200 text-green-600">
               <Trophy className="h-4 w-4 mr-1" />
-              Winners: {winnerPartnership.player1.full_name} & {winnerPartnership.player2.full_name}
+              {t('history.winners')}: {winnerPartnership.player1.full_name} & {winnerPartnership.player2.full_name}
             </Badge>
           </div>
           
@@ -220,10 +222,10 @@ const History = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-blue-50/50">
-                  <TableHead className="w-[200px] font-semibold text-gray-700">Team</TableHead>
+                  <TableHead className="w-[200px] font-semibold text-gray-700">{t('history.team')}</TableHead>
                   {winnerSets.map((_, index) => (
                     <TableHead key={index} className="text-center font-semibold text-gray-700">
-                      Set {index + 1}
+                      {t('history.set')} {index + 1}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -273,17 +275,17 @@ const History = () => {
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Match History</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('history.title')}</h1>
       
       <Tabs defaultValue="duo" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="duo">Duo Matches</TabsTrigger>
-          <TabsTrigger value="history">Individual Matches</TabsTrigger>
+          <TabsTrigger value="duo">{t('matches.duoMatches')}</TabsTrigger>
+          <TabsTrigger value="history">{t('matches.individualMatches')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="duo" className="space-y-4">
           {!duoMatches?.length ? (
-            <p className="text-gray-500 text-center py-8">No completed duo matches</p>
+            <p className="text-gray-500 text-center py-8">{t('history.noCompletedDuoMatches')}</p>
           ) : (
             duoMatches.map(match => renderDuoMatchCard(match))
           )}
@@ -291,7 +293,7 @@ const History = () => {
 
         <TabsContent value="history" className="space-y-4">
           {!matches?.length ? (
-            <p className="text-gray-500 text-center py-8">No completed matches yet</p>
+            <p className="text-gray-500 text-center py-8">{t('history.noCompletedMatches')}</p>
           ) : (
             matches.map(match => renderMatchCard(match))
           )}
