@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from "react";
-import { Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { NavbarLinks } from "./navbar/NavbarLinks";
@@ -34,9 +33,8 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Left Section */}
           <div className="flex items-center space-x-4 sm:space-x-8">
-            <Link to="/" className="flex items-center space-x-2">
-              <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
-              <span className="font-bold text-lg sm:text-xl text-purple-600">{t('app.name')}</span>
+            <Link to="/" className="flex items-center">
+              <span className="font-bold text-lg sm:text-2xl bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">{t('app.name')}</span>
             </Link>
             <NavbarLinks isAuthenticated={isAuthenticated} />
           </div>
