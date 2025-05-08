@@ -1,4 +1,3 @@
-
 import { SearchHeader } from "@/components/SearchHeader";
 import { FilterBar } from "@/components/FilterBar";
 import { useQuery } from "@tanstack/react-query";
@@ -148,10 +147,12 @@ const Index = () => {
         </div>
 
         {activeTab === 'leagues' && (
-          <LeagueTypeSelector 
-            leagueType={leagueType} 
-            onLeagueTypeChange={setLeagueType} 
-          />
+          <div className="flex justify-center gap-2 mb-6">
+            <LeagueTypeSelector 
+              leagueType={leagueType} 
+              onLeagueTypeChange={setLeagueType} 
+            />
+          </div>
         )}
 
         <SearchHeader 

@@ -10,7 +10,7 @@ interface LeagueTypeSelectorProps {
 
 export const LeagueTypeSelector = ({ leagueType, onLeagueTypeChange }: LeagueTypeSelectorProps) => {
   return (
-    <div className="flex justify-center gap-2 mb-6">
+    <>
       <Button
         variant={leagueType === 'duo' ? 'default' : 'outline'}
         onClick={() => onLeagueTypeChange('duo')}
@@ -33,6 +33,6 @@ export const LeagueTypeSelector = ({ leagueType, onLeagueTypeChange }: LeagueTyp
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse" />
         )}
       </Button>
-    </div>
+    </>
   );
 };
