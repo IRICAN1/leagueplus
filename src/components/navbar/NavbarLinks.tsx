@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
@@ -15,9 +16,9 @@ export const NavbarLinks = ({ isAuthenticated }: NavbarLinksProps) => {
     { href: "/", label: "Home" },
     ...(isAuthenticated
       ? [
-          { href: "/my-leagues", label: "My Leagues" },
-          { href: "/my-matches", label: "My Matches" },
-          { href: "/duo-search", label: "My DUOs" },
+          { href: "/my-leagues", label: "Leagues" },
+          { href: "/my-matches", label: "Matches" },
+          { href: "/duo-search", label: "DUOs" },
         ]
       : [])
   ];

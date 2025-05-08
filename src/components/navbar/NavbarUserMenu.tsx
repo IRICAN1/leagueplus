@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Settings, LogOut, Medal, Users, History } from "lucide-react";
@@ -93,7 +94,7 @@ export const NavbarUserMenu = () => {
         <DropdownMenuItem asChild>
           <Link to="/my-leagues" className="flex items-center w-full">
             <Medal className="h-4 w-4 mr-2" />
-            <span>My Leagues</span>
+            <span>Leagues</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
