@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -198,28 +199,11 @@ const MatchRequests = () => {
     <div className="container max-w-5xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">My Matches</h1>
       
-      <Tabs defaultValue="individual" className="space-y-6">
+      <Tabs defaultValue="duo" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="individual">Individual Matches</TabsTrigger>
           <TabsTrigger value="duo">Duo Matches</TabsTrigger>
+          <TabsTrigger value="individual">Individual Matches</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="individual" className="space-y-4">
-          {!hasIndividualMatches ? (
-            <p className="text-gray-500 text-center py-8">No individual matches found</p>
-          ) : (
-            <div className="grid gap-4">
-              {individualChallenges.map(challenge => (
-                <ChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  type={challenge.challengeType}
-                  onResponse={handleIndividualResponse}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
 
         <TabsContent value="duo" className="space-y-4">
           {!hasDuoMatches ? (
@@ -232,6 +216,23 @@ const MatchRequests = () => {
                   challenge={challenge}
                   type={challenge.challengeType}
                   onResponse={handleDuoResponse}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="individual" className="space-y-4">
+          {!hasIndividualMatches ? (
+            <p className="text-gray-500 text-center py-8">No individual matches found</p>
+          ) : (
+            <div className="grid gap-4">
+              {individualChallenges.map(challenge => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  type={challenge.challengeType}
+                  onResponse={handleIndividualResponse}
                 />
               ))}
             </div>
