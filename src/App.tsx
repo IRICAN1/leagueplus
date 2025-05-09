@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
+import { CookieConsent } from "./components/CookieConsent";
 import { publicRoutes } from "./routes/publicRoutes";
 import { protectedRoutes } from "./routes/protectedRoutes";
 import "./i18n"; // Import i18n configuration
@@ -28,6 +29,7 @@ const App = () => (
             ))}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <CookieConsent />
         </BrowserRouter>
       </div>
     </TooltipProvider>

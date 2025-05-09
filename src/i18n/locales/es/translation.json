@@ -1,3 +1,4 @@
+
 {
   "app": {
     "name": "RaketLeague"
@@ -22,6 +23,13 @@
     "filter": "Filtrar",
     "accept": "Aceptar",
     "reject": "Rechazar",
+    "decline": "Rechazar"
+  },
+  "cookies": {
+    "title": "Consentimiento de Cookies",
+    "description": "Utilizamos cookies para mejorar su experiencia en nuestro sitio web. Al hacer clic en \"Aceptar\", usted consiente el uso de todas las cookies.",
+    "policy": "Este sitio utiliza cookies esenciales para asegurar un funcionamiento adecuado y cookies analíticas para entender cómo interactúa con el sitio. Sus datos personales no se compartirán con terceros sin su consentimiento explícito.",
+    "accept": "Aceptar Todas las Cookies",
     "decline": "Rechazar"
   },
   "matches": {
