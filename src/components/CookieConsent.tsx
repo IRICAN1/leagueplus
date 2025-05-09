@@ -69,41 +69,37 @@ export const CookieConsent = () => {
         </div>
       </div>
       
-      {/* Desktop dialog */}
-      <Dialog open={showConsent} onOpenChange={setShowConsent}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Cookie className="h-5 w-5 text-blue-600" />
-              {t('cookies.title')}
-            </DialogTitle>
-            <DialogDescription>
-              {t('cookies.description')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
-            <Alert>
-              <AlertDescription className="text-sm">
-                {t('cookies.policy')}
-              </AlertDescription>
-            </Alert>
+      {/* Desktop dialog - using fixed positioning instead of Dialog component */}
+      <div className="hidden md:block fixed bottom-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-6 z-50 max-w-md">
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center gap-2">
+            <Cookie className="h-5 w-5 text-blue-600" />
+            <h3 className="font-semibold">{t('cookies.title')}</h3>
           </div>
-          <DialogFooter className="flex justify-between sm:justify-between mt-4">
+          <p className="text-sm text-gray-600">
+            {t('cookies.description')}
+          </p>
+          <div className="text-xs bg-gray-50 p-3 rounded-md border border-gray-100">
+            {t('cookies.policy')}
+          </div>
+          <div className="flex justify-between gap-3 pt-2">
             <Button
               variant="outline"
               onClick={handleDecline}
+              size="sm"
             >
               {t('cookies.decline')}
             </Button>
             <Button
               onClick={handleAccept}
               className="bg-blue-600 hover:bg-blue-700"
+              size="sm"
             >
               {t('cookies.accept')}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
