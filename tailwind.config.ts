@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -96,18 +95,6 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-5px)" },
         },
-        "spin-slow": {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" },
-        },
-        "spin-slow-reverse": {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(-360deg)" },
-        },
-        "ping-slow": {
-          "0%, 100%": { transform: "scale(1)", opacity: "0.2" },
-          "50%": { transform: "scale(1.2)", opacity: "0.4" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -119,9 +106,6 @@ export default {
         "uncross-swords": "uncross-swords 0.3s ease-out forwards",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
-        "spin-slow": "spin-slow 20s linear infinite",
-        "spin-slow-reverse": "spin-slow-reverse 15s linear infinite",
-        "ping-slow": "ping-slow 3s ease-in-out infinite",
       },
     },
   },

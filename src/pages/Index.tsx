@@ -17,7 +17,7 @@ const Index = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-20 md:pt-28 pb-16">
         <div className="container max-w-6xl mx-auto px-4">
@@ -56,19 +56,9 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Abstract shapes - Enhanced background */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-400 opacity-10 filter blur-3xl animate-pulse-soft"></div>
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-blue-600 opacity-15 filter blur-3xl animate-float"></div>
-        <div className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-green-400 opacity-10 filter blur-3xl animate-pulse-soft"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-72 h-72 rounded-full bg-indigo-500 opacity-10 filter blur-3xl animate-float"></div>
-        
-        {/* Tennis ball pattern */}
-        <div className="absolute top-20 right-10 w-24 h-24 rounded-full border-4 border-dashed border-yellow-400 opacity-20 animate-spin-slow"></div>
-        <div className="absolute bottom-20 left-10 w-16 h-16 rounded-full border-4 border-dashed border-yellow-400 opacity-20 animate-spin-slow-reverse"></div>
-        
-        {/* Racket outlines */}
-        <div className="absolute top-40 right-1/4 w-40 h-40 rounded-full border-2 border-blue-400 opacity-20 transform rotate-12"></div>
-        <div className="absolute bottom-40 left-1/3 w-48 h-48 rounded-full border-2 border-blue-400 opacity-20 transform -rotate-12"></div>
+        {/* Abstract shapes */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-400 opacity-10 filter blur-3xl"></div>
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-blue-600 opacity-10 filter blur-3xl"></div>
       </section>
 
       {/* Features Section */}
@@ -171,14 +161,6 @@ const Index = () => {
       {/* CTA Section */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-90"></div>
-        
-        {/* Enhanced CTA background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/4 left-1/4 w-40 h-40 rounded-full border-4 border-white opacity-20 animate-ping-slow"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-32 h-32 rounded-full border-4 border-white opacity-20 animate-ping-slow delay-300"></div>
-          <div className="absolute top-3/4 left-1/3 w-24 h-24 rounded-full border-2 border-white opacity-10 animate-ping-slow delay-700"></div>
-        </div>
-        
         <div className="container max-w-6xl mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto text-center space-y-6">
             <h2 className="text-3xl md:text-4xl font-bold text-white">
