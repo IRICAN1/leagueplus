@@ -1,23 +1,15 @@
-
 import { SearchHeader } from "@/components/SearchHeader";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Award, Calendar, Star, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 const Index = () => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-white">
+  const {
+    t
+  } = useTranslation();
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-20 md:pt-28 pb-16">
         <div className="container max-w-6xl mx-auto px-4">
@@ -46,11 +38,7 @@ const Index = () => {
             <div className="relative animate-fade-in hidden md:block">
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-blue-300 opacity-20 filter blur-3xl animate-pulse-soft"></div>
               <div className="relative transform rotate-6 animate-float">
-                <img
-                  src="/placeholder.svg"
-                  alt="Racket sports"
-                  className="relative rounded-2xl shadow-xl border-8 border-white"
-                />
+                <img alt="Racket sports" className="relative rounded-2xl shadow-xl border-8 border-white" src="https://www.lta.org.uk/49c827/contentassets/39501a7254d04e17a9833684b2aa75a5/padel-launch_42.jpg" />
               </div>
             </div>
           </div>
@@ -113,9 +101,7 @@ const Index = () => {
                 <div className="p-6 bg-white rounded-2xl shadow-sm">
                   <div className="flex items-center mb-4">
                     <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                      ))}
+                      {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
                     </div>
                   </div>
                   <p className="text-gray-600 italic mb-4">
@@ -134,9 +120,7 @@ const Index = () => {
                 <div className="p-6 bg-white rounded-2xl shadow-sm">
                   <div className="flex items-center mb-4">
                     <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                      ))}
+                      {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
                     </div>
                   </div>
                   <p className="text-gray-600 italic mb-4">
@@ -191,14 +175,9 @@ const Index = () => {
               <Link to="/all-duo-leagues">{t('league.viewAll')}</Link>
             </Button>
           </div>
-          <SearchHeader 
-            onSearch={() => {}}
-            showDuoOnly={true}
-          />
+          <SearchHeader onSearch={() => {}} showDuoOnly={true} />
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
