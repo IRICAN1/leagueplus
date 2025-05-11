@@ -1,20 +1,48 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoginForm, LoginFormValues } from "@/components/auth/LoginForm";
+import { LoginForm } from "@/components/auth/LoginForm";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const { signIn, isLoading } = useAuth();
 
   return (
-    <div className="container max-w-lg mx-auto px-4 py-8">
-      <Card className="bg-white/80 backdrop-blur-sm shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Login</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LoginForm onSubmit={signIn} />
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-purple-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6 animate-fade-in">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="h-1 w-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full my-2"></div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-700 via-blue-600 to-purple-700 text-transparent bg-clip-text">RaketLeague</h1>
+          <p className="text-gray-600 text-center font-medium">Welcome back to your sports community</p>
+          <div className="h-1 w-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full my-2"></div>
+        </div>
+        
+        <Card className="border-0 shadow-lg backdrop-blur-sm bg-white/90 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 pointer-events-none"></div>
+          <CardHeader className="space-y-1 pb-2 pt-6">
+            <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-purple-700 to-blue-700 text-transparent bg-clip-text">Sign In</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-2 pb-6">
+            <LoginForm onSubmit={signIn} />
+            
+            <div className="flex items-center justify-center space-x-1 pt-2">
+              <span className="text-sm text-gray-500">Don't have an account?</span>
+              <Link 
+                to="/register" 
+                className="text-sm font-semibold text-purple-600 hover:text-blue-600 transition-colors"
+              >
+                Register here
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <div className="flex justify-center">
+          <div className="text-xs text-gray-400 text-center animate-pulse">
+            Secure login • Quick access • Start playing
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
