@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RegisterForm } from "@/components/auth/RegisterForm";
@@ -9,7 +10,7 @@ const Register = () => {
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="flex flex-col items-center space-y-2">
           <Trophy className="h-12 w-12 text-purple-600" />
-          <h1 className="text-3xl font-bold text-purple-700">LeaguePlus</h1>
+          <h1 className="text-3xl font-bold text-purple-700">RaketLeague</h1>
           <p className="text-gray-500 text-center">Join our community of sports enthusiasts</p>
         </div>
         
