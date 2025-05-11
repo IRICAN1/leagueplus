@@ -24,16 +24,6 @@ const Login = () => {
           </CardHeader>
           <CardContent className="space-y-6 pt-2 pb-6">
             <LoginForm onSubmit={signIn} />
-            
-            <div className="flex items-center justify-center space-x-1 pt-2">
-              <span className="text-sm text-gray-500">Don't have an account?</span>
-              <Link 
-                to="/register" 
-                className="text-sm font-semibold text-purple-600 hover:text-blue-600 transition-colors"
-              >
-                Register here
-              </Link>
-            </div>
           </CardContent>
         </Card>
         
