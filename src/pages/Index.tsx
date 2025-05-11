@@ -1,10 +1,12 @@
+
 import { SearchHeader } from "@/components/SearchHeader";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Award, Calendar, Star, Users } from "lucide-react";
+import { ArrowRight, Award, Calendar, Flag, Star, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
 const Index = () => {
   const {
     t
@@ -15,7 +17,8 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6 animate-fade-in">
-              <div className="inline-block bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">
+              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">
+                <Flag className="w-4 h-4" />
                 #1 Racket Sports Platform
               </div>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-transparent bg-clip-text">
@@ -89,6 +92,43 @@ const Index = () => {
         </div>
       </section>
 
+      {/* International Competition Section */}
+      <section className="py-16 bg-blue-50/70">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Flag className="w-6 h-6 text-blue-600" />
+            <h2 className="text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-blue-700 to-blue-500 text-transparent bg-clip-text">
+              International Competition
+            </h2>
+          </div>
+          <p className="text-center text-lg text-gray-600 max-w-2xl mx-auto mb-12">
+            Join players from around the world and compete in global rankings. Show your skills on an international stage.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div className="p-4 rounded-lg bg-white shadow-sm">
+              <div className="text-4xl mb-2">🇬🇧</div>
+              <div className="font-semibold">United Kingdom</div>
+              <div className="text-sm text-gray-500">426 players</div>
+            </div>
+            <div className="p-4 rounded-lg bg-white shadow-sm">
+              <div className="text-4xl mb-2">🇫🇷</div>
+              <div className="font-semibold">France</div>
+              <div className="text-sm text-gray-500">318 players</div>
+            </div>
+            <div className="p-4 rounded-lg bg-white shadow-sm">
+              <div className="text-4xl mb-2">🇪🇸</div>
+              <div className="font-semibold">Spain</div>
+              <div className="text-sm text-gray-500">287 players</div>
+            </div>
+            <div className="p-4 rounded-lg bg-white shadow-sm">
+              <div className="text-4xl mb-2">🌎</div>
+              <div className="font-semibold">Global</div>
+              <div className="text-sm text-gray-500">1200+ players</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="py-16 bg-blue-50">
         <div className="container max-w-6xl mx-auto px-4">
@@ -135,6 +175,25 @@ const Index = () => {
                   </div>
                 </div>
               </CarouselItem>
+              <CarouselItem>
+                <div className="p-6 bg-white rounded-2xl shadow-sm">
+                  <div className="flex items-center mb-4">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
+                    </div>
+                  </div>
+                  <p className="text-gray-600 italic mb-4">
+                    "Competing internationally has been incredible. I've played with players from different countries and learned so many new techniques."
+                  </p>
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-blue-200"></div>
+                    <div className="ml-3">
+                      <p className="font-medium">Anna Rodriguez</p>
+                      <p className="text-sm text-gray-500">International competitor</p>
+                    </div>
+                  </div>
+                </div>
+              </CarouselItem>
             </CarouselContent>
             <CarouselPrevious className="hidden lg:flex" />
             <CarouselNext className="hidden lg:flex" />
@@ -147,9 +206,12 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-90"></div>
         <div className="container max-w-6xl mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-white">
-              Ready to Elevate Your Game?
-            </h2>
+            <div className="flex items-center justify-center gap-2">
+              <Flag className="w-6 h-6 text-white" />
+              <h2 className="text-3xl md:text-4xl font-bold text-white">
+                Ready to Elevate Your Game?
+              </h2>
+            </div>
             <p className="text-blue-100 text-lg">
               Join thousands of players already competing, improving, and having fun on RaketLeague.
             </p>
